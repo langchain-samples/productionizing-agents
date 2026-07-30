@@ -203,7 +203,7 @@ probability.
 
 <h1 class="chapter" id="ch-2"><span class="cn">Chapter 2</span>Writing the tests<span class="cb">The five levels, bottom to top, and the evaluators that grade them.</span></h1>
 
-## Level 0, the level nobody writes
+## Level 0, harness tests
 
 This is the highest value per second in the entire suite. Two kinds.
 
