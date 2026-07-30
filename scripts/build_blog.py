@@ -397,8 +397,9 @@ def main() -> int:
         extensions=["extra", "toc", "sane_lists"],
     )
     body = highlight_blocks(body)
-    # A chapter divider draws its own rule, so drop the section `---` just above it.
-    body = re.sub(r"<hr\s*/?>\s*(?=<h1 class=\"chapter\")", "", body)
+    # Section `---` markers exist for the markdown view on GitHub. In HTML both `h2` and the
+    # chapter divider draw their own rule, so an `<hr>` just above one is a second, doubled line.
+    body = re.sub(r"<hr\s*/?>\s*(?=<h1 class=\"chapter\"|<h2)", "", body)
     toc = build_toc(body)
 
     OUT.write_text(

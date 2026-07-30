@@ -163,7 +163,7 @@ pre .copy:hover{color:var(--acc);border-color:var(--acc)}
 pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media (hover:none){pre .copy{opacity:1}}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
-</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-harness-tests">Level 0, harness tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</a></div><ol class="sub"><li><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></li><li><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</a></div><ol class="sub"><li><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></li><li><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
+</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-harness-tests">Level 0, harness tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
 <h3 id="how-to-save-and-produce-incredible-agents">How to save $$$ and produce incredible agents</h3>
 <div class="bio">
 <p><strong>Hi, I'm Josiah.</strong> I've been building LLM applications in production, with
@@ -275,7 +275,6 @@ human involved. Write your error messages for the model that will read them.</p>
 raw JSON and hopes it notices the field. It often does, which is the problem: <strong>"often" is
 not a safety property</strong>, and it degrades silently when you upgrade the model. Compute a
 <code>data_quality_warnings</code> list in tested code instead.</p>
-<hr />
 <h2 id="the-eval-mental-model">The eval mental model</h2>
 <p>Everything here maps onto something you already do:</p>
 <table>
@@ -326,7 +325,6 @@ change cheap.</strong> And agent work involves an unusual amount of change:</p>
 <p>Even if you ship a perfect agent today, it is probably out of date next month. <strong>Without a
 suite you won't try any of that, because trying is too risky</strong>, and that timidity costs more
 than the bugs do.</p>
-<hr />
 <h2 id="what-are-you-actually-testing">What are you actually testing?</h2>
 <p>Once the application layer is solid, what remains splits cleanly, and the two halves have
 completely different economics:</p>
@@ -358,7 +356,6 @@ completely different economics:</p>
 </table>
 <p><strong>Most teams only build the right-hand column</strong>, then wonder why their suite is slow, flaky and
 expensive. A large share of what you want to verify lives on the left and needs no model at all.</p>
-<hr />
 <h2 id="the-five-levels">The five levels</h2>
 <p>Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is <em>how many components
 are involved</em>; for agents, every test involves the whole agent. The useful axis is <strong>how much of
@@ -548,9 +545,7 @@ a paragraph about. It presents as <em>"the model keeps passing the wrong format"
 you looking at the model instead of the schema. Check, don't assume:
 <code>print(tool.args_schema.model_json_schema()["properties"])</code></p>
 </blockquote>
-<hr />
-<h2 id="levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</h2>
-<h3 id="level-1-smoke-your-health-endpoint">Level 1 (Smoke): your <code>/health</code> endpoint</h3>
+<h2 id="level-1-smoke-your-health-endpoint">Level 1 (Smoke): your <code>/health</code> endpoint</h2>
 <p>No real tools; every tool is a stub that returns an explicit "not scripted" marker. You're
 testing that the agent <strong>works</strong> and <strong>routes</strong>, not that it retrieves well.</p>
 <pre><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">responded</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -564,7 +559,7 @@ which your clever groundedness judge will notice, because it never receives an a
 <p>Also cheap and valuable at this level: does it <em>reach for the right tool</em>? An agent that answers
 a tank-level question without calling the tank tool got it right from memory, which is a bug even
 when the answer is correct.</p>
-<h3 id="level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</h3>
+<h2 id="level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</h2>
 <p>Instead of <em>waiting</em> for production to hand you a suspect sensor reading so
 you can see what the agent does, you <strong>script</strong> it.</p>
 <p>Put the mock world in the dataset. Both halves of a row take arbitrary JSON that the platform
@@ -666,9 +661,7 @@ logs. Dashboards green.</p>
 <p>When a <em>write</em> fails there's an obvious success to falsely claim. When a <em>read</em> fails, the agent
 often just... answers anyway. Assert that no numbers appear:</p>
 <pre><code class="language-python"><span class="s2">&quot;must_not_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ft&quot;</span><span class="p">,</span> <span class="s2">&quot;bbl&quot;</span><span class="p">,</span> <span class="s2">&quot;psi&quot;</span><span class="p">]</span></code></pre>
-<hr />
-<h2 id="levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</h2>
-<h3 id="level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</h3>
+<h2 id="level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</h2>
 <p>Levels 1 and 2 script a tool's <em>response</em>. That works while the response is a pure function of
 the call. It breaks the moment there's state behind the tool, because <strong>the correct second
 response depends on what the first call did</strong>:</p>
@@ -698,7 +691,7 @@ order exists"</em> are different claims, and the gap between them is the failure
 first is obvious: the interrupt fires; <strong>nothing is written before approval</strong>; rejecting leaves
 the world untouched. That second one matters: an approval gate that runs after the action isn't
 a gate.</p>
-<h3 id="level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</h3>
+<h2 id="level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</h2>
 <p>The only level that catches anything multi-turn:</p>
 <ul>
 <li>Does the agent hold its position when a user pushes back three times?</li>
@@ -729,7 +722,6 @@ simulated user gives you confident, wrong results. Validate the simulator agains
 transcripts, the same way you'd validate a judge.</p>
 <p>Start with the personas that map to failures you've actually seen. If you haven't shipped,
 "pressured" and "terse" earn their keep first.</p>
-<hr />
 <h2 id="writing-evaluators-that-dont-lie">Writing evaluators that don't lie</h2>
 <h3 id="code-first-every-time">Code first. Every time.</h3>
 <p>People reach for a judge because the questions feel subjective, then discover the judge is the
@@ -799,7 +791,6 @@ pass and fail, then iterate the judge prompt until it agrees with you. What move
 read the misaligned cases and <strong>group them</strong>, failure modes cluster, and two or three explain
 most of the gap. Then put those failure modes in the prompt. And add more labels
 before celebrating: 100% agreement on 20 examples is overfitting, not success.</p>
-<hr />
 <h2 id="assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</h2>
 <p>Instead of writing a correct answer by hand, describe <strong>what a correct answer looks like</strong> in
 free-form English, one claim per row:</p>
@@ -972,7 +963,6 @@ argument.</p>
 <code>max_concurrency=8</code>, async is roughly ten seconds against roughly a minute. When the suite is
 fast enough to run on every prompt tweak, you run it on every prompt tweak, and that behavioral
 change is worth more than the wall-clock saving.</p>
-<hr />
 <h2 id="reading-the-results">Reading the results</h2>
 <p><em>"Should we use the expensive model or the cheap one?"</em> is normally settled by
 vibes, seniority, or whoever last read a benchmark. With a suite it's a measurement:</p>
@@ -1059,7 +1049,6 @@ before you're staring at a number you want to be acceptable:</p>
 mean will hide from you. Agent latency also isn't API latency: several model calls and several
 tool calls per request is normal, and that's a product decision to make consciously (stream
 partial output, show the plan, show which tool is running) rather than discover from a complaint.</p>
-<hr />
 <h2 id="the-limit-and-the-loop">The limit, and the loop</h2>
 <blockquote>
 <p><strong>Every case in your suite is one you thought of.</strong></p>
@@ -1179,7 +1168,6 @@ tests/
   test_middleware.py       call the hooks directly
   test_harness_context.py  assert on what the model actually receives
 </code></pre>
-<hr />
 <h2 id="going-further">Going further</h2>
 <p>Everything above is about getting a suite to exist and be trustworthy. Once you have one, and
 once you have real traces flowing through it, there's a further body of practice worth reading:
@@ -1209,7 +1197,6 @@ traffic. Three places it goes deeper:</p>
 </tr>
 </tbody>
 </table>
-<hr />
 <h2 id="the-short-version">The short version</h2>
 <ol>
 <li><strong>Test as much deterministic code as you can</strong>, to isolate the one non-deterministic part.</li>

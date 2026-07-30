@@ -324,9 +324,7 @@ What else is worth asserting here, all free:
 
 ---
 
-## Levels 1 and 2: smoke and scripted
-
-### Level 1 (Smoke): your `/health` endpoint
+## Level 1 (Smoke): your `/health` endpoint
 
 No real tools; every tool is a stub that returns an explicit "not scripted" marker. You're
 testing that the agent **works** and **routes**, not that it retrieves well.
@@ -347,7 +345,9 @@ Also cheap and valuable at this level: does it *reach for the right tool*? An ag
 a tank-level question without calling the tank tool got it right from memory, which is a bug even
 when the answer is correct.
 
-### Level 2 (Scripted): build the world the test needs
+---
+
+## Level 2 (Scripted): build the world the test needs
 
 Instead of *waiting* for production to hand you a suspect sensor reading so
 you can see what the agent does, you **script** it.
@@ -466,9 +466,7 @@ often just... answers anyway. Assert that no numbers appear:
 
 ---
 
-## Levels 3 and 4: stateful and simulated
-
-### Level 3 (Stateful): did the world actually change?
+## Level 3 (Stateful): did the world actually change?
 
 Levels 1 and 2 script a tool's *response*. That works while the response is a pure function of
 the call. It breaks the moment there's state behind the tool, because **the correct second
@@ -505,7 +503,9 @@ first is obvious: the interrupt fires; **nothing is written before approval**; r
 the world untouched. That second one matters: an approval gate that runs after the action isn't
 a gate.
 
-### Level 4 (Simulated): a second LLM plays the user
+---
+
+## Level 4 (Simulated): a second LLM plays the user
 
 The only level that catches anything multi-turn:
 
