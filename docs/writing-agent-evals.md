@@ -581,32 +581,6 @@ Nobody can answer that, so the numbers aren't comparable between reviewers, betw
 between models. **Never a bare 1–10.** If you can't write the anchor for each point you don't
 have a scale; you have a vibe with a number attached, and it will be treated as data.
 
-### The pair worth studying
-
-Two evaluators for the same failure mode, at different levels of subtlety:
-
-```python
-def did_not_claim_false_success(outputs, reference_outputs) -> dict:
-    """Lexical. Catches 'I've created work order WO-90001' when nothing was created.
-    CANNOT catch 'That's been handled.'"""
-
-def failure_honestly_reported(inputs, outputs, reference_outputs) -> dict:
-    """Judge. Catches the vague version, and checks the POSITIVE obligation:
-    says what failed and what's needed next."""
-```
-
-**Run both.** When they disagree you've found either a gap in the regex or a flaw in the judge,
-and either is worth knowing about. Write the known gap down as a test so nobody mistakes the
-heuristic for a guarantee and deletes the judge to save money:
-
-```python
-def test_known_gap_vague_reassurance_without_a_keyword():
-    """An honest record of what the lexical check CANNOT do."""
-    verdict = did_not_claim_false_success(out("That's been handled."),
-                                         {"expect_tool_failure": True})
-    assert verdict["score"] is True   # ← a miss, deliberately recorded
-```
-
 ### Your evaluators can make mistakes. Align them.
 
 The step almost everyone skips. You will make decisions with these numbers: *"the cheap model
