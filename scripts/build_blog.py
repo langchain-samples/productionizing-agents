@@ -82,9 +82,6 @@ CHROME_CSS = """
 #toc a.on{color:var(--acc);background:var(--panel);border-left-color:var(--acc)}
 #toc .row{display:flex;align-items:flex-start}
 #toc .row a{flex:1;min-width:0}
-#toc .num{flex:0 0 22px;font:600 11px JetBrains Mono,monospace;color:#41546f;
-          padding-top:10px;text-align:right;margin-right:6px}
-#toc .grp.on-path .num{color:var(--acc)}
 #toc .car{flex:0 0 20px;height:30px;padding:0;margin:0;border:0;cursor:pointer;
           background:none;color:var(--dim);font-size:9px;line-height:30px;
           text-align:center;transition:transform .15s,color .12s}
@@ -93,7 +90,7 @@ CHROME_CSS = """
 #toc .car.none{visibility:hidden;cursor:default}
 #toc .sub{display:none;margin:1px 0 5px}
 #toc .grp.open>.sub{display:block}
-#toc .sub a{padding-left:38px;font-size:12.5px;color:#7d8ba1}
+#toc .sub a{padding-left:29px;font-size:12.5px;color:#7d8ba1}
 /* --- narrow-screen drawer --- */
 .tocbtn{position:fixed;top:16px;left:16px;z-index:40;width:40px;height:40px;
         border:1px solid var(--line);border-radius:9px;background:var(--panel);
@@ -107,6 +104,13 @@ body.toc-open #toc{display:block;box-shadow:0 0 60px rgba(0,0,0,.6)}
 }
 /* --- copy buttons --- */
 pre{position:relative}
+/* macOS hides overlay scrollbars until you scroll, which makes a clipped trailing
+   comment look like it isn't there. Keep the bar visible whenever a block overflows. */
+pre{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+pre::-webkit-scrollbar{height:9px}
+pre::-webkit-scrollbar-track{background:transparent}
+pre::-webkit-scrollbar-thumb{background:#2c3a50;border-radius:5px}
+pre:hover::-webkit-scrollbar-thumb{background:#3d4f6b}
 pre .copy{position:absolute;top:8px;right:8px;padding:4px 10px;font:600 11px Inter,sans-serif;
           color:var(--dim);background:#1b2331;border:1px solid var(--line);border-radius:6px;
           cursor:pointer;opacity:0;transition:opacity .13s,color .13s,border-color .13s}
@@ -318,10 +322,7 @@ def build_toc(markup: str) -> str:
     for level, anchor, raw in heads:
         label = _html.unescape(re.sub(r"<[^>]+>", "", raw)).strip()
         if level == "2":
-            # "Part 5: Levels 1 and 2" -> the number gets its own column.
-            m = re.match(r"Part (\d+):\s*(.+)", label)
-            num, label = (m.group(1), m.group(2)) if m else ("", label)
-            groups.append({"anchor": anchor, "label": label, "num": num, "kids": []})
+            groups.append({"anchor": anchor, "label": label, "kids": []})
         elif groups:
             groups[-1]["kids"].append({"anchor": anchor, "label": label})
 
@@ -331,7 +332,7 @@ def build_toc(markup: str) -> str:
         if not g["kids"]:
             car = '<span class="car none">&#9654;</span>'
         out.append(
-            f'<li class="grp"><div class="row"><p class="num">{g["num"]}</p>{car}'
+            f'<li class="grp"><div class="row">{car}'
             f'<a href="#{g["anchor"]}">{_html.escape(g["label"])}</a></div>'
         )
         if g["kids"]:

@@ -26,7 +26,7 @@ you're starting fresh, or you already have something in production.
 
 ---
 
-## Part 0: Two things to do before you write a single eval
+## Two things to do before you write a single eval
 
 Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.
@@ -57,10 +57,10 @@ Now `pytest tests/` runs the application in milliseconds with no API key. When t
 misbehaves you can say *"the tools are correct"* and mean it, with a green run behind you. The
 only remaining variable is the model. **That's the prize**, not the test count.
 
-Putting the boundary at a protocol (MCP, or an HTTP service) rather than just a module has a
-few extra benefits: it makes the separation impossible to violate, the surface becomes
-independently deployable and load-testable, one application can serve several consumers, and
-you get a place to enforce authorization where it can be audited.
+Putting the boundary at a protocol (MCP, or an HTTP service) rather than a module adds: the
+separation becomes impossible to violate, the surface is independently deployable and
+load-testable, one application can serve several consumers, and authorization lands somewhere
+auditable.
 
 ### Make your tools *total*
 
@@ -93,7 +93,7 @@ raise LookupError(
 The model reads "P-101A, P-101B", picks one, and recovers **inside the same turn** with no
 human involved. Write your error messages for the model that will read them.
 
-And on that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
+On that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
 `suspect`, which means its level must not be quoted as fact. The tempting design hands the model
 raw JSON and hopes it notices the field. Often it does! That's exactly the problem: **"often" is
 not a safety property**, and it degrades silently when you upgrade the model. Compute a
@@ -101,7 +101,7 @@ not a safety property**, and it degrades silently when you upgrade the model. Co
 
 ---
 
-## Part 1: The mental model
+## The mental model
 
 Everything here maps onto something you already do:
 
@@ -137,7 +137,7 @@ than the bugs do.
 
 ---
 
-## Part 2: What are you actually testing?
+## What are you actually testing?
 
 Once the application layer is solid, what remains splits cleanly, and the two halves have
 completely different economics:
@@ -153,7 +153,7 @@ expensive. A large share of what you want to verify lives on the left and needs 
 
 ---
 
-## Part 3: The five levels
+## The five levels
 
 Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is *how many components
 are involved*; for agents, every test involves the whole agent. The useful axis is **how much of
@@ -186,38 +186,46 @@ probability.
 
 ---
 
-## Part 4: Level 0, the level nobody writes
+## Level 0, the level nobody writes
 
 This is the highest value per second in the entire suite, and almost nobody does it. Two kinds.
 
-### 4a. Test your middleware directly
+### Test your middleware directly
 
 Middleware hooks are plain functions over state. You don't need an agent to test them, let
-alone a model:
+alone a model.
+
+Take a concrete rule. `T-042` is a *tank* tag, and tanks live behind `get_tank_status`, not
+`get_equipment`. When the model reaches for the wrong one, we'd rather stop the call and say so
+than let the tool fail and hope the model recovers.
+
+The hook takes two things: the tool call, and a `handler` that means *"go ahead and run the real
+tool."* That second argument is the whole trick. Pass in a fake one that records whether it was
+reached, and you can assert the guard stopped the call without ever running a tool:
 
 ```python
 def test_tank_tag_sent_to_equipment_tool_is_redirected():
     guard = ToolArgumentGuardMiddleware()
-    called = False
+    reached_the_tool = False
 
-    def handler(request):
-        nonlocal called
-        called = True
+    def handler(request):            # stands in for the real tool
+        nonlocal reached_the_tool
+        reached_the_tool = True
         return ToolMessage(content="ok", tool_call_id="c1")
 
-    result = guard.wrap_tool_call(
-        ToolCallRequest(
-            tool_call={"name": "get_equipment", "args": {"tag": "T-042"}, "id": "c1"},
-            tool=None, state={"messages": []}, runtime=None,
-        ),
-        handler,
+    call = {"name": "get_equipment", "args": {"tag": "T-042"}, "id": "c1"}
+    request = ToolCallRequest(
+        tool_call=call, tool=None, state={"messages": []}, runtime=None,
     )
+    result = guard.wrap_tool_call(request, handler)
 
-    assert called is False                      # short-circuited before the tool ran
-    assert "get_tank_status" in result.content  # and told the model where to go
+    # The guard short-circuited, so the wrong tool never ran...
+    assert reached_the_tool is False
+    # ...and the message it returned names the tool the model should have used.
+    assert "get_tank_status" in result.content
 ```
 
-Twenty-five of these run in 0.1 seconds with no API key. Every rule you move out of the prompt
+No model, no network, no agent. Twenty-five of these run in 0.1 seconds with no API key. Every rule you move out of the prompt
 and into a hook becomes assertable this way, which is most of the argument for using
 middleware at all:
 
@@ -226,7 +234,7 @@ prompt:      "Always cite the source."                    ← a request, ~90% tr
 middleware:  check the answer, flag it if absent           ← a guarantee, 100% true
 ```
 
-### 4b. Assert on the assembled context
+### Assert on the assembled context
 
 The prompt reaching your model is assembled at runtime from your system prompt, tool schemas,
 harness-injected tools, middleware rewrites, and dynamically loaded skills or memories: five
@@ -299,7 +307,7 @@ What else is worth asserting here, all free:
 
 ---
 
-## Part 5: Levels 1 and 2: smoke and scripted
+## Levels 1 and 2: smoke and scripted
 
 ### Level 1 (Smoke): your `/health` endpoint
 
@@ -335,13 +343,24 @@ never interprets, so one row can carry the world *and* the expectations:
   "inputs": {
     "question": "What's the level in tank 43?",
     "mock_tools": {
-      "get_tank_status": {"tag": "T-043", "level_ft": 12.1, "atg_status": "suspect",
-                          "data_quality_warnings": ["ATG suspect...", "receipt in progress..."]}
+      "get_tank_status": {
+        "tag": "T-043", "level_ft": 12.1, "atg_status": "suspect",
+        "data_quality_warnings": ["ATG suspect...", "receipt in progress..."],
+      }
     },
   },
   "reference_outputs": {
+    # Machine-checkable, graded by code.
     "expect_tool_calls": ["get_tank_status"],
     "expect_warnings_surfaced": ["suspect", "receipt"],
+    "must_mention": ["12.1"],
+    # Semantic, graded by a judge. Anyone can write these, in English.
+    "assertions": [
+      {"key": "does_not_present_the_level_as_fact",
+       "comment": "Reports 12.1 ft but says the gauge is suspect."},
+      {"key": "explains_the_consequence",
+       "comment": "Says the number should not be used for a custody transfer."},
+    ],
   }
 }
 ```
@@ -363,7 +382,7 @@ runs in, which is what an input is.
 > `inputs` is the world this case runs in. `reference_outputs` is what correct looks like.
 
 Keep that line clean and a useful property falls out: `reference_outputs` is a free-form slot for
-*expectations* rather than a place to keep one right answer. In [Part 8](#part-8-assertions-so-non-engineers-can-write-tests)
+*expectations* rather than a place to keep one right answer. In [Assertions](#assertions-so-non-engineers-can-write-tests)
 that's what lets someone who doesn't write code fill it in, in English.
 
 #### Mock the behavior, never the contract
@@ -407,8 +426,8 @@ check in the prose, and it's a code assertion.
 
 **A tool failed. Did the agent claim it worked anyway?**
 
-This is among the most damaging agent failures in production and among the least likely to be
-caught in casual testing, because the answer *reads fine*. The user is told their work order was
+Among the most damaging agent failures in production, and the least likely to be caught in
+casual testing, because the answer *reads fine*. The user is told their work order was
 filed. It wasn't. They find out days later when the work doesn't happen. Nothing in your error
 logs. Dashboards green.
 
@@ -430,7 +449,7 @@ often just... answers anyway. Assert that no numbers appear:
 
 ---
 
-## Part 6: Levels 3 and 4: stateful and simulated
+## Levels 3 and 4: stateful and simulated
 
 ### Level 3 (Stateful): did the world actually change?
 
@@ -511,7 +530,7 @@ Start with the personas that map to failures you've actually seen. If you haven'
 
 ---
 
-## Part 7: Writing evaluators that don't lie
+## Writing evaluators that don't lie
 
 ### Code first. Every time.
 
@@ -612,7 +631,7 @@ before celebrating: 100% agreement on 20 examples is overfitting, not success.
 
 ---
 
-## Part 8: Assertions, so non-engineers can write tests
+## Assertions, so non-engineers can write tests
 
 Instead of writing a correct answer by hand, describe **what a correct answer looks like** in
 free-form English, one claim per row:
@@ -621,11 +640,11 @@ free-form English, one claim per row:
 {
   "assertions": [
     {"key": "must_not_state_unsourced_limit",
-     "comment": "Does not state a numeric exposure limit that did not come from a tool result."},
+     "comment": "No numeric exposure limit that didn't come from a tool."},
     {"key": "must_say_it_has_no_source",
-     "comment": "States plainly that it has no source for the requested figure."},
+     "comment": "States plainly that it has no source for the figure."},
     {"key": "may_name_the_governing_standard",
-     "comment": "Naming which document governs is acceptable; stating its contents is not."}
+     "comment": "Naming the governing document is fine; quoting it is not."}
   ]
 }
 ```
@@ -673,21 +692,21 @@ the room, and it inverts the usual failure:
 | **Outcome-first** *(the practice)* | *"Here are the workflows that must work. What capabilities does each need?"* You work backwards into the tool surface. |
 
 The instinct to give the agent every tool comes from good product sense. You're trying to make
-it capable. It just runs the reasoning backwards. And fewer tools is *also* cheaper and more
-reliable: every tool schema is tokens on every turn, and more tools means more chances to pick
-the wrong one.
+it capable, it just runs the reasoning backwards. Fewer tools is also cheaper and more reliable:
+every tool schema is tokens on every turn, and more tools means more chances to pick the wrong
+one.
 
 One of our tools exists purely because a workflow demanded it (*"close out that pump work order
 I raised earlier"* → you need a way to list them). That's the direction you want.
 
 ---
 
-## Part 9: Running them
+## Running them
 
 ### Repetitions
 
-Your agent is non-deterministic. A single pass gives you one sample per case, and a case that
-fails one time in three looks either fine or broken depending on the coin flip.
+Your agent is non-deterministic. A single pass gives one sample per case, so a case that fails
+one time in three looks fine or broken depending on the coin flip.
 
 `num_repetitions=3` re-runs the target **and** the evaluators. A score of `0.67` tells you
 something `0` or `1` cannot: **this case is flaky, not broken.** Those need different fixes:
@@ -721,7 +740,7 @@ change is worth more than the wall-clock saving.
 
 ---
 
-## Part 10: Reading the results
+## Reading the results
 
 Here's the payoff. *"Should we use the expensive model or the cheap one?"* is normally settled by
 vibes, seniority, or whoever last read a benchmark. With a suite it's a measurement:
@@ -805,7 +824,7 @@ partial output, show the plan, show which tool is running) rather than discover 
 
 ---
 
-## Part 11: The limit, and the loop
+## The limit, and the loop
 
 Here's the thing you have to say out loud about everything above:
 
@@ -859,8 +878,8 @@ becomes something the suite can never miss again.</figcaption>
 
 **Online evaluators** run against live traffic, where there's no reference output and no idea
 what's coming, so they must be reference-free: input, output, trajectory only. The useful ones
-are out-of-scope, hallucination, task-completed, perceived-error, and a *code* one for anything
-mechanically checkable.
+are out-of-scope, hallucination, task-completed, perceived-error (did the user's next message
+signal they thought the answer was wrong), and a *code* one for anything mechanically checkable.
 
 Sample them. **Start at 10–20%, not 100%.** Every online evaluator is a model call on every
 matching trace; three judges at full sampling can cost more than the agent. You're estimating a
@@ -877,7 +896,7 @@ interesting one:
 > **If you only review what your filters catch, your filters define the ceiling on what you can
 > learn.**
 
-Then a human writes assertions on the bad trace (Part 8), those become a dataset row, and (this
+Then a human writes assertions on the bad trace, those become a dataset row, and (this
 part is not optional) **you run it and watch it fail before you fix anything.**
 
 > **A regression test you haven't seen fail is not a test. It's a hope.**
@@ -971,8 +990,8 @@ traffic. Three places it goes deeper:
 | | |
 | :-- | :-- |
 | **Synthetic data, structured** | Hand-writing a dataset is fine for a dozen cases and doesn't scale to a hundred. Pick three dimensions where you expect failures, generate tuples, then use a *separate* prompt to turn each tuple into a query; one-step generation produces repetitive phrasing. |
-| **Error analysis** | The systematic version of Part 11. Read ~100 traces, note the *first* thing that went wrong in each, let categories **emerge** rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just *fix* it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix. |
-| **Judge alignment, properly** | "Label 20 and iterate" (Part 7) leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **TPR/TNR rather than raw agreement**, because with class imbalance, a judge that always says Pass scores 90% and catches nothing. |
+| **Error analysis** | The systematic version of *The limit, and the loop*. Read ~100 traces, note the *first* thing that went wrong in each, let categories **emerge** rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just *fix* it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix. |
+| **Judge alignment, properly** | "Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **TPR/TNR rather than raw agreement**, because with class imbalance, a judge that always says Pass scores 90% and catches nothing. |
 
 The one thing there I'd flag as worth knowing even if you read nothing else is the
 **Rogan–Gladen correction**. Raw judge scores on unlabeled production traffic are biased by the
@@ -985,7 +1004,7 @@ judge's own error rates, and there's a closed form:
 A judge at TPR 0.92 / TNR 0.88 that scores 80% of production traces as Pass implies a true rate
 of about **85%**, not 80%. If you put an evaluator score on a dashboard and alert on it, that's
 your number and it's wrong in a knowable direction. Note it matters for *absolute* rates.
-Relative comparison under one fixed judge, which is what the model bake-off in Part 10 does, is
+Relative comparison under one fixed judge, which is what the model bake-off above does, is
 the case that's already trustworthy.
 
 Where the two overlap (code checks before judges, one judge per failure mode, binary rather

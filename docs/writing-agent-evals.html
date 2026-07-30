@@ -103,9 +103,6 @@ figure svg{display:block;width:100%;height:auto}
 #toc a.on{color:var(--acc);background:var(--panel);border-left-color:var(--acc)}
 #toc .row{display:flex;align-items:flex-start}
 #toc .row a{flex:1;min-width:0}
-#toc .num{flex:0 0 22px;font:600 11px JetBrains Mono,monospace;color:#41546f;
-          padding-top:10px;text-align:right;margin-right:6px}
-#toc .grp.on-path .num{color:var(--acc)}
 #toc .car{flex:0 0 20px;height:30px;padding:0;margin:0;border:0;cursor:pointer;
           background:none;color:var(--dim);font-size:9px;line-height:30px;
           text-align:center;transition:transform .15s,color .12s}
@@ -114,7 +111,7 @@ figure svg{display:block;width:100%;height:auto}
 #toc .car.none{visibility:hidden;cursor:default}
 #toc .sub{display:none;margin:1px 0 5px}
 #toc .grp.open>.sub{display:block}
-#toc .sub a{padding-left:38px;font-size:12.5px;color:#7d8ba1}
+#toc .sub a{padding-left:29px;font-size:12.5px;color:#7d8ba1}
 /* --- narrow-screen drawer --- */
 .tocbtn{position:fixed;top:16px;left:16px;z-index:40;width:40px;height:40px;
         border:1px solid var(--line);border-radius:9px;background:var(--panel);
@@ -128,6 +125,13 @@ body.toc-open #toc{display:block;box-shadow:0 0 60px rgba(0,0,0,.6)}
 }
 /* --- copy buttons --- */
 pre{position:relative}
+/* macOS hides overlay scrollbars until you scroll, which makes a clipped trailing
+   comment look like it isn't there. Keep the bar visible whenever a block overflows. */
+pre{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+pre::-webkit-scrollbar{height:9px}
+pre::-webkit-scrollbar-track{background:transparent}
+pre::-webkit-scrollbar-thumb{background:#2c3a50;border-radius:5px}
+pre:hover::-webkit-scrollbar-thumb{background:#3d4f6b}
 pre .copy{position:absolute;top:8px;right:8px;padding:4px 10px;font:600 11px Inter,sans-serif;
           color:var(--dim);background:#1b2331;border:1px solid var(--line);border-radius:6px;
           cursor:pointer;opacity:0;transition:opacity .13s,color .13s,border-color .13s}
@@ -136,7 +140,7 @@ pre .copy:hover{color:var(--acc);border-color:var(--acc)}
 pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media (hover:none){pre .copy{opacity:1}}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
-</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="grp"><div class="row"><p class="num">0</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-0-two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><p class="num">1</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-1-the-mental-model">The mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><p class="num">2</p><span class="car none">&#9654;</span><a href="#part-2-what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><p class="num">3</p><span class="car none">&#9654;</span><a href="#part-3-the-five-levels">The five levels</a></div></li><li class="grp"><div class="row"><p class="num">4</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-4-level-0-the-level-nobody-writes">Level 0, the level nobody writes</a></div><ol class="sub"><li><a href="#4a-test-your-middleware-directly">4a. Test your middleware directly</a></li><li><a href="#4b-assert-on-the-assembled-context">4b. Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><p class="num">5</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-5-levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</a></div><ol class="sub"><li><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></li><li><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></li></ol></li><li class="grp"><div class="row"><p class="num">6</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-6-levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</a></div><ol class="sub"><li><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></li><li><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><p class="num">7</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-7-writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#your-evaluators-can-make-mistakes-align-them">Your evaluators can make mistakes. Align them.</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><p class="num">8</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-8-assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="grp"><div class="row"><p class="num">9</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-9-running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><p class="num">10</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-10-reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><p class="num">11</p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#part-11-the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="grp"><div class="row"><p class="num"></p><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><p class="num"></p><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><p class="num"></p><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
+</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-mental-model">The mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-the-level-nobody-writes">Level 0, the level nobody writes</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</a></div><ol class="sub"><li><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></li><li><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</a></div><ol class="sub"><li><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></li><li><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#your-evaluators-can-make-mistakes-align-them">Your evaluators can make mistakes. Align them.</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
 <h3 id="how-to-save-and-produce-incredible-agents">How to save $$$ and produce incredible agents</h3>
 <p>A user asks our refinery assistant about pump "P-101". The real pumps are <strong>P-101A</strong> and
 <strong>P-101B</strong>, an A/B pair, which is how essentially every critical pump is installed. The tool
@@ -153,7 +157,7 @@ bugs described were found by the very tests being recommended, including two we 
 <p>There's a <a href="#starter-kit">starter kit</a> at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.</p>
 <hr />
-<h2 id="part-0-two-things-to-do-before-you-write-a-single-eval">Part 0: Two things to do before you write a single eval</h2>
+<h2 id="two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</h2>
 <p>Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.</p>
 <h3 id="get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</h3>
@@ -176,10 +180,10 @@ agent/             THE AGENT: prompt, middleware, model, tool wiring
 <p>Now <code>pytest tests/</code> runs the application in milliseconds with no API key. When the agent
 misbehaves you can say <em>"the tools are correct"</em> and mean it, with a green run behind you. The
 only remaining variable is the model. <strong>That's the prize</strong>, not the test count.</p>
-<p>Putting the boundary at a protocol (MCP, or an HTTP service) rather than just a module has a
-few extra benefits: it makes the separation impossible to violate, the surface becomes
-independently deployable and load-testable, one application can serve several consumers, and
-you get a place to enforce authorization where it can be audited.</p>
+<p>Putting the boundary at a protocol (MCP, or an HTTP service) rather than a module adds: the
+separation becomes impossible to violate, the surface is independently deployable and
+load-testable, one application can serve several consumers, and authorization lands somewhere
+auditable.</p>
 <h3 id="make-your-tools-total">Make your tools <em>total</em></h3>
 <p><em>Total</em> in the mathematical sense: every input gets a defined, informative response, and no input
 produces a silent empty. Design rules change when your caller is a model rather than a
@@ -229,13 +233,13 @@ programmer. Six that matter:</p>
 <span class="p">)</span></code></pre>
 <p>The model reads "P-101A, P-101B", picks one, and recovers <strong>inside the same turn</strong> with no
 human involved. Write your error messages for the model that will read them.</p>
-<p>And on that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
+<p>On that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
 <code>suspect</code>, which means its level must not be quoted as fact. The tempting design hands the model
 raw JSON and hopes it notices the field. Often it does! That's exactly the problem: <strong>"often" is
 not a safety property</strong>, and it degrades silently when you upgrade the model. Compute a
 <code>data_quality_warnings</code> list in tested code instead.</p>
 <hr />
-<h2 id="part-1-the-mental-model">Part 1: The mental model</h2>
+<h2 id="the-mental-model">The mental model</h2>
 <p>Everything here maps onto something you already do:</p>
 <table>
 <thead>
@@ -286,7 +290,7 @@ change cheap.</strong> And agent work involves an unusual amount of change:</p>
 suite you won't try any of that, because trying is too risky</strong>, and that timidity costs more
 than the bugs do.</p>
 <hr />
-<h2 id="part-2-what-are-you-actually-testing">Part 2: What are you actually testing?</h2>
+<h2 id="what-are-you-actually-testing">What are you actually testing?</h2>
 <p>Once the application layer is solid, what remains splits cleanly, and the two halves have
 completely different economics:</p>
 <table>
@@ -318,7 +322,7 @@ completely different economics:</p>
 <p><strong>Most teams only build the right-hand column</strong>, then wonder why their suite is slow, flaky and
 expensive. A large share of what you want to verify lives on the left and needs no model at all.</p>
 <hr />
-<h2 id="part-3-the-five-levels">Part 3: The five levels</h2>
+<h2 id="the-five-levels">The five levels</h2>
 <p>Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is <em>how many components
 are involved</em>; for agents, every test involves the whole agent. The useful axis is <strong>how much of
 the world is real</strong>.</p>
@@ -387,37 +391,43 @@ never flakes; red costs money and returns a probability.</figcaption>
 costs nothing and never flakes; at Level 4 the same property costs a dollar and returns a
 probability.</p>
 <hr />
-<h2 id="part-4-level-0-the-level-nobody-writes">Part 4: Level 0, the level nobody writes</h2>
+<h2 id="level-0-the-level-nobody-writes">Level 0, the level nobody writes</h2>
 <p>This is the highest value per second in the entire suite, and almost nobody does it. Two kinds.</p>
-<h3 id="4a-test-your-middleware-directly">4a. Test your middleware directly</h3>
+<h3 id="test-your-middleware-directly">Test your middleware directly</h3>
 <p>Middleware hooks are plain functions over state. You don't need an agent to test them, let
-alone a model:</p>
+alone a model.</p>
+<p>Take a concrete rule. <code>T-042</code> is a <em>tank</em> tag, and tanks live behind <code>get_tank_status</code>, not
+<code>get_equipment</code>. When the model reaches for the wrong one, we'd rather stop the call and say so
+than let the tool fail and hope the model recovers.</p>
+<p>The hook takes two things: the tool call, and a <code>handler</code> that means <em>"go ahead and run the real
+tool."</em> That second argument is the whole trick. Pass in a fake one that records whether it was
+reached, and you can assert the guard stopped the call without ever running a tool:</p>
 <pre><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">test_tank_tag_sent_to_equipment_tool_is_redirected</span><span class="p">():</span>
     <span class="n">guard</span> <span class="o">=</span> <span class="n">ToolArgumentGuardMiddleware</span><span class="p">()</span>
-    <span class="n">called</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">reached_the_tool</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
-        <span class="k">nonlocal</span> <span class="n">called</span>
-        <span class="n">called</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handler</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>            <span class="c1"># stands in for the real tool</span>
+        <span class="k">nonlocal</span> <span class="n">reached_the_tool</span>
+        <span class="n">reached_the_tool</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="n">ToolMessage</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="n">tool_call_id</span><span class="o">=</span><span class="s2">&quot;c1&quot;</span><span class="p">)</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="n">guard</span><span class="o">.</span><span class="n">wrap_tool_call</span><span class="p">(</span>
-        <span class="n">ToolCallRequest</span><span class="p">(</span>
-            <span class="n">tool_call</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;get_equipment&quot;</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;T-042&quot;</span><span class="p">},</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;c1&quot;</span><span class="p">},</span>
-            <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[]},</span> <span class="n">runtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="n">handler</span><span class="p">,</span>
+    <span class="n">call</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;get_equipment&quot;</span><span class="p">,</span> <span class="s2">&quot;args&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;T-042&quot;</span><span class="p">},</span> <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;c1&quot;</span><span class="p">}</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">ToolCallRequest</span><span class="p">(</span>
+        <span class="n">tool_call</span><span class="o">=</span><span class="n">call</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;messages&quot;</span><span class="p">:</span> <span class="p">[]},</span> <span class="n">runtime</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">guard</span><span class="o">.</span><span class="n">wrap_tool_call</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">handler</span><span class="p">)</span>
 
-    <span class="k">assert</span> <span class="n">called</span> <span class="ow">is</span> <span class="kc">False</span>                      <span class="c1"># short-circuited before the tool ran</span>
-    <span class="k">assert</span> <span class="s2">&quot;get_tank_status&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span>  <span class="c1"># and told the model where to go</span></code></pre>
-<p>Twenty-five of these run in 0.1 seconds with no API key. Every rule you move out of the prompt
+    <span class="c1"># The guard short-circuited, so the wrong tool never ran...</span>
+    <span class="k">assert</span> <span class="n">reached_the_tool</span> <span class="ow">is</span> <span class="kc">False</span>
+    <span class="c1"># ...and the message it returned names the tool the model should have used.</span>
+    <span class="k">assert</span> <span class="s2">&quot;get_tank_status&quot;</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">content</span></code></pre>
+<p>No model, no network, no agent. Twenty-five of these run in 0.1 seconds with no API key. Every rule you move out of the prompt
 and into a hook becomes assertable this way, which is most of the argument for using
 middleware at all:</p>
 <pre><code>prompt:      &quot;Always cite the source.&quot;                    ← a request, ~90% true
 middleware:  check the answer, flag it if absent           ← a guarantee, 100% true
 </code></pre>
-<h3 id="4b-assert-on-the-assembled-context">4b. Assert on the assembled context</h3>
+<h3 id="assert-on-the-assembled-context">Assert on the assembled context</h3>
 <p>The prompt reaching your model is assembled at runtime from your system prompt, tool schemas,
 harness-injected tools, middleware rewrites, and dynamically loaded skills or memories: five
 layers of code you didn't write today.</p>
@@ -501,7 +511,7 @@ you looking at the model instead of the schema. Check, don't assume:
 <code>print(tool.args_schema.model_json_schema()["properties"])</code></p>
 </blockquote>
 <hr />
-<h2 id="part-5-levels-1-and-2-smoke-and-scripted">Part 5: Levels 1 and 2: smoke and scripted</h2>
+<h2 id="levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</h2>
 <h3 id="level-1-smoke-your-health-endpoint">Level 1 (Smoke): your <code>/health</code> endpoint</h3>
 <p>No real tools; every tool is a stub that returns an explicit "not scripted" marker. You're
 testing that the agent <strong>works</strong> and <strong>routes</strong>, not that it retrieves well.</p>
@@ -525,13 +535,24 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
   <span class="s2">&quot;inputs&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;What&#39;s the level in tank 43?&quot;</span><span class="p">,</span>
     <span class="s2">&quot;mock_tools&quot;</span><span class="p">:</span> <span class="p">{</span>
-      <span class="s2">&quot;get_tank_status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;T-043&quot;</span><span class="p">,</span> <span class="s2">&quot;level_ft&quot;</span><span class="p">:</span> <span class="mf">12.1</span><span class="p">,</span> <span class="s2">&quot;atg_status&quot;</span><span class="p">:</span> <span class="s2">&quot;suspect&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;data_quality_warnings&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ATG suspect...&quot;</span><span class="p">,</span> <span class="s2">&quot;receipt in progress...&quot;</span><span class="p">]}</span>
+      <span class="s2">&quot;get_tank_status&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;T-043&quot;</span><span class="p">,</span> <span class="s2">&quot;level_ft&quot;</span><span class="p">:</span> <span class="mf">12.1</span><span class="p">,</span> <span class="s2">&quot;atg_status&quot;</span><span class="p">:</span> <span class="s2">&quot;suspect&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;data_quality_warnings&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ATG suspect...&quot;</span><span class="p">,</span> <span class="s2">&quot;receipt in progress...&quot;</span><span class="p">],</span>
+      <span class="p">}</span>
     <span class="p">},</span>
   <span class="p">},</span>
   <span class="s2">&quot;reference_outputs&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="c1"># Machine-checkable, graded by code.</span>
     <span class="s2">&quot;expect_tool_calls&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;get_tank_status&quot;</span><span class="p">],</span>
     <span class="s2">&quot;expect_warnings_surfaced&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;suspect&quot;</span><span class="p">,</span> <span class="s2">&quot;receipt&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;must_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;12.1&quot;</span><span class="p">],</span>
+    <span class="c1"># Semantic, graded by a judge. Anyone can write these, in English.</span>
+    <span class="s2">&quot;assertions&quot;</span><span class="p">:</span> <span class="p">[</span>
+      <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;does_not_present_the_level_as_fact&quot;</span><span class="p">,</span>
+       <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;Reports 12.1 ft but says the gauge is suspect.&quot;</span><span class="p">},</span>
+      <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;explains_the_consequence&quot;</span><span class="p">,</span>
+       <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;Says the number should not be used for a custody transfer.&quot;</span><span class="p">},</span>
+    <span class="p">],</span>
   <span class="p">}</span>
 <span class="p">}</span></code></pre>
 <p><strong>A new test case is a new dict, not new code.</strong> That's what makes this scale to 200 cases.</p>
@@ -546,7 +567,7 @@ runs in, which is what an input is.</p>
 <p><code>inputs</code> is the world this case runs in. <code>reference_outputs</code> is what correct looks like.</p>
 </blockquote>
 <p>Keep that line clean and a useful property falls out: <code>reference_outputs</code> is a free-form slot for
-<em>expectations</em> rather than a place to keep one right answer. In <a href="#part-8-assertions-so-non-engineers-can-write-tests">Part 8</a>
+<em>expectations</em> rather than a place to keep one right answer. In <a href="#assertions-so-non-engineers-can-write-tests">Assertions</a>
 that's what lets someone who doesn't write code fill it in, in English.</p>
 <h4 id="mock-the-behavior-never-the-contract">Mock the behavior, never the contract</h4>
 <p>Build every mock from the <strong>real</strong> tool's name, description and <code>args_schema</code>:</p>
@@ -573,8 +594,8 @@ and you've thrown away the most testable part of an agent's behavior. <em>"Did i
 check in the prose, and it's a code assertion.</p>
 <h4 id="the-failure-mode-that-hides-best">★ The failure mode that hides best</h4>
 <p><strong>A tool failed. Did the agent claim it worked anyway?</strong></p>
-<p>This is among the most damaging agent failures in production and among the least likely to be
-caught in casual testing, because the answer <em>reads fine</em>. The user is told their work order was
+<p>Among the most damaging agent failures in production, and the least likely to be caught in
+casual testing, because the answer <em>reads fine</em>. The user is told their work order was
 filed. It wasn't. They find out days later when the work doesn't happen. Nothing in your error
 logs. Dashboards green.</p>
 <p>Script four flavors, because they fail differently:</p>
@@ -608,7 +629,7 @@ logs. Dashboards green.</p>
 often just... answers anyway. Assert that no numbers appear:</p>
 <pre><code class="language-python"><span class="s2">&quot;must_not_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ft&quot;</span><span class="p">,</span> <span class="s2">&quot;bbl&quot;</span><span class="p">,</span> <span class="s2">&quot;psi&quot;</span><span class="p">]</span></code></pre>
 <hr />
-<h2 id="part-6-levels-3-and-4-stateful-and-simulated">Part 6: Levels 3 and 4: stateful and simulated</h2>
+<h2 id="levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</h2>
 <h3 id="level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</h3>
 <p>Levels 1 and 2 script a tool's <em>response</em>. That works while the response is a pure function of
 the call. It breaks the moment there's state behind the tool, because <strong>the correct second
@@ -671,7 +692,7 @@ transcripts, the same way you'd validate a judge.</p>
 <p>Start with the personas that map to failures you've actually seen. If you haven't shipped,
 "pressured" and "terse" earn their keep first.</p>
 <hr />
-<h2 id="part-7-writing-evaluators-that-dont-lie">Part 7: Writing evaluators that don't lie</h2>
+<h2 id="writing-evaluators-that-dont-lie">Writing evaluators that don't lie</h2>
 <h3 id="code-first-every-time">Code first. Every time.</h3>
 <p>People reach for a judge because the questions feel subjective, then discover the judge is the
 least reliable component in the pipeline. Most of what you want to assert is exactly checkable:</p>
@@ -748,17 +769,17 @@ read the misaligned cases and <strong>group them</strong> — failure modes clus
 most of the gap. Then put those failure modes in the prompt. And add more labels
 before celebrating: 100% agreement on 20 examples is overfitting, not success.</p>
 <hr />
-<h2 id="part-8-assertions-so-non-engineers-can-write-tests">Part 8: Assertions, so non-engineers can write tests</h2>
+<h2 id="assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</h2>
 <p>Instead of writing a correct answer by hand, describe <strong>what a correct answer looks like</strong> in
 free-form English, one claim per row:</p>
 <pre><code class="language-json"><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;assertions&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;must_not_state_unsourced_limit&quot;</span><span class="p">,</span>
-<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Does not state a numeric exposure limit that did not come from a tool result.&quot;</span><span class="p">},</span>
+<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;No numeric exposure limit that didn&#39;t come from a tool.&quot;</span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;must_say_it_has_no_source&quot;</span><span class="p">,</span>
-<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;States plainly that it has no source for the requested figure.&quot;</span><span class="p">},</span>
+<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;States plainly that it has no source for the figure.&quot;</span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span><span class="nt">&quot;key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;may_name_the_governing_standard&quot;</span><span class="p">,</span>
-<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Naming which document governs is acceptable; stating its contents is not.&quot;</span><span class="p">}</span>
+<span class="w">     </span><span class="nt">&quot;comment&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Naming the governing document is fine; quoting it is not.&quot;</span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span></code></pre>
 <p>Then one evaluator grades each claim and returns <strong>one feedback score per assertion</strong>, so each
@@ -824,16 +845,16 @@ the room, and it inverts the usual failure:</p>
 </tbody>
 </table>
 <p>The instinct to give the agent every tool comes from good product sense. You're trying to make
-it capable. It just runs the reasoning backwards. And fewer tools is <em>also</em> cheaper and more
-reliable: every tool schema is tokens on every turn, and more tools means more chances to pick
-the wrong one.</p>
+it capable, it just runs the reasoning backwards. Fewer tools is also cheaper and more reliable:
+every tool schema is tokens on every turn, and more tools means more chances to pick the wrong
+one.</p>
 <p>One of our tools exists purely because a workflow demanded it (<em>"close out that pump work order
 I raised earlier"</em> → you need a way to list them). That's the direction you want.</p>
 <hr />
-<h2 id="part-9-running-them">Part 9: Running them</h2>
+<h2 id="running-them">Running them</h2>
 <h3 id="repetitions">Repetitions</h3>
-<p>Your agent is non-deterministic. A single pass gives you one sample per case, and a case that
-fails one time in three looks either fine or broken depending on the coin flip.</p>
+<p>Your agent is non-deterministic. A single pass gives one sample per case, so a case that fails
+one time in three looks fine or broken depending on the coin flip.</p>
 <p><code>num_repetitions=3</code> re-runs the target <strong>and</strong> the evaluators. A score of <code>0.67</code> tells you
 something <code>0</code> or <code>1</code> cannot: <strong>this case is flaky, not broken.</strong> Those need different fixes:
 flaky usually means an underspecified prompt; broken usually means a missing capability.</p>
@@ -886,7 +907,7 @@ answer in thirty seconds instead of an argument.</p>
 fast enough to run on every prompt tweak, you run it on every prompt tweak, and that behavioral
 change is worth more than the wall-clock saving.</p>
 <hr />
-<h2 id="part-10-reading-the-results">Part 10: Reading the results</h2>
+<h2 id="reading-the-results">Reading the results</h2>
 <p>Here's the payoff. <em>"Should we use the expensive model or the cheap one?"</em> is normally settled by
 vibes, seniority, or whoever last read a benchmark. With a suite it's a measurement:</p>
 <pre><code>metric                       expensive      cheap
@@ -973,7 +994,7 @@ mean will hide from you. Agent latency also isn't API latency: several model cal
 tool calls per request is normal, and that's a product decision to make consciously (stream
 partial output, show the plan, show which tool is running) rather than discover from a complaint.</p>
 <hr />
-<h2 id="part-11-the-limit-and-the-loop">Part 11: The limit, and the loop</h2>
+<h2 id="the-limit-and-the-loop">The limit, and the loop</h2>
 <p>Here's the thing you have to say out loud about everything above:</p>
 <blockquote>
 <p><strong>Every case in your suite is one you thought of.</strong></p>
@@ -1018,8 +1039,8 @@ becomes something the suite can never miss again.</figcaption>
 
 <p><strong>Online evaluators</strong> run against live traffic, where there's no reference output and no idea
 what's coming, so they must be reference-free: input, output, trajectory only. The useful ones
-are out-of-scope, hallucination, task-completed, perceived-error, and a <em>code</em> one for anything
-mechanically checkable.</p>
+are out-of-scope, hallucination, task-completed, perceived-error (did the user's next message
+signal they thought the answer was wrong), and a <em>code</em> one for anything mechanically checkable.</p>
 <p>Sample them. <strong>Start at 10–20%, not 100%.</strong> Every online evaluator is a model call on every
 matching trace; three judges at full sampling can cost more than the agent. You're estimating a
 rate, not auditing every transaction, and a systemic problem shows up just as fast.</p>
@@ -1050,7 +1071,7 @@ interesting one:</p>
 <p><strong>If you only review what your filters catch, your filters define the ceiling on what you can
 learn.</strong></p>
 </blockquote>
-<p>Then a human writes assertions on the bad trace (Part 8), those become a dataset row, and (this
+<p>Then a human writes assertions on the bad trace, those become a dataset row, and (this
 part is not optional) <strong>you run it and watch it fail before you fix anything.</strong></p>
 <blockquote>
 <p><strong>A regression test you haven't seen fail is not a test. It's a hope.</strong></p>
@@ -1139,11 +1160,11 @@ traffic. Three places it goes deeper:</p>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Error analysis</strong></td>
-<td style="text-align: left;">The systematic version of Part 11. Read ~100 traces, note the <em>first</em> thing that went wrong in each, let categories <strong>emerge</strong> rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just <em>fix</em> it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix.</td>
+<td style="text-align: left;">The systematic version of <em>The limit, and the loop</em>. Read ~100 traces, note the <em>first</em> thing that went wrong in each, let categories <strong>emerge</strong> rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just <em>fix</em> it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Judge alignment, properly</strong></td>
-<td style="text-align: left;">"Label 20 and iterate" (Part 7) leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and <strong>TPR/TNR rather than raw agreement</strong>, because with class imbalance, a judge that always says Pass scores 90% and catches nothing.</td>
+<td style="text-align: left;">"Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and <strong>TPR/TNR rather than raw agreement</strong>, because with class imbalance, a judge that always says Pass scores 90% and catches nothing.</td>
 </tr>
 </tbody>
 </table>
@@ -1155,7 +1176,7 @@ judge's own error rates, and there's a closed form:</p>
 <p>A judge at TPR 0.92 / TNR 0.88 that scores 80% of production traces as Pass implies a true rate
 of about <strong>85%</strong>, not 80%. If you put an evaluator score on a dashboard and alert on it, that's
 your number and it's wrong in a knowable direction. Note it matters for <em>absolute</em> rates.
-Relative comparison under one fixed judge, which is what the model bake-off in Part 10 does, is
+Relative comparison under one fixed judge, which is what the model bake-off above does, is
 the case that's already trustworthy.</p>
 <p>Where the two overlap (code checks before judges, one judge per failure mode, binary rather
 than Likert, domain experts in the loop) they agree, which is some evidence both are right.</p>
