@@ -116,7 +116,7 @@ not a safety property**, and it degrades silently when you upgrade the model. Co
 
 ---
 
-## The mental model
+## The eval mental model
 
 Everything here maps onto something you already do:
 
