@@ -2,6 +2,16 @@
 
 ### How to save $$$ and produce incredible agents
 
+<div class="bio">
+<p><strong>Hi, I'm Josiah.</strong> I've been building LLM applications in production, with
+LangChain, since 2023. I founded an AI marketing company that reached several hundred thousand
+users. After a year of working with plain LLMs we graduated to workflows, with LangGraph, for
+stringing model calls and tool calls together in more complicated ways. In 2025 we launched our
+first agent, and spent the year that followed learning by fire how to refine it. Over that
+stretch, the price of intelligence fell about <strong>100x</strong>.</p>
+<p>What follows is the result of those battle scars. Enjoy!</p>
+</div>
+
 A user asks our refinery assistant about pump "P-101". The real pumps are **P-101A** and
 **P-101B**, an A/B pair, which is how essentially every critical pump is installed. The tool
 does the correct thing and returns:

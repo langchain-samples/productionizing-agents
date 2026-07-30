@@ -60,6 +60,13 @@ tr:last-child td{border-bottom:none}
 hr{border:0;border-top:1px solid var(--line);margin:56px 0}
 ul,ol{padding-left:24px}li{margin:7px 0}
 h2,h3{scroll-margin-top:24px}
+/* Author note above the opening anecdote. Deliberately quieter than body text so it
+   reads as a preface rather than competing with the cold open. */
+.bio{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc);
+     border-radius:9px;padding:20px 24px;margin:0 0 44px}
+.bio p{margin:0 0 12px;color:var(--dim);font-size:15.5px;line-height:1.68}
+.bio p:last-child{margin:0}
+.bio strong{color:var(--tx);font-weight:600}
 /* --- chapter dividers --- */
 h1.chapter{display:block;font-size:34px;line-height:1.15;letter-spacing:-.02em;
            font-weight:700;margin:76px 0 10px;padding-top:34px;
