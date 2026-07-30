@@ -25,6 +25,7 @@ their environment five minutes before the session starts.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -90,12 +91,30 @@ def uncomment(source: str) -> str:
     return "\n".join(lines).strip("\n")
 
 
+def cell_id(cell_type: str, body: str, seen: set[str]) -> str:
+    """A stable id derived from the cell's own content.
+
+    nbformat 4.5 requires an id on every cell. It has to be deterministic or `--check`
+    would report drift on every run, and it has to come from the content rather than the
+    index, or inserting one cell renumbers every id below it and we're back to the
+    unreviewable diffs this whole build step exists to avoid.
+    """
+    digest = hashlib.sha1(f"{cell_type}\n{body}".encode()).hexdigest()[:12]
+    candidate, n = digest, 1
+    while candidate in seen:            # identical cells appear twice in a couple of modules
+        candidate, n = f"{digest}-{n}", n + 1
+    seen.add(candidate)
+    return candidate
+
+
 def to_notebook(cells: list[tuple[str, str]]) -> dict:
     nb_cells = []
+    seen_ids: set[str] = set()
     for cell_type, source in cells:
         body = uncomment(source) if cell_type in {"markdown", "raw"} else source
         cell: dict = {
             "cell_type": cell_type,
+            "id": cell_id(cell_type, body, seen_ids),
             "metadata": {},
             "source": body.splitlines(keepends=True) or [""],
         }
