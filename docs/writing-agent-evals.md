@@ -1,6 +1,6 @@
 # Your Agent Needs a Test Suite
 
-### How to write evals that actually catch things
+### How to save $$$ and produce incredible agents
 
 A user asks our refinery assistant about pump "P-101". The real pumps are **P-101A** and
 **P-101B**, an A/B pair, which is how essentially every critical pump is installed. The tool
