@@ -277,7 +277,7 @@ print(result.stdout[-700:])
 # When I first ran that file, `test_harness_injected_tools_are_present` **failed**:
 #
 # ```
-# AssertionError: expected harness tools absent: {'write_todos'}
+# AssertionError: harness tools never reached the model: {'write_todos'}
 # ```
 #
 # ARIA's system prompt says *"plan the work first with `write_todos`"* — but `deepagents`

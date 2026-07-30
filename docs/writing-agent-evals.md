@@ -17,10 +17,9 @@ dashboard is green.
 **A technically-correct API produced a lying agent.** That's the class of failure this post is
 about, and none of it shows up in the places you normally look.
 
-What follows is a practical guide to building an eval suite for an agent: what to test, in what
-order, what it costs, and which parts people reliably skip. Every example is from a real
-codebase, and several of the bugs described were found by the very tests being recommended,
-including two we didn't plant.
+This is a practical guide to building an eval suite for an agent: what to test, in what order,
+what it costs, and what people skip. Every example is from a real codebase, and several of the
+bugs described were found by the very tests being recommended, including two we didn't plant.
 
 There's a [starter kit](#starter-kit) at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.
@@ -29,8 +28,8 @@ you're starting fresh, or you already have something in production.
 
 ## Part 0: Two things to do before you write a single eval
 
-Evals measure the agent. If the layer underneath the agent is shaky, you're not measuring the
-agent. You're measuring a coupled system and guessing which half moved.
+Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
+guessing which half moved.
 
 ### Get your application logic out of the agent
 
@@ -65,7 +64,9 @@ you get a place to enforce authorization where it can be audited.
 
 ### Make your tools *total*
 
-Design rules change when your caller is a model rather than a programmer. Six that matter:
+*Total* in the mathematical sense: every input gets a defined, informative response, and no input
+produces a silent empty. Design rules change when your caller is a model rather than a
+programmer. Six that matter:
 
 | Rule | Why, when a model is calling |
 | :-- | :-- |
@@ -122,10 +123,8 @@ That's it. A judge is an assertion you can't write as a regex.
 
 ### Both reasons you want a suite
 
-People build eval suites to catch bugs before shipping. That's the obvious reason and it's the
-smaller one.
-
-The bigger one is the same reason you want unit tests before a refactor: **tests are what make
+People build eval suites to catch bugs before shipping. That's the obvious reason and the smaller
+one. The bigger one is the same reason you want unit tests before a refactor: **tests are what make
 change cheap.** And agent work involves an unusual amount of change:
 
 - New models ship constantly, cheaper and faster. You'll want to swap them.
@@ -156,9 +155,22 @@ expensive. A large share of what you want to verify lives on the left and needs 
 
 ## Part 3: The five levels
 
-I'd avoid borrowing "unit / integration / e2e" here, because the analogy breaks. In ordinary
-testing the axis is *how many components are involved*. For agents, every test involves the
-whole agent. The useful axis is **how much of the world is real**.
+Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is *how many components
+are involved*; for agents, every test involves the whole agent. The useful axis is **how much of
+the world is real**.
+
+<figure>
+<div class="ladder">
+<div class="rung prod dear"><p class="lvl">&#9679;</p><p class="nm">Production</p><p class="desc">testing in production &#128517;</p></div>
+<div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="desc">another LLM plays the user</p></div>
+<div class="rung mid"><p class="lvl">3</p><p class="nm">Stateful</p><p class="desc">tool calls alter real state</p></div>
+<div class="rung mid"><p class="lvl">2</p><p class="nm">Scripted</p><p class="desc">tool responses come from the dataset</p></div>
+<div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="desc">the real model, but no tool calls</p></div>
+<div class="rung free"><p class="lvl">0</p><p class="nm">Harness</p><p class="desc">deterministic code, fake model</p></div>
+</div>
+<figcaption>Each level makes more of the world real, and costs more to run. Green is free and
+never flakes; red costs money and returns a probability.</figcaption>
+</figure>
 
 | Level | Name | What's real | You can assert | Cost |
 | :-: | :-- | :-- | :-- | :-- |
@@ -168,9 +180,9 @@ whole agent. The useful axis is **how much of the world is real**.
 | **3** | **Stateful** | Real mutable state, real side effects | The world actually changed | medium |
 | **4** | **Simulated** | A second LLM playing the user | Behavior over a trajectory, under a persona | expensive |
 
-**The rule: push every property as far down the ladder as it will go.** A property asserted at
-Level 0 costs nothing and never flakes. The same property at Level 4 costs a dollar and gives
-you a probability.
+**The rule: push every property as far down the ladder as it will go.** At Level 0 a property
+costs nothing and never flakes; at Level 4 the same property costs a dollar and returns a
+probability.
 
 ---
 
@@ -216,10 +228,9 @@ middleware:  check the answer, flag it if absent           ← a guarantee, 100%
 
 ### 4b. Assert on the assembled context
 
-The prompt reaching your model is assembled at runtime from your system prompt, your tool
-schemas, harness-injected tools, middleware rewrites, and any dynamically loaded skills or
-memories. By the time it arrives it has passed through five layers of code you didn't write
-today.
+The prompt reaching your model is assembled at runtime from your system prompt, tool schemas,
+harness-injected tools, middleware rewrites, and dynamically loaded skills or memories: five
+layers of code you didn't write today.
 
 **Almost nobody looks at it.** People debug agent behavior by reading their own source and
 reasoning about what the model *probably* received.
@@ -248,16 +259,15 @@ a fake model, and invoke once. Milliseconds. Free.
 > **A real bug this caught on its first run.**
 >
 > ```
-> AssertionError: expected harness tools absent: {'write_todos'}
+> AssertionError: harness tools never reached the model: {'write_todos'}
 > ```
 >
 > Our system prompt said *"plan the work first with `write_todos`."* But the agent framework
 > didn't inject the todo middleware by default, **that tool was never presented to the model.**
 >
-> Think about how that behaves in production. The agent doesn't error when told to use a tool it
-> doesn't have. It quietly doesn't plan, and multi-step answers get slightly worse in a way
-> you'd naturally attribute to the model. You could spend an afternoon tuning a prompt that
-> referenced a tool that didn't exist.
+> The agent doesn't error when told to use a tool it doesn't have. It quietly doesn't plan, and
+> multi-step answers get slightly worse in a way you'd attribute to the model. You could spend an
+> afternoon tuning a prompt that referenced a tool that didn't exist.
 >
 > **If your prompt names a tool, assert that the tool reaches the model.**
 
@@ -304,7 +314,7 @@ def responded(outputs) -> dict:
             "comment": f"{len(answer)} chars" if answer else "EMPTY final answer"}
 ```
 
-Three lines. It looks too trivial to write. It is the split that catches a model deprecation, a
+Three lines, and too trivial-looking to write. It catches a model deprecation, a
 broken prompt template, a tool schema that stopped serializing, and a bad deploy, **none of
 which your clever groundedness judge will notice, because it never receives an answer to grade.**
 
@@ -346,9 +356,9 @@ async def target(inputs: dict) -> dict:   # the whole signature
 ```
 
 Evaluators get `inputs`, `outputs` and `reference_outputs`. The target gets one. So the mock
-world has to live in `inputs`, because the *target* is what needs it: the target is what builds
-the agent. That isn't a workaround, it's the right home. `mock_tools` makes no claim about what a
-correct answer looks like; it's the environment the case runs in, which is what an input is.
+world has to live in `inputs` — the target is what builds the agent. That isn't a workaround:
+`mock_tools` makes no claim about what a correct answer looks like, it's the environment the case
+runs in, which is what an input is.
 
 > `inputs` is the world this case runs in. `reference_outputs` is what correct looks like.
 
@@ -411,8 +421,8 @@ Script four flavors, because they fail differently:
 | Permission denied | Unrecoverable; must not be retried into the ground |
 | A **read** fails | Sneakiest: no action to falsely claim, so the agent just answers from nothing |
 
-That last one deserves emphasis. When a *write* fails there's an obvious success to falsely
-claim. When a *read* fails, the agent often just... answers anyway. Assert that no numbers appear:
+When a *write* fails there's an obvious success to falsely claim. When a *read* fails, the agent
+often just... answers anyway. Assert that no numbers appear:
 
 ```python
 "must_not_mention": ["ft", "bbl", "psi"]
@@ -506,8 +516,7 @@ Start with the personas that map to failures you've actually seen. If you haven'
 ### Code first. Every time.
 
 People reach for a judge because the questions feel subjective, then discover the judge is the
-least reliable component in the pipeline. A surprising amount of what you want to assert is
-exactly checkable:
+least reliable component in the pipeline. Most of what you want to assert is exactly checkable:
 
 ```
 "did it respond at all"                    →  len(text) > 0
@@ -522,15 +531,15 @@ Reach for a judge only when the property is genuinely semantic: *did it accompli
 
 ### One judge, one question, and the answer is yes or no
 
-The instinct when you finally reach for a judge is to ask it for a quality score out of ten.
-Resist it. A single holistic number is the least useful thing a judge can produce:
+The instinct when you reach for a judge is to ask for a quality score out of ten. Resist it: a
+single holistic number is the least useful thing a judge can produce.
 
 > **`quality: 6/10` tells you nothing you can act on.** It doesn't say what was wrong, it doesn't
 > say what to fix, and when it moves to 7 next week you can't tell whether the agent improved or
 > the judge was in a better mood.
 
-Decompose instead. Whatever you meant by "quality," write it out as the handful of separate
-things you were actually grading, and make each one a claim that is verifiably true or false:
+Decompose instead. Write out whatever you meant by "quality" as the separate things you were
+grading, each a claim that is verifiably true or false:
 
 ```python
 # Instead of: one judge returning quality ∈ [0, 10]
@@ -568,9 +577,9 @@ actually ships:
 1 = bad ... 10 = good        ← what is a 6? what is a 7? what is the difference?
 ```
 
-Nobody can answer that, which means the numbers aren't comparable between reviewers, between
-runs, or between models. **Never a bare 1–10.** If you can't write the anchor for each point,
-you don't have a scale. You have a vibe with a number attached, and it will be treated as data.
+Nobody can answer that, so the numbers aren't comparable between reviewers, between runs, or
+between models. **Never a bare 1–10.** If you can't write the anchor for each point you don't
+have a scale; you have a vibe with a number attached, and it will be treated as data.
 
 ### The pair worth studying
 
@@ -622,9 +631,9 @@ it would produce. Then pin the real formats as test cases.
    suspicion and its *relative* numbers (A vs B, same judge) as useful.
 
 Aligning is straightforward and nobody does it: label ~20 examples yourself, balanced between
-pass and fail, then iterate the judge prompt until it agrees with you. What actually moves the
-number: read the misaligned cases and **group them**, because failure modes cluster and two or
-three explain most of the gap. Then put those failure modes in the prompt. And add more labels
+pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
+read the misaligned cases and **group them** — failure modes cluster, and two or three explain
+most of the gap. Then put those failure modes in the prompt. And add more labels
 before celebrating: 100% agreement on 20 examples is overfitting, not success.
 
 ---
@@ -755,6 +764,43 @@ cost per run                   $0.0841    $0.0163
 latency p50                       31.4s      18.2s
 ```
 
+<figure>
+<svg class="bars" viewBox="0 0 760 178" role="img" aria-label="Three bar charts comparing the expensive and cheap models: mean score 0.94 versus 0.93, cost per run $0.0841 versus $0.0163, and p50 latency 31.4 seconds versus 18.2 seconds.">
+<g>
+  <text class="cap" x="0" y="11">QUALITY &#183; MEAN SCORE</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="33" width="58" height="117" fill="#40668D" rx="2"/>
+  <rect x="124" y="35" width="58" height="115" fill="#7FC8FF" rx="2"/>
+  <text class="val" x="63" y="26" text-anchor="middle">0.94</text>
+  <text class="val" x="153" y="28" text-anchor="middle">0.93</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+<g transform="translate(272,0)">
+  <text class="cap" x="0" y="11">COST &#183; USD PER RUN</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="34" width="58" height="116" fill="#40668D" rx="2"/>
+  <rect x="124" y="128" width="58" height="22" fill="#E3FF8F" rx="2"/>
+  <text class="val" x="63" y="27" text-anchor="middle">$0.0841</text>
+  <text class="val" x="153" y="121" text-anchor="middle">$0.0163</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+<g transform="translate(544,0)">
+  <text class="cap" x="0" y="11">LATENCY &#183; P50</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="39" width="58" height="111" fill="#40668D" rx="2"/>
+  <rect x="124" y="86" width="58" height="64" fill="#E3FF8F" rx="2"/>
+  <text class="val" x="63" y="32" text-anchor="middle">31.4s</text>
+  <text class="val" x="153" y="79" text-anchor="middle">18.2s</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+</svg>
+<figcaption>One point of mean score, for 5&#215; the cost and 1.7&#215; the latency. That is the
+decision the suite exists to let you make on evidence.</figcaption>
+</figure>
+
 Hold **three things** fixed: the dataset, the evaluators, and the judge model. Change any of
 those between runs and you can no longer attribute a difference to the agent rather than the
 grader.
@@ -771,8 +817,8 @@ groundedness      0.98 → 0.89     STOP. That's hallucination.
 Same delta. Completely different decision. **Not all points are equal**, and an average
 deliberately hides that.
 
-So tier your metrics *before* you run the comparison, not after. It's much easier to be honest
-about what matters before you're staring at a number you want to be acceptable:
+So tier your metrics *before* you run the comparison. It's easier to be honest about what matters
+before you're staring at a number you want to be acceptable:
 
 | Tier | A regression here means |
 | :-- | :-- |
@@ -820,18 +866,24 @@ refuses to plan dinner.
 
 ### Closing the loop
 
-```
-PRODUCTION ─▶ online evaluators ─▶ automation ─▶ ANNOTATION QUEUE
-                                                        │
-                                                        ▼
-                                          human writes ASSERTIONS
-                                                        │
-                                                        ▼
-                                              REGRESSION DATASET
-                                                        │
-                                                        ▼
-                                     eval fails (RED) ─▶ fix ─▶ GREEN ─▶ ship
-```
+<figure>
+<svg class="ring" viewBox="0 0 820 330" role="img" aria-label="Production traces flow through online evaluators to a human review queue, where assertions are written, run red, then fixed and shipped back to production.">
+<path class="arc" d="M132 70 L268 70"/><polygon points="278,70 260,61 260,79" fill="#7FC8FF"/>
+<path class="arc" d="M362 70 L528 70"/><polygon points="538,70 520,61 520,79" fill="#7FC8FF"/>
+<path class="arc" d="M660 92 Q702 100 702 170 Q702 250 646 250"/><polygon points="632,250 650,241 650,259" fill="#7FC8FF"/>
+<path class="arc" d="M556 250 L452 250"/><polygon points="442,250 460,241 460,259" fill="#7FC8FF"/>
+<path class="arc" d="M328 250 L232 250"/><polygon points="222,250 240,241 240,259" fill="#7FC8FF"/>
+<path class="arc" d="M136 250 Q54 250 54 165 Q54 122 78 110"/><polygon points="90,104 71,102 79,119" fill="#7FC8FF"/>
+<circle class="node" cx="100" cy="70" r="32"/><text class="k" x="100" y="75" text-anchor="middle">PROD</text><text x="100" y="24" text-anchor="middle">traces</text>
+<circle class="node" cx="330" cy="70" r="32"/><text class="k" x="330" y="75" text-anchor="middle">EVAL</text><text x="330" y="24" text-anchor="middle">online</text>
+<circle class="node hum" cx="596" cy="70" r="34"/><text class="k" x="596" y="75" text-anchor="middle">QUEUE</text><text x="596" y="22" text-anchor="middle">human</text>
+<circle class="node hum" cx="588" cy="250" r="34"/><text class="k" x="588" y="255" text-anchor="middle">ASSERT</text><text x="588" y="304" text-anchor="middle">in English</text>
+<circle class="node" cx="390" cy="250" r="32"/><text class="k" x="390" y="255" text-anchor="middle">RED</text><text x="390" y="304" text-anchor="middle">it must fail</text>
+<circle class="node" cx="170" cy="250" r="32"/><text class="k" x="170" y="255" text-anchor="middle">FIX</text><text x="170" y="304" text-anchor="middle">then green</text>
+</svg>
+<figcaption>The two pink nodes are the only ones a human touches. Everything a reviewer notices
+becomes something the suite can never miss again.</figcaption>
+</figure>
 
 **Online evaluators** run against live traffic, where there's no reference output and no idea
 what's coming, so they must be reference-free: input, output, trajectory only. The useful ones
@@ -862,9 +914,9 @@ Skip red and you never learn whether the assertion discriminates. A surprising f
 hand-written assertions pass trivially against the broken agent, because they describe something
 it already did.
 
-Finally, don't automate the *whole* loop yet. Tooling now exists that will detect a recurring
-issue, diagnose it, write the fix and open a pull request, which is genuinely most of the work.
-Keep a human on the merge, though, for anything safety-adjacent. Two reasons: your evals are an
+Don't automate the *whole* loop yet. Tooling now exists that will detect a recurring issue,
+diagnose it, write the fix and open a pull request: most of the work. Keep a human on the merge
+for anything safety-adjacent. Two reasons: your evals are an
 incomplete proxy for "good," and an optimizer will find the gap between your metric and your
 intent, because that's what optimizers do. *This whole section exists because our suite had
 exactly such a gap.* And the failure is silent: a prompt that games your evaluators looks like
@@ -976,7 +1028,7 @@ than Likert, domain experts in the loop) they agree, which is some evidence both
 3. **Five levels, by how much of the world is real.** Push every property as far down as it goes.
 4. **Level 0 is free and nobody writes it.** If your prompt names a tool, assert the tool arrives.
 5. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
-6. **One judge, one question, answered yes or no.** Decompose "quality" into binaries and sum
+6. **One judge, one question, answered yes or no.** Decompose "quality" into binaries and average
    them. If you must have a scale, anchor every point. Never a bare 1–10.
 7. **Test what happens when tools fail.** "Claimed success anyway" is the highest-severity,
    lowest-visibility failure you have.
@@ -986,8 +1038,10 @@ than Likert, domain experts in the loop) they agree, which is some evidence both
 11. **Always watch the test fail first.**
 12. **Every case is one you thought of.** Build the production loop that finds the rest.
 
-The one-sentence version:
+And if you keep five things:
 
-> You get one irreducibly non-deterministic component. Make everything around it as deterministic
-> as you can, measure what's left, watch it in production, and make sure everything you learn
-> there becomes something you can never learn again.
+1. **Isolate and test deterministic code** as much as possible.
+2. **Make tests for any failure case you catch.**
+3. **Keep your agent thin.**
+4. **Engineer for change.**
+5. **Build on the shoulders of giants, and ride the wave.**

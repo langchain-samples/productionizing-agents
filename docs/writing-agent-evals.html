@@ -53,6 +53,39 @@ pre .na{color:#E3FF8F}
 pre .nv,pre .vi,pre .vc,pre .vg{color:#e8edf5}
 pre .err,pre .gr{color:#FBB0A5}
 
+figure{margin:34px 0;padding:0}
+figure figcaption{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.55;
+                  text-align:center}
+figure svg{display:block;width:100%;height:auto}
+/* --- the five-levels ladder --- */
+.ladder{display:flex;flex-direction:column;gap:7px}
+.ladder .rung{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:16px;
+              padding:11px 16px;border-radius:9px;border:1px solid var(--line);
+              background:var(--panel)}
+.ladder .rung p{margin:0}
+.ladder .lvl{font:600 17px JetBrains Mono,monospace;color:var(--dim);text-align:center}
+.ladder .nm{font-size:17px;font-weight:600}
+.ladder .desc{font-size:13.5px;color:var(--dim);text-align:right}
+.ladder .free{border-color:var(--good);background:rgba(227,255,143,.07)}
+.ladder .free .lvl{color:var(--good)}
+.ladder .mid{border-color:#2f4b68}
+.ladder .mid .lvl{color:var(--acc)}
+.ladder .dear{border-color:var(--bad);background:rgba(251,176,165,.06)}
+.ladder .dear .lvl{color:var(--bad)}
+.ladder .prod{opacity:.7;border-style:dashed}
+/* --- the loop diagram --- */
+.ring text{font:12px JetBrains Mono,monospace;fill:var(--tx)}
+.ring text.k{fill:var(--acc);font-weight:600}
+.ring circle.node{fill:var(--panel);stroke:var(--acc);stroke-width:1.5}
+.ring circle.node.hum{stroke:#C78EAD}
+.ring path.arc{fill:none;stroke:#6FA8D8;stroke-width:2.6}
+/* --- bake-off bars --- */
+.bars text{font:12px JetBrains Mono,monospace;fill:var(--dim)}
+.bars text.cap{font-weight:600;letter-spacing:.08em;fill:var(--dim);font-size:11px}
+.bars text.val{fill:var(--tx);font-weight:600;font-size:13px}
+.bars text.nm{fill:var(--tx);font-size:12.5px}
+.bars line{stroke:var(--line);stroke-width:1}
+
 /* --- table of contents --- */
 #toc{position:fixed;top:0;left:0;bottom:0;width:var(--toc-w);overflow-y:auto;
      padding:40px 14px 60px 22px;border-right:1px solid var(--line);
@@ -114,16 +147,15 @@ confidence, and moves on. No exception was raised. Nothing is in the error logs.
 dashboard is green.</p>
 <p><strong>A technically-correct API produced a lying agent.</strong> That's the class of failure this post is
 about, and none of it shows up in the places you normally look.</p>
-<p>What follows is a practical guide to building an eval suite for an agent: what to test, in what
-order, what it costs, and which parts people reliably skip. Every example is from a real
-codebase, and several of the bugs described were found by the very tests being recommended,
-including two we didn't plant.</p>
+<p>This is a practical guide to building an eval suite for an agent: what to test, in what order,
+what it costs, and what people skip. Every example is from a real codebase, and several of the
+bugs described were found by the very tests being recommended, including two we didn't plant.</p>
 <p>There's a <a href="#starter-kit">starter kit</a> at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.</p>
 <hr />
 <h2 id="part-0-two-things-to-do-before-you-write-a-single-eval">Part 0: Two things to do before you write a single eval</h2>
-<p>Evals measure the agent. If the layer underneath the agent is shaky, you're not measuring the
-agent. You're measuring a coupled system and guessing which half moved.</p>
+<p>Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
+guessing which half moved.</p>
 <h3 id="get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</h3>
 <p>When your agent gives a wrong answer there are exactly two candidates:</p>
 <ol>
@@ -149,7 +181,9 @@ few extra benefits: it makes the separation impossible to violate, the surface b
 independently deployable and load-testable, one application can serve several consumers, and
 you get a place to enforce authorization where it can be audited.</p>
 <h3 id="make-your-tools-total">Make your tools <em>total</em></h3>
-<p>Design rules change when your caller is a model rather than a programmer. Six that matter:</p>
+<p><em>Total</em> in the mathematical sense: every input gets a defined, informative response, and no input
+produces a silent empty. Design rules change when your caller is a model rather than a
+programmer. Six that matter:</p>
 <table>
 <thead>
 <tr>
@@ -240,9 +274,8 @@ LLM-as-judge     assert grounded_in(answer, sources)  fuzzy, costs a model call
 </code></pre>
 <p>That's it. A judge is an assertion you can't write as a regex.</p>
 <h3 id="both-reasons-you-want-a-suite">Both reasons you want a suite</h3>
-<p>People build eval suites to catch bugs before shipping. That's the obvious reason and it's the
-smaller one.</p>
-<p>The bigger one is the same reason you want unit tests before a refactor: <strong>tests are what make
+<p>People build eval suites to catch bugs before shipping. That's the obvious reason and the smaller
+one. The bigger one is the same reason you want unit tests before a refactor: <strong>tests are what make
 change cheap.</strong> And agent work involves an unusual amount of change:</p>
 <ul>
 <li>New models ship constantly, cheaper and faster. You'll want to swap them.</li>
@@ -286,9 +319,22 @@ completely different economics:</p>
 expensive. A large share of what you want to verify lives on the left and needs no model at all.</p>
 <hr />
 <h2 id="part-3-the-five-levels">Part 3: The five levels</h2>
-<p>I'd avoid borrowing "unit / integration / e2e" here, because the analogy breaks. In ordinary
-testing the axis is <em>how many components are involved</em>. For agents, every test involves the
-whole agent. The useful axis is <strong>how much of the world is real</strong>.</p>
+<p>Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is <em>how many components
+are involved</em>; for agents, every test involves the whole agent. The useful axis is <strong>how much of
+the world is real</strong>.</p>
+<figure>
+<div class="ladder">
+<div class="rung prod dear"><p class="lvl">&#9679;</p><p class="nm">Production</p><p class="desc">testing in production &#128517;</p></div>
+<div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="desc">another LLM plays the user</p></div>
+<div class="rung mid"><p class="lvl">3</p><p class="nm">Stateful</p><p class="desc">tool calls alter real state</p></div>
+<div class="rung mid"><p class="lvl">2</p><p class="nm">Scripted</p><p class="desc">tool responses come from the dataset</p></div>
+<div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="desc">the real model, but no tool calls</p></div>
+<div class="rung free"><p class="lvl">0</p><p class="nm">Harness</p><p class="desc">deterministic code, fake model</p></div>
+</div>
+<figcaption>Each level makes more of the world real, and costs more to run. Green is free and
+never flakes; red costs money and returns a probability.</figcaption>
+</figure>
+
 <table>
 <thead>
 <tr>
@@ -337,9 +383,9 @@ whole agent. The useful axis is <strong>how much of the world is real</strong>.<
 </tr>
 </tbody>
 </table>
-<p><strong>The rule: push every property as far down the ladder as it will go.</strong> A property asserted at
-Level 0 costs nothing and never flakes. The same property at Level 4 costs a dollar and gives
-you a probability.</p>
+<p><strong>The rule: push every property as far down the ladder as it will go.</strong> At Level 0 a property
+costs nothing and never flakes; at Level 4 the same property costs a dollar and returns a
+probability.</p>
 <hr />
 <h2 id="part-4-level-0-the-level-nobody-writes">Part 4: Level 0, the level nobody writes</h2>
 <p>This is the highest value per second in the entire suite, and almost nobody does it. Two kinds.</p>
@@ -372,10 +418,9 @@ middleware at all:</p>
 middleware:  check the answer, flag it if absent           ← a guarantee, 100% true
 </code></pre>
 <h3 id="4b-assert-on-the-assembled-context">4b. Assert on the assembled context</h3>
-<p>The prompt reaching your model is assembled at runtime from your system prompt, your tool
-schemas, harness-injected tools, middleware rewrites, and any dynamically loaded skills or
-memories. By the time it arrives it has passed through five layers of code you didn't write
-today.</p>
+<p>The prompt reaching your model is assembled at runtime from your system prompt, tool schemas,
+harness-injected tools, middleware rewrites, and dynamically loaded skills or memories: five
+layers of code you didn't write today.</p>
 <p><strong>Almost nobody looks at it.</strong> People debug agent behavior by reading their own source and
 reasoning about what the model <em>probably</em> received.</p>
 <p>So look at it. Invoke once against a fake model that records what it got:</p>
@@ -396,13 +441,12 @@ reasoning about what the model <em>probably</em> received.</p>
 a fake model, and invoke once. Milliseconds. Free.</p>
 <blockquote>
 <p><strong>A real bug this caught on its first run.</strong></p>
-<p><code>AssertionError: expected harness tools absent: {'write_todos'}</code></p>
+<p><code>AssertionError: harness tools never reached the model: {'write_todos'}</code></p>
 <p>Our system prompt said <em>"plan the work first with <code>write_todos</code>."</em> But the agent framework
 didn't inject the todo middleware by default, <strong>that tool was never presented to the model.</strong></p>
-<p>Think about how that behaves in production. The agent doesn't error when told to use a tool it
-doesn't have. It quietly doesn't plan, and multi-step answers get slightly worse in a way
-you'd naturally attribute to the model. You could spend an afternoon tuning a prompt that
-referenced a tool that didn't exist.</p>
+<p>The agent doesn't error when told to use a tool it doesn't have. It quietly doesn't plan, and
+multi-step answers get slightly worse in a way you'd attribute to the model. You could spend an
+afternoon tuning a prompt that referenced a tool that didn't exist.</p>
 <p><strong>If your prompt names a tool, assert that the tool reaches the model.</strong></p>
 </blockquote>
 <p>What else is worth asserting here, all free:</p>
@@ -466,7 +510,7 @@ testing that the agent <strong>works</strong> and <strong>routes</strong>, not t
     <span class="n">answer</span> <span class="o">=</span> <span class="n">_answer</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;responded&quot;</span><span class="p">,</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
             <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">answer</span><span class="p">)</span><span class="si">}</span><span class="s2"> chars&quot;</span> <span class="k">if</span> <span class="n">answer</span> <span class="k">else</span> <span class="s2">&quot;EMPTY final answer&quot;</span><span class="p">}</span></code></pre>
-<p>Three lines. It looks too trivial to write. It is the split that catches a model deprecation, a
+<p>Three lines, and too trivial-looking to write. It catches a model deprecation, a
 broken prompt template, a tool schema that stopped serializing, and a bad deploy, <strong>none of
 which your clever groundedness judge will notice, because it never receives an answer to grade.</strong></p>
 <p>Also cheap and valuable at this level: does it <em>reach for the right tool</em>? An agent that answers
@@ -495,9 +539,9 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
 <code>aevaluate</code> receives <code>inputs</code> <strong>only</strong>:</p>
 <pre><code class="language-python"><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">target</span><span class="p">(</span><span class="n">inputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>   <span class="c1"># the whole signature</span></code></pre>
 <p>Evaluators get <code>inputs</code>, <code>outputs</code> and <code>reference_outputs</code>. The target gets one. So the mock
-world has to live in <code>inputs</code>, because the <em>target</em> is what needs it: the target is what builds
-the agent. That isn't a workaround, it's the right home. <code>mock_tools</code> makes no claim about what a
-correct answer looks like; it's the environment the case runs in, which is what an input is.</p>
+world has to live in <code>inputs</code> — the target is what builds the agent. That isn't a workaround:
+<code>mock_tools</code> makes no claim about what a correct answer looks like, it's the environment the case
+runs in, which is what an input is.</p>
 <blockquote>
 <p><code>inputs</code> is the world this case runs in. <code>reference_outputs</code> is what correct looks like.</p>
 </blockquote>
@@ -560,8 +604,8 @@ logs. Dashboards green.</p>
 </tr>
 </tbody>
 </table>
-<p>That last one deserves emphasis. When a <em>write</em> fails there's an obvious success to falsely
-claim. When a <em>read</em> fails, the agent often just... answers anyway. Assert that no numbers appear:</p>
+<p>When a <em>write</em> fails there's an obvious success to falsely claim. When a <em>read</em> fails, the agent
+often just... answers anyway. Assert that no numbers appear:</p>
 <pre><code class="language-python"><span class="s2">&quot;must_not_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ft&quot;</span><span class="p">,</span> <span class="s2">&quot;bbl&quot;</span><span class="p">,</span> <span class="s2">&quot;psi&quot;</span><span class="p">]</span></code></pre>
 <hr />
 <h2 id="part-6-levels-3-and-4-stateful-and-simulated">Part 6: Levels 3 and 4: stateful and simulated</h2>
@@ -630,8 +674,7 @@ transcripts, the same way you'd validate a judge.</p>
 <h2 id="part-7-writing-evaluators-that-dont-lie">Part 7: Writing evaluators that don't lie</h2>
 <h3 id="code-first-every-time">Code first. Every time.</h3>
 <p>People reach for a judge because the questions feel subjective, then discover the judge is the
-least reliable component in the pipeline. A surprising amount of what you want to assert is
-exactly checkable:</p>
+least reliable component in the pipeline. Most of what you want to assert is exactly checkable:</p>
 <pre><code>&quot;did it respond at all&quot;                    →  len(text) &gt; 0
 &quot;did it call get_tank_status&quot;               →  name in trajectory
 &quot;did it cite a source with a version&quot;       →  regex
@@ -641,15 +684,15 @@ exactly checkable:</p>
 <p>Reach for a judge only when the property is genuinely semantic: <em>did it accomplish the task</em>,
 <em>is this grounded</em>, <em>did it honestly report the failure</em>.</p>
 <h3 id="one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</h3>
-<p>The instinct when you finally reach for a judge is to ask it for a quality score out of ten.
-Resist it. A single holistic number is the least useful thing a judge can produce:</p>
+<p>The instinct when you reach for a judge is to ask for a quality score out of ten. Resist it: a
+single holistic number is the least useful thing a judge can produce.</p>
 <blockquote>
 <p><strong><code>quality: 6/10</code> tells you nothing you can act on.</strong> It doesn't say what was wrong, it doesn't
 say what to fix, and when it moves to 7 next week you can't tell whether the agent improved or
 the judge was in a better mood.</p>
 </blockquote>
-<p>Decompose instead. Whatever you meant by "quality," write it out as the handful of separate
-things you were actually grading, and make each one a claim that is verifiably true or false:</p>
+<p>Decompose instead. Write out whatever you meant by "quality" as the separate things you were
+grading, each a claim that is verifiably true or false:</p>
 <pre><code class="language-python"><span class="c1"># Instead of: one judge returning quality ∈ [0, 10]</span>
 <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;cited_a_source&quot;</span><span class="p">,</span>          <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
 <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;answered_the_question&quot;</span><span class="p">,</span>   <span class="s2">&quot;score&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
@@ -675,9 +718,9 @@ observable thing, so two people reading the same output land on the same number:
 actually ships:</p>
 <pre><code>1 = bad ... 10 = good        ← what is a 6? what is a 7? what is the difference?
 </code></pre>
-<p>Nobody can answer that, which means the numbers aren't comparable between reviewers, between
-runs, or between models. <strong>Never a bare 1–10.</strong> If you can't write the anchor for each point,
-you don't have a scale. You have a vibe with a number attached, and it will be treated as data.</p>
+<p>Nobody can answer that, so the numbers aren't comparable between reviewers, between runs, or
+between models. <strong>Never a bare 1–10.</strong> If you can't write the anchor for each point you don't
+have a scale; you have a vibe with a number attached, and it will be treated as data.</p>
 <h3 id="the-pair-worth-studying">The pair worth studying</h3>
 <p>Two evaluators for the same failure mode, at different levels of subtlety:</p>
 <pre><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">did_not_claim_false_success</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">reference_outputs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -717,9 +760,9 @@ it would produce. Then pin the real formats as test cases.</p>
    suspicion and its <em>relative</em> numbers (A vs B, same judge) as useful.</li>
 </ol>
 <p>Aligning is straightforward and nobody does it: label ~20 examples yourself, balanced between
-pass and fail, then iterate the judge prompt until it agrees with you. What actually moves the
-number: read the misaligned cases and <strong>group them</strong>, because failure modes cluster and two or
-three explain most of the gap. Then put those failure modes in the prompt. And add more labels
+pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
+read the misaligned cases and <strong>group them</strong> — failure modes cluster, and two or three explain
+most of the gap. Then put those failure modes in the prompt. And add more labels
 before celebrating: 100% agreement on 20 examples is overfitting, not success.</p>
 <hr />
 <h2 id="part-8-assertions-so-non-engineers-can-write-tests">Part 8: Assertions, so non-engineers can write tests</h2>
@@ -872,6 +915,43 @@ mean score                        0.94       0.93
 cost per run                   $0.0841    $0.0163
 latency p50                       31.4s      18.2s
 </code></pre>
+<figure>
+<svg class="bars" viewBox="0 0 760 178" role="img" aria-label="Three bar charts comparing the expensive and cheap models: mean score 0.94 versus 0.93, cost per run $0.0841 versus $0.0163, and p50 latency 31.4 seconds versus 18.2 seconds.">
+<g>
+  <text class="cap" x="0" y="11">QUALITY &#183; MEAN SCORE</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="33" width="58" height="117" fill="#40668D" rx="2"/>
+  <rect x="124" y="35" width="58" height="115" fill="#7FC8FF" rx="2"/>
+  <text class="val" x="63" y="26" text-anchor="middle">0.94</text>
+  <text class="val" x="153" y="28" text-anchor="middle">0.93</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+<g transform="translate(272,0)">
+  <text class="cap" x="0" y="11">COST &#183; USD PER RUN</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="34" width="58" height="116" fill="#40668D" rx="2"/>
+  <rect x="124" y="128" width="58" height="22" fill="#E3FF8F" rx="2"/>
+  <text class="val" x="63" y="27" text-anchor="middle">$0.0841</text>
+  <text class="val" x="153" y="121" text-anchor="middle">$0.0163</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+<g transform="translate(544,0)">
+  <text class="cap" x="0" y="11">LATENCY &#183; P50</text>
+  <line x1="0" y1="150" x2="216" y2="150"/>
+  <rect x="34" y="39" width="58" height="111" fill="#40668D" rx="2"/>
+  <rect x="124" y="86" width="58" height="64" fill="#E3FF8F" rx="2"/>
+  <text class="val" x="63" y="32" text-anchor="middle">31.4s</text>
+  <text class="val" x="153" y="79" text-anchor="middle">18.2s</text>
+  <text class="nm" x="63" y="169" text-anchor="middle">expensive</text>
+  <text class="nm" x="153" y="169" text-anchor="middle">cheap</text>
+</g>
+</svg>
+<figcaption>One point of mean score, for 5&#215; the cost and 1.7&#215; the latency. That is the
+decision the suite exists to let you make on evidence.</figcaption>
+</figure>
+
 <p>Hold <strong>three things</strong> fixed: the dataset, the evaluators, and the judge model. Change any of
 those between runs and you can no longer attribute a difference to the agent rather than the
 grader.</p>
@@ -882,8 +962,8 @@ groundedness      0.98 → 0.89     STOP. That's hallucination.
 </code></pre>
 <p>Same delta. Completely different decision. <strong>Not all points are equal</strong>, and an average
 deliberately hides that.</p>
-<p>So tier your metrics <em>before</em> you run the comparison, not after. It's much easier to be honest
-about what matters before you're staring at a number you want to be acceptable:</p>
+<p>So tier your metrics <em>before</em> you run the comparison. It's easier to be honest about what matters
+before you're staring at a number you want to be acceptable:</p>
 <table>
 <thead>
 <tr>
@@ -935,17 +1015,25 @@ library"</em>, and gave the number anyway. It knew. It flagged it. It proceeded.
 out-of-scope questions are the ones that sound in-domain.</strong> Nobody gets hurt when an agent
 refuses to plan dinner.</p>
 <h3 id="closing-the-loop">Closing the loop</h3>
-<pre><code>PRODUCTION ─▶ online evaluators ─▶ automation ─▶ ANNOTATION QUEUE
-                                                        │
-                                                        ▼
-                                          human writes ASSERTIONS
-                                                        │
-                                                        ▼
-                                              REGRESSION DATASET
-                                                        │
-                                                        ▼
-                                     eval fails (RED) ─▶ fix ─▶ GREEN ─▶ ship
-</code></pre>
+<figure>
+<svg class="ring" viewBox="0 0 820 330" role="img" aria-label="Production traces flow through online evaluators to a human review queue, where assertions are written, run red, then fixed and shipped back to production.">
+<path class="arc" d="M132 70 L268 70"/><polygon points="278,70 260,61 260,79" fill="#7FC8FF"/>
+<path class="arc" d="M362 70 L528 70"/><polygon points="538,70 520,61 520,79" fill="#7FC8FF"/>
+<path class="arc" d="M660 92 Q702 100 702 170 Q702 250 646 250"/><polygon points="632,250 650,241 650,259" fill="#7FC8FF"/>
+<path class="arc" d="M556 250 L452 250"/><polygon points="442,250 460,241 460,259" fill="#7FC8FF"/>
+<path class="arc" d="M328 250 L232 250"/><polygon points="222,250 240,241 240,259" fill="#7FC8FF"/>
+<path class="arc" d="M136 250 Q54 250 54 165 Q54 122 78 110"/><polygon points="90,104 71,102 79,119" fill="#7FC8FF"/>
+<circle class="node" cx="100" cy="70" r="32"/><text class="k" x="100" y="75" text-anchor="middle">PROD</text><text x="100" y="24" text-anchor="middle">traces</text>
+<circle class="node" cx="330" cy="70" r="32"/><text class="k" x="330" y="75" text-anchor="middle">EVAL</text><text x="330" y="24" text-anchor="middle">online</text>
+<circle class="node hum" cx="596" cy="70" r="34"/><text class="k" x="596" y="75" text-anchor="middle">QUEUE</text><text x="596" y="22" text-anchor="middle">human</text>
+<circle class="node hum" cx="588" cy="250" r="34"/><text class="k" x="588" y="255" text-anchor="middle">ASSERT</text><text x="588" y="304" text-anchor="middle">in English</text>
+<circle class="node" cx="390" cy="250" r="32"/><text class="k" x="390" y="255" text-anchor="middle">RED</text><text x="390" y="304" text-anchor="middle">it must fail</text>
+<circle class="node" cx="170" cy="250" r="32"/><text class="k" x="170" y="255" text-anchor="middle">FIX</text><text x="170" y="304" text-anchor="middle">then green</text>
+</svg>
+<figcaption>The two pink nodes are the only ones a human touches. Everything a reviewer notices
+becomes something the suite can never miss again.</figcaption>
+</figure>
+
 <p><strong>Online evaluators</strong> run against live traffic, where there's no reference output and no idea
 what's coming, so they must be reference-free: input, output, trajectory only. The useful ones
 are out-of-scope, hallucination, task-completed, perceived-error, and a <em>code</em> one for anything
@@ -988,9 +1076,9 @@ part is not optional) <strong>you run it and watch it fail before you fix anythi
 <p>Skip red and you never learn whether the assertion discriminates. A surprising fraction of
 hand-written assertions pass trivially against the broken agent, because they describe something
 it already did.</p>
-<p>Finally, don't automate the <em>whole</em> loop yet. Tooling now exists that will detect a recurring
-issue, diagnose it, write the fix and open a pull request, which is genuinely most of the work.
-Keep a human on the merge, though, for anything safety-adjacent. Two reasons: your evals are an
+<p>Don't automate the <em>whole</em> loop yet. Tooling now exists that will detect a recurring issue,
+diagnose it, write the fix and open a pull request: most of the work. Keep a human on the merge
+for anything safety-adjacent. Two reasons: your evals are an
 incomplete proxy for "good," and an optimizer will find the gap between your metric and your
 intent, because that's what optimizers do. <em>This whole section exists because our suite had
 exactly such a gap.</em> And the failure is silent: a prompt that games your evaluators looks like
@@ -1097,7 +1185,7 @@ than Likert, domain experts in the loop) they agree, which is some evidence both
 <li><strong>Five levels, by how much of the world is real.</strong> Push every property as far down as it goes.</li>
 <li><strong>Level 0 is free and nobody writes it.</strong> If your prompt names a tool, assert the tool arrives.</li>
 <li><strong>Code evaluators before judges.</strong> Judges only where a regex genuinely can't reach.</li>
-<li><strong>One judge, one question, answered yes or no.</strong> Decompose "quality" into binaries and sum
+<li><strong>One judge, one question, answered yes or no.</strong> Decompose "quality" into binaries and average
    them. If you must have a scale, anchor every point. Never a bare 1–10.</li>
 <li><strong>Test what happens when tools fail.</strong> "Claimed success anyway" is the highest-severity,
    lowest-visibility failure you have.</li>
@@ -1107,12 +1195,14 @@ than Likert, domain experts in the loop) they agree, which is some evidence both
 <li><strong>Always watch the test fail first.</strong></li>
 <li><strong>Every case is one you thought of.</strong> Build the production loop that finds the rest.</li>
 </ol>
-<p>The one-sentence version:</p>
-<blockquote>
-<p>You get one irreducibly non-deterministic component. Make everything around it as deterministic
-as you can, measure what's left, watch it in production, and make sure everything you learn
-there becomes something you can never learn again.</p>
-</blockquote></div><script>
+<p>And if you keep five things:</p>
+<ol>
+<li><strong>Isolate and test deterministic code</strong> as much as possible.</li>
+<li><strong>Make tests for any failure case you catch.</strong></li>
+<li><strong>Keep your agent thin.</strong></li>
+<li><strong>Engineer for change.</strong></li>
+<li><strong>Build on the shoulders of giants, and ride the wave.</strong></li>
+</ol></div><script>
 (function(){
   // ---- copy buttons ----
   function fallback(text){

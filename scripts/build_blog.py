@@ -117,6 +117,43 @@ pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
 """
 
+# Figures ported from the deck (slides/index.html). Kept as inline SVG + CSS rather than
+# exported images so the page stays dependency-free and the type scales with the reader's zoom.
+FIGURE_CSS = """
+figure{margin:34px 0;padding:0}
+figure figcaption{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.55;
+                  text-align:center}
+figure svg{display:block;width:100%;height:auto}
+/* --- the five-levels ladder --- */
+.ladder{display:flex;flex-direction:column;gap:7px}
+.ladder .rung{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:16px;
+              padding:11px 16px;border-radius:9px;border:1px solid var(--line);
+              background:var(--panel)}
+.ladder .rung p{margin:0}
+.ladder .lvl{font:600 17px JetBrains Mono,monospace;color:var(--dim);text-align:center}
+.ladder .nm{font-size:17px;font-weight:600}
+.ladder .desc{font-size:13.5px;color:var(--dim);text-align:right}
+.ladder .free{border-color:var(--good);background:rgba(227,255,143,.07)}
+.ladder .free .lvl{color:var(--good)}
+.ladder .mid{border-color:#2f4b68}
+.ladder .mid .lvl{color:var(--acc)}
+.ladder .dear{border-color:var(--bad);background:rgba(251,176,165,.06)}
+.ladder .dear .lvl{color:var(--bad)}
+.ladder .prod{opacity:.7;border-style:dashed}
+/* --- the loop diagram --- */
+.ring text{font:12px JetBrains Mono,monospace;fill:var(--tx)}
+.ring text.k{fill:var(--acc);font-weight:600}
+.ring circle.node{fill:var(--panel);stroke:var(--acc);stroke-width:1.5}
+.ring circle.node.hum{stroke:#C78EAD}
+.ring path.arc{fill:none;stroke:#6FA8D8;stroke-width:2.6}
+/* --- bake-off bars --- */
+.bars text{font:12px JetBrains Mono,monospace;fill:var(--dim)}
+.bars text.cap{font-weight:600;letter-spacing:.08em;fill:var(--dim);font-size:11px}
+.bars text.val{fill:var(--tx);font-weight:600;font-size:13px}
+.bars text.nm{fill:var(--tx);font-size:12.5px}
+.bars line{stroke:var(--line);stroke-width:1}
+"""
+
 CHROME_JS = """
 (function(){
   // ---- copy buttons ----
@@ -327,7 +364,7 @@ def main() -> int:
         "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">"
         "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
         f"<title>{TITLE}</title>"
-        f"<style>{BASE_CSS}{SYNTAX_CSS}{CHROME_CSS}</style></head><body>"
+        f"<style>{BASE_CSS}{SYNTAX_CSS}{FIGURE_CSS}{CHROME_CSS}</style></head><body>"
         '<button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button>'
         f'{toc}<div class="wrap">{body}</div>'
         f"<script>{CHROME_JS}</script></body></html>"

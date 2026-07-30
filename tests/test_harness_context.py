@@ -142,7 +142,7 @@ def test_harness_injected_tools_are_present(context) -> None:
     """The deep agent adds these. Assert them so a harness upgrade that changes the set is
     something you find out from a test rather than from behavior."""
     missing = HARNESS_TOOLS - set(context.tool_names)
-    assert not missing, f"expected harness tools absent: {missing}"
+    assert not missing, f"harness tools never reached the model: {missing}"
 
 
 def test_every_tool_has_a_description(context) -> None:
