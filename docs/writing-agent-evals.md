@@ -551,6 +551,10 @@ least reliable component in the pipeline. Most of what you want to assert is exa
 Reach for a judge only when the property is genuinely semantic: *did it accomplish the task*,
 *is this grounded*, *did it honestly report the failure*.
 
+Either way, **write them against output your agent actually produced**, not output you imagined it
+would produce. A regex built from a format you guessed at will quietly disagree with the real
+thing.
+
 ### One judge, one question, and the answer is yes or no
 
 The instinct when you reach for a judge is to ask for a quality score out of ten. Resist it: a
@@ -602,18 +606,6 @@ actually ships:
 Nobody can answer that, so the numbers aren't comparable between reviewers, between runs, or
 between models. **Never a bare 1–10.** If you can't write the anchor for each point you don't
 have a scale, and reviewers will disagree while the number gets treated as data anyway.
-
-### Your evaluators can make mistakes. Align them.
-
-You will make decisions with these numbers: *"the cheap model
-scored 0.94, ship it."* If an evaluator has an inverted condition, that number is noise and
-you'll act on it anyway, because a green dashboard is persuasive.
-
-> **A broken evaluator is worse than no evaluator. It doesn't leave a gap; it manufactures
-> false confidence.**
-
-**Write your evaluators against output your agent actually produced**, not output you imagined
-it would produce. Then pin the real formats as test cases.
 
 ### Three rules for judges
 
@@ -983,7 +975,6 @@ tests/
   test_app.py              the application. No API key.
   test_middleware.py       call the hooks directly
   test_harness_context.py  assert on what the model actually receives
-  test_evaluators.py       tests for the tests
 ```
 
 ---
@@ -1049,20 +1040,18 @@ than Likert, domain experts in the loop) they agree.
 
 ## The short version
 
-1. **Test the tools first.** Otherwise you're debugging two coupled non-deterministic systems.
-2. **Errors carry the fix.** `{}` reads as "doesn't exist" and produces confident lies.
+1. **Test as much deterministic code as you can**, to isolate the one non-deterministic part.
+2. **Design your tool results to be readable by an agent.** `{}` reads as "doesn't exist" and
+   produces confident lies; an error that names the fix gets you a recovery in the same turn.
 3. **Five levels, by how much of the world is real.** Push every property as far down as it goes.
-4. **Level 0 is free.** If your prompt names a tool, assert the tool arrives.
-5. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
-6. **One judge, one question, answered yes or no.** Decompose "quality" into binaries and average
-   them. If you must have a scale, anchor every point. Never a bare 1–10.
-7. **Test what happens when tools fail.** "Claimed success anyway" is the highest-severity,
-   lowest-visibility failure you have.
-8. **Unit-test your evaluators.** A broken one manufactures false confidence.
-9. **Pin the judge. Align the judge.**
-10. **Assertions let domain experts write tests.** That's what keeps the loop moving.
-11. **Always watch the test fail first.**
-12. **Every case is one you thought of.** Build the production loop that finds the rest.
+4. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
+5. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
+   average them. If you must have a scale, anchor every point.
+6. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
+7. **Pin the judge. Align the judge.**
+8. **Assertions let domain experts write tests.** That's what keeps the loop moving.
+9. **Always watch the test fail first.**
+10. **Every case is one you thought of.** Build the production loop that finds the rest.
 
 And if you keep five things:
 
