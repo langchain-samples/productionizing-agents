@@ -1,0 +1,942 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap");
+
+/* Base reveal.js styles
+ *
+ * Copy this file as styles.css for each new presentation.
+ * Customize the CSS variables (especially colors) for your theme.
+ *
+ * IMPORTANT: All font sizes use pt (points) for predictable sizing.
+ * Base text is intentionally small (16pt) to fit content-heavy slides.
+ * Use .text-lg, .text-xl, etc. classes when slides have less content.
+ */
+
+/* ===========================================
+   CSS VARIABLES - Customize these for each presentation
+   =========================================== */
+:root {
+  /* ===========================================
+     BACKGROUND COLORS
+     For dark presentations, change to dark colors (e.g., #1a1a2e, #0d1117)
+     Then update --text-color and --muted-color to light colors below.
+     =========================================== */
+  --background-color: #030710;              /* LangChain Dark Blue */
+  --section-divider-bg: #0D1322;            /* Dark Shade 1 */
+
+  /* Typography - ALWAYS use pt for font sizes */
+  --heading-font: "Inter", "Helvetica Neue", Helvetica, sans-serif;
+  --body-font: "Inter", "Helvetica Neue", Helvetica, sans-serif;
+  --mono-font: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --base-font-size: 32px;   /* Only px value - sets reveal.js base */
+  --text-size: 16pt;        /* Base body text - intentionally small */
+  --h1-size: 48pt;
+  --h2-size: 36pt;
+  --h3-size: 24pt;
+  --footnote-size: 11pt;
+
+  /* Colors - CUSTOMIZE THESE */
+  --primary-color: #7FC8FF;    /* LangChain Light Blue */
+  --secondary-color: #006DDD;  /* LangChain Blue */
+  --text-color: #F2FAFF;       /* Light Tint 5 */
+  --muted-color: #8DA2BC;      /* Muted on dark */
+  --line-color: #2F4B68;       /* Dark Shade 3 */
+
+  /* Semantic palette, from the LangChain secondary colors */
+  --panel: #0D1322;            /* Dark Shade 1 */
+  --panel-2: #161F34;          /* Dark Shade 2 */
+  --good: #E3FF8F;             /* Green light - fixed / correct */
+  --bad: #FBB0A5;              /* Peach mid - pitfall / failure */
+  --human: #C78EAD;            /* Plum light - human in the loop */
+  --deep-blue: #40668D;        /* Dark Shade 4 */
+
+  /* Layout */
+  --slide-padding: 60px;
+  --slide-padding-top: 40px;
+  --content-gap: 30px;
+
+  /* Border radius for custom components */
+  --box-radius: 10px;
+}
+
+/* ===========================================
+   BASE STYLES - Override reveal.js defaults
+   =========================================== */
+
+.reveal {
+  font-family: var(--body-font);
+  font-size: var(--base-font-size);
+}
+
+/* Restore bold after reset.css strips it with font: inherit */
+.reveal strong,
+.reveal b {
+  font-weight: bold;
+}
+
+/* Apply background colors */
+.reveal-viewport {
+  background-color: var(--background-color);
+}
+
+/* Section divider background via data-state */
+.reveal-viewport.is-section-divider .slide-background.present {
+  background-color: var(--section-divider-bg) !important;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+  font-family: var(--heading-font);
+  text-transform: none;
+  color: var(--text-color);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.reveal h1 { font-size: var(--h1-size); }
+.reveal h2 { font-size: var(--h2-size); margin-bottom: 0; }
+.reveal h3 { font-size: var(--h3-size); }
+
+.reveal p,
+.reveal li,
+.reveal td,
+.reveal th,
+.reveal blockquote {
+  font-size: var(--text-size);
+  color: var(--text-color);
+  line-height: 1.5;
+}
+
+/* ===========================================
+   LISTS
+   =========================================== */
+
+.reveal ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 15px 0;
+}
+
+.reveal ul li {
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 10px;
+}
+
+.reveal ul li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: 8px;
+  height: 8px;
+  background: var(--text-color);
+  border-radius: 50%;
+}
+
+.reveal ul ul li::before {
+  background: var(--muted-color);
+  width: 6px;
+  height: 6px;
+}
+
+/* Prevent double-sizing for nested elements */
+.reveal blockquote p {
+  font-size: inherit;
+}
+
+/* ===========================================
+   SLIDE LAYOUT
+   =========================================== */
+
+.reveal .slides section {
+  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: var(--slide-padding-top) var(--slide-padding) var(--slide-padding) var(--slide-padding) !important;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+/* Vertical stack wrapper - no padding, just pass through */
+.reveal .slides section.stack {
+  padding: 0 !important;
+}
+
+/* Content area - fills remaining space */
+.reveal .slides section > .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: var(--content-gap);
+  text-align: left;
+}
+
+/* Footnotes at bottom */
+.reveal .slides section > .footnote {
+  position: absolute;
+  bottom: 15px;
+  left: var(--slide-padding);
+  right: var(--slide-padding);
+  font-size: var(--footnote-size);
+  color: var(--muted-color);
+}
+
+/* ===========================================
+   SECTION DIVIDERS - Centered title slides
+   =========================================== */
+
+.reveal .slides section.section-divider {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center;
+}
+
+.reveal .slides section.section-divider h1 {
+  font-size: 56pt;
+  text-align: center;
+}
+
+.reveal .slides section.section-divider p {
+  font-size: 20pt;
+  color: var(--muted-color);
+}
+
+/* ===========================================
+   TEXT SIZE UTILITIES
+
+   Base text is 16pt - use these to scale UP when
+   slides have less content and you want to fill space.
+   =========================================== */
+
+.text-lg { font-size: 18pt !important; }   /* Slightly larger */
+.text-xl { font-size: 20pt !important; }   /* Medium emphasis */
+.text-2xl { font-size: 24pt !important; }  /* Strong emphasis */
+.text-3xl { font-size: 28pt !important; }  /* Very large */
+.text-4xl { font-size: 32pt !important; }  /* Maximum body text */
+
+/* Other text utilities */
+.text-muted { color: var(--muted-color) !important; }
+.text-center { text-align: center !important; }
+.text-uppercase { text-transform: uppercase; letter-spacing: 0.1em; }
+.font-light { font-weight: 300; }
+.font-bold { font-weight: 600; }
+
+/* ===========================================
+   BLOCKQUOTES
+   =========================================== */
+
+.reveal blockquote {
+  border-left: 4px solid var(--primary-color);
+  padding-left: 20px;
+  margin: 20px 0;
+  font-style: italic;
+  background: none;
+  box-shadow: none;
+  width: 100%;
+  max-width: none;
+}
+
+.reveal blockquote cite {
+  display: block;
+  margin-top: 10px;
+  font-style: normal;
+  color: var(--muted-color);
+}
+
+/* ===========================================
+   OPTIONAL: TITLE WITH UNDERLINE
+
+   Add this to presentations where you want
+   a line under the slide title.
+   =========================================== */
+
+/*
+.reveal .slides section > h1,
+.reveal .slides section > h2 {
+  flex-shrink: 0;
+  margin: 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--line-color);
+}
+*/
+
+/* ===========================================
+   OPTIONAL: DECORATIVE ELEMENTS
+   =========================================== */
+
+/* Top decorative line on all slides */
+/*
+.reveal .slides section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-color);
+}
+*/
+
+/* Bottom decorative line */
+/*
+.reveal .slides section::after {
+  content: '';
+  position: absolute;
+  bottom: 40px;
+  left: var(--slide-padding);
+  right: var(--slide-padding);
+  height: 2px;
+  background: var(--line-color);
+}
+*/
+
+
+/* ===========================================
+   LANGCHAIN WORKSHOP THEME
+   =========================================== */
+
+.reveal h1, .reveal h2, .reveal h3 { letter-spacing: -0.015em; font-weight: 700; }
+.reveal h2 { color: var(--text-color); }
+.reveal h2 em { color: var(--primary-color); font-style: normal; }
+.reveal a { color: var(--primary-color); }
+
+/* A thin accent rule under every content-slide title */
+.reveal .slides section:not(.section-divider) > h2 {
+  padding-right: 130px;
+  margin-bottom: 34px;
+  font-size: 40pt;
+  line-height: 1.12;
+}
+
+/* --- section dividers --------------------------------------------------- */
+.reveal .section-divider h1 { color: var(--primary-color); }
+.reveal .section-divider .eyebrow {
+  font-family: var(--mono-font);
+  font-size: 13pt;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  margin-bottom: 10px;
+}
+.reveal .section-divider .lede {
+  font-size: 19pt;
+  color: var(--text-color);
+  max-width: 22em;
+  margin: 22px auto 0;
+}
+
+/* --- panels ------------------------------------------------------------- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line-color);
+  border-radius: var(--box-radius);
+  padding: 20px 22px;
+}
+.panel.good   { border-color: var(--good);  background: rgba(227,255,143,0.05); }
+.panel.bad    { border-color: var(--bad);   background: rgba(251,176,165,0.05); }
+.panel.human  { border-color: var(--human); background: rgba(199,142,173,0.06); }
+.panel h3 { font-size: 15pt; margin: 0 0 10px; }
+.panel.good  h3 { color: var(--good); }
+.panel.bad   h3 { color: var(--bad); }
+.panel.human h3 { color: var(--human); }
+.panel p, .panel li { font-size: 14pt; }
+.panel .label {
+  font-family: var(--mono-font);
+  font-size: 11pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  margin: 0 0 6px;
+}
+
+/* --- the big statement -------------------------------------------------- */
+.statement {
+  font-size: 26pt;
+  line-height: 1.35;
+  font-weight: 600;
+  border-left: 4px solid var(--primary-color);
+  padding-left: 26px;
+  margin: 0;
+}
+.statement em { color: var(--primary-color); font-style: normal; }
+
+/* --- code --------------------------------------------------------------- */
+.reveal pre, .reveal code, .mono { font-family: var(--mono-font); }
+.reveal pre {
+  background: var(--panel);
+  border: 1px solid var(--line-color);
+  border-radius: var(--box-radius);
+  box-shadow: none;
+  font-size: 12pt;
+  padding: 16px 18px;
+  width: 100%;
+  margin: 0;
+}
+/* Explicit color. reveal.css leaves `code` dark, which is invisible on a dark deck — and
+   it only shows up when you look at a screenshot, because the markup is perfectly valid. */
+.reveal pre,
+.reveal pre code {
+  color: var(--text-color);
+}
+.reveal pre code { background: none; padding: 0; max-height: none; font-size: 12pt; line-height: 1.5; }
+.reveal :not(pre) > code {
+  background: var(--panel-2);
+  color: var(--primary-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+/* --- tables ------------------------------------------------------------- */
+.reveal table { font-size: 14pt; border-collapse: collapse; width: 100%; }
+.reveal table th {
+  text-align: left;
+  font-family: var(--mono-font);
+  font-size: 11pt;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  font-weight: 600;
+  border-bottom: 1px solid var(--line-color);
+  padding: 0 14px 8px 0;
+}
+.reveal table td {
+  padding: 9px 14px 9px 0;
+  border-bottom: 1px solid rgba(47,75,104,0.35);
+  vertical-align: top;
+}
+.reveal table tr:last-child td { border-bottom: none; }
+
+/* --- before / after ----------------------------------------------------- */
+.ba { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.ba .side { border-radius: var(--box-radius); padding: 18px 20px; border: 1px solid var(--line-color); }
+.ba .before { background: rgba(251,176,165,0.06); border-color: rgba(251,176,165,0.45); }
+.ba .after  { background: rgba(227,255,143,0.05); border-color: rgba(227,255,143,0.45); }
+.ba .tag {
+  font-family: var(--mono-font); font-size: 11pt; letter-spacing: 0.12em;
+  text-transform: uppercase; margin: 0 0 10px;
+}
+.ba .before .tag { color: var(--bad); }
+.ba .after .tag  { color: var(--good); }
+.ba p, .ba li { font-size: 13.5pt; }
+
+/* --- numbered practice chip -------------------------------------------- */
+.chip {
+  display: inline-block;
+  /* .content is a flex column, so an inline-block child still stretches to full width
+     unless it opts out. Without this the pill spans the whole slide. */
+  align-self: flex-start;
+  font-family: var(--mono-font);
+  font-size: 11pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--background-color);
+  background: var(--primary-color);
+  padding: 4px 11px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.chip.warn { background: var(--bad); }
+
+/* --- the loop diagram / ascii ------------------------------------------ */
+.ascii {
+  font-family: var(--mono-font);
+  font-size: 12.5pt;
+  line-height: 1.55;
+  color: var(--primary-color);
+  white-space: pre;
+  background: var(--panel);
+  border: 1px solid var(--line-color);
+  border-radius: var(--box-radius);
+  padding: 20px 24px;
+  margin: 0;
+}
+
+/* --- stat row ----------------------------------------------------------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.stat { text-align: left; }
+.stat .n { font-size: 34pt; font-weight: 700; color: var(--primary-color); line-height: 1.05; margin: 0; }
+.stat .l { font-size: 12.5pt; color: var(--muted-color); margin: 4px 0 0; }
+
+/* --- image placeholder for the diagrams Josiah is sending -------------- */
+.placeholder {
+  border: 2px dashed var(--deep-blue);
+  border-radius: var(--box-radius);
+  padding: 30px;
+  text-align: center;
+  background: rgba(64,102,141,0.08);
+}
+.placeholder p { color: var(--muted-color); font-size: 14pt; margin: 0; }
+.placeholder .mono { color: var(--primary-color); }
+
+/* --- footnote ----------------------------------------------------------- */
+.reveal .footnote { color: var(--muted-color); font-size: var(--footnote-size); }
+
+/* --- module progress in the corner ------------------------------------- */
+.modmark {
+  position: absolute; top: 26px; right: 60px;
+  font-family: var(--mono-font); font-size: 11pt;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--deep-blue); margin: 0;
+}
+
+/* Code inside tinted panels: inherit the light text color, never reveal.css's default. */
+.ba pre, .ba pre code,
+.panel pre, .panel pre code {
+  color: var(--text-color);
+}
+
+
+/* =======================================================================
+   VISUAL DECK COMPONENTS
+   Under ten words a slide, so the words that remain are large and the
+   figure does the work. Everything explanatory lives in speaker notes.
+   ======================================================================= */
+
+/* --- centred figure slide: title, then one big thing ------------------- */
+.reveal .slides section > .content.figure {
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- hero: a single statement, nothing else ---------------------------- */
+.hero {
+  font-size: 54pt;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-align: left;
+  margin: 0;
+}
+.hero em { color: var(--primary-color); font-style: normal; }
+.hero.sm { font-size: 40pt; }
+
+/* --- big number -------------------------------------------------------- */
+.bignum {
+  font-size: 130pt;
+  font-weight: 700;
+  line-height: 0.9;
+  color: var(--primary-color);
+  letter-spacing: -0.04em;
+  margin: 0;
+}
+.bignum.good { color: var(--good); }
+.bignum.bad  { color: var(--bad); }
+.numlabel { font-size: 20pt; color: var(--muted-color); margin: 14px 0 0; }
+
+/* --- icon row ---------------------------------------------------------- */
+.iconrow { display: grid; gap: 30px; width: 100%; text-align: center; }
+.iconrow.c2 { grid-template-columns: repeat(2, 1fr); }
+.iconrow.c3 { grid-template-columns: repeat(3, 1fr); }
+.iconrow.c4 { grid-template-columns: repeat(4, 1fr); }
+.iconrow.c5 { grid-template-columns: repeat(5, 1fr); }
+.iconrow i {
+  font-size: 46pt;
+  color: var(--primary-color);
+  display: block;
+  margin-bottom: 18px;
+}
+.iconrow .cap { font-size: 19pt; font-weight: 600; margin: 0; }
+.iconrow .sub { font-size: 14pt; color: var(--muted-color); margin: 6px 0 0; }
+.iconrow .step i { color: var(--primary-color); }
+.iconrow .warn i { color: var(--bad); }
+.iconrow .ok i   { color: var(--good); }
+.iconrow .hum i  { color: var(--human); }
+
+/* --- the determinism ladder / five levels ----------------------------- */
+.ladder { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+.rung {
+  display: grid;
+  grid-template-columns: 74px 1fr auto;
+  align-items: center;
+  gap: 22px;
+  padding: 15px 24px;
+  border-radius: var(--box-radius);
+  border: 1px solid var(--line-color);
+  background: var(--panel);
+}
+.rung .lvl {
+  font-family: var(--mono-font);
+  font-size: 26pt;
+  font-weight: 600;
+  color: var(--muted-color);
+}
+.rung .nm { font-size: 24pt; font-weight: 650; margin: 0; }
+.rung .nm .paren { font-size: 15pt; font-weight: 400; color: var(--muted-color); }
+.rung .cost { font-family: var(--mono-font); font-size: 15pt; margin: 0; }
+.rung.free  { border-color: var(--good); background: rgba(227,255,143,0.07); }
+.rung.free .lvl, .rung.free .cost { color: var(--good); }
+.rung.cheap .cost { color: var(--primary-color); }
+.rung.dear  { border-color: var(--bad); background: rgba(251,176,165,0.06); }
+.rung.dear .lvl, .rung.dear .cost { color: var(--bad); }
+
+/* --- split: before | after -------------------------------------------- */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; width: 100%; }
+.split > div {
+  border-radius: var(--box-radius);
+  padding: 30px;
+  border: 1px solid var(--line-color);
+  text-align: center;
+}
+.split .l { background: rgba(251,176,165,0.07); border-color: rgba(251,176,165,0.5); }
+.split .r { background: rgba(227,255,143,0.06); border-color: rgba(227,255,143,0.5); }
+.split .hd {
+  font-family: var(--mono-font); font-size: 14pt; letter-spacing: 0.14em;
+  text-transform: uppercase; margin: 0 0 18px;
+}
+.split .l .hd { color: var(--bad); }
+.split .r .hd { color: var(--good); }
+.split .big { font-size: 34pt; font-weight: 650; margin: 0; line-height: 1.2; }
+.split code { font-size: 0.95em; }
+
+/* --- one big line of code / output ------------------------------------ */
+.codebig {
+  font-family: var(--mono-font);
+  font-size: 22pt;
+  line-height: 1.5;
+  background: var(--panel);
+  border: 1px solid var(--line-color);
+  border-left: 4px solid var(--primary-color);
+  border-radius: var(--box-radius);
+  padding: 24px 30px;
+  margin: 0;
+  width: 100%;
+  white-space: pre-wrap;
+  color: var(--text-color);
+}
+.codebig.bad  { border-left-color: var(--bad); }
+.codebig.good { border-left-color: var(--good); }
+.codebig .hi     { color: var(--bad); font-weight: 600; }
+.codebig .hi-ok  { color: var(--good); font-weight: 600; }
+.codebig .dim    { color: var(--muted-color); }
+
+/* --- flow: boxes joined by arrows ------------------------------------- */
+.flow {
+  display: flex; align-items: center; justify-content: center;
+  gap: 20px; width: 100%; flex-wrap: wrap;
+}
+.flow .box {
+  border: 1px solid var(--line-color);
+  background: var(--panel);
+  border-radius: var(--box-radius);
+  padding: 22px 26px;
+  text-align: center;
+  min-width: 168px;
+}
+.flow .box p { font-size: 19pt; font-weight: 600; margin: 0; }
+.flow .box i { font-size: 28pt; color: var(--primary-color); display: block; margin-bottom: 12px; }
+.flow .box.nd { border-color: var(--bad); background: rgba(251,176,165,0.08); }
+.flow .box.nd i { color: var(--bad); }
+.flow .box.d  { border-color: var(--good); background: rgba(227,255,143,0.06); }
+.flow .box.d i { color: var(--good); }
+.flow .arw { font-size: 26pt; color: var(--deep-blue); }
+
+/* --- the wall: agent | boundary | application ------------------------- */
+.wall { display: grid; grid-template-columns: 1fr 64px 1fr; align-items: stretch; gap: 0; width: 100%; }
+.wall .side {
+  border: 1px solid var(--line-color); background: var(--panel);
+  border-radius: var(--box-radius); padding: 30px; text-align: center;
+}
+.wall .side i { font-size: 40pt; display: block; margin-bottom: 16px; color: var(--primary-color); }
+.wall .side .t { font-size: 24pt; font-weight: 650; margin: 0; }
+.wall .side .s { font-size: 15pt; color: var(--muted-color); margin: 8px 0 0; }
+.wall .brk {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--primary-color);
+}
+.wall .brk .ln { width: 2px; flex: 1; background: repeating-linear-gradient(to bottom, var(--primary-color) 0 8px, transparent 8px 16px); }
+.wall .brk i { font-size: 22pt; margin: 10px 0; }
+
+/* --- the closed loop, as a ring --------------------------------------- */
+.ring { display: block; margin: 0 auto; }
+.ring text { font-family: var(--mono-font); font-size: 12px; fill: var(--text-color); }
+.ring text.k { fill: var(--primary-color); font-weight: 600; }
+.ring circle.node { fill: var(--panel); stroke: var(--primary-color); stroke-width: 1.5; }
+.ring circle.node.hum { stroke: var(--human); }
+.ring path.arc { fill: none; stroke: #6FA8D8; stroke-width: 2.6; }
+
+/* --- cadence timeline ------------------------------------------------- */
+.cadence { width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.cadence .row { display: grid; grid-template-columns: 190px 1fr; align-items: center; gap: 24px; }
+.cadence .when {
+  font-family: var(--mono-font); font-size: 15pt; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted-color); text-align: right; margin: 0;
+}
+.cadence .bar {
+  border-radius: 6px; padding: 13px 22px; font-size: 18pt; font-weight: 600;
+  background: var(--panel); border: 1px solid var(--line-color); margin: 0;
+}
+.cadence .bar.free { border-color: var(--good); color: var(--good); }
+.cadence .bar.mid  { border-color: var(--primary-color); color: var(--primary-color); }
+.cadence .bar.dear { border-color: var(--bad); color: var(--bad); }
+
+/* --- a dial, for sampling rate / alignment --------------------------- */
+.dial { display: flex; align-items: center; gap: 40px; }
+.dial svg { flex: none; }
+.dial .rdg { font-size: 46pt; font-weight: 700; color: var(--primary-color); margin: 0; }
+.dial .rdgsub { font-size: 17pt; color: var(--muted-color); margin: 8px 0 0; }
+
+/* --- placeholders for the two diagrams still to come ----------------- */
+.placeholder { padding: 54px 30px; }
+.placeholder i { font-size: 36pt; color: var(--deep-blue); display: block; margin-bottom: 16px; }
+.placeholder p { font-size: 17pt; }
+
+/* --- speaker-notes hint (never rendered on the slide) ---------------- */
+.reveal aside.notes { display: none; }
+
+/* --- orbit: the one uncontrollable thing, flanked by what you do control --- */
+.orbit {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px;
+  width: 100%; align-items: center;
+}
+.orbit .box {
+  border: 1px solid var(--line-color); background: var(--panel);
+  border-radius: var(--box-radius); padding: 26px 14px; text-align: center;
+}
+.orbit .box p { font-size: 18pt; font-weight: 600; margin: 0; }
+.orbit .box i { font-size: 28pt; display: block; margin-bottom: 14px; color: var(--good); }
+.orbit .box.d { border-color: rgba(227,255,143,0.45); background: rgba(227,255,143,0.05); }
+/* The wildcard reads bigger and warmer, so the eye lands on it first. */
+.orbit .box.core {
+  border-color: var(--bad); background: rgba(251,176,165,0.10);
+  padding: 40px 14px; transform: scale(1.08);
+}
+.orbit .box.core i { font-size: 42pt; color: var(--bad); }
+.orbit .box.core p { font-size: 23pt; }
+
+/* --- caption above a chart panel -------------------------------------- */
+.panelcap {
+  font-family: var(--mono-font);
+  font-size: 14pt;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  margin: 0 0 14px;
+  text-align: center;
+}
+
+/* --- a single takeaway line under a figure ---------------------------- */
+.kicker {
+  font-size: 22pt;
+  font-weight: 650;
+  text-align: center;
+  color: var(--primary-color);
+  margin: 26px 0 0;
+}
+
+/* --- a Q/A pair with a pass/fail mark -------------------------------------- */
+.qapair {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+  border: 1px solid var(--line-color);
+  border-radius: var(--box-radius);
+  padding: 22px 26px;
+}
+.qapair + .qapair { margin-top: 18px; }
+.qapair i { font-size: 30pt; }
+.qapair p {
+  font-family: var(--mono-font);
+  font-size: 17pt;
+  line-height: 1.65;
+  margin: 0;
+}
+.qapair .dim { color: var(--muted-color); margin-right: 10px; }
+.qapair .hi { color: var(--bad); font-weight: 600; }
+.qapair.ok  { border-color: rgba(227,255,143,0.5); background: rgba(227,255,143,0.05); }
+.qapair.ok i  { color: var(--good); }
+.qapair.bad { border-color: rgba(251,176,165,0.55); background: rgba(251,176,165,0.06); }
+.qapair.bad i { color: var(--bad); }
+
+/* --- a supplied diagram, sized to the space below the title ---------------
+   No filter or inversion: these assets have gradients that mangle badly. A
+   light diagram on a dark deck reads fine as its own panel, so just round the
+   corners so it doesn't look pasted on. */
+.figimg {
+  max-width: 100%;
+  max-height: 548px;
+  width: auto;
+  height: auto;
+  /* The supplied asset is opaque white with no frame of its own, so give it one:
+     a little white padding plus rounded corners, so it reads as a deliberate panel
+     rather than a screenshot dropped on the slide. */
+  background: #fff;
+  padding: 20px 26px;
+  border-radius: var(--box-radius);
+  box-shadow: 0 0 0 1px rgba(127,200,255,0.28);
+  box-sizing: border-box;
+  display: block;
+  margin: 0 auto;
+}
+
+/* An image slide needs less breathing room under the title than a text one. */
+.reveal .slides section:has(> .content > .figimg) > h2 { margin-bottom: 18px; }
+
+/* --- kitchen sink vs. shipped workflows -----------------------------------
+   The left pile is deliberately UNLABELLED. Blank chips read as "an
+   undifferentiated heap of capability", which is the whole point, and they cost
+   no words against the under-ten-words budget. */
+.sink { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; width: 100%; align-items: start; }
+.sink .pile, .sink .flows {
+  border: 1px solid var(--line-color);
+  border-radius: var(--box-radius);
+  padding: 24px 26px 20px;
+  min-height: 300px;
+}
+.sink .pile  { background: rgba(251,176,165,0.06); border-color: rgba(251,176,165,0.5); }
+.sink .flows { background: rgba(227,255,143,0.05); border-color: rgba(227,255,143,0.5); }
+.sink .hd {
+  font-family: var(--mono-font); font-size: 14pt; letter-spacing: 0.12em;
+  text-transform: uppercase; margin: 0 0 20px; text-align: center;
+}
+.sink .hd.bad  { color: var(--bad); }
+.sink .hd.good { color: var(--good); }
+
+.sink .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 11px; }
+.sink .chips span {
+  height: 34px; border-radius: 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--line-color);
+}
+
+.sink .flow-row {
+  display: grid; grid-template-columns: 1fr auto auto;
+  align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.sink .flow-row p { font-size: 20pt; font-weight: 600; margin: 0; }
+.sink .flow-row span {
+  width: 52px; height: 30px; border-radius: 5px;
+  background: rgba(227,255,143,0.14);
+  border: 1px solid rgba(227,255,143,0.5);
+}
+
+.sink .then {
+  font-family: var(--mono-font); font-size: 15pt;
+  color: var(--muted-color); margin: 20px 0 0; text-align: center;
+}
+
+/* --- the setup line above a before/after pair ------------------------------ */
+.ask {
+  font-size: 21pt;
+  font-weight: 600;
+  margin: 0 0 26px;
+  text-align: center;
+  color: var(--text-color);
+}
+
+/* The qapair rows carry a returned value plus an outcome, so give the label
+   column a fixed width — otherwise "v1 returns" and "agent says" don't line up
+   and the eye can't scan down. */
+.qapair p .dim {
+  display: inline-block;
+  min-width: 132px;
+}
+
+/* --- a small caption labelling a row inside a figure ---------------------- */
+.rowcap {
+  font-family: var(--mono-font);
+  font-size: 13.5pt;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  margin: 0 0 20px;
+  text-align: center;
+  width: 100%;
+}
+.rowcap.good { color: var(--good); }
+
+/* --- title slide: sandbox vs production ------------------------------------ */
+.titleh1 {
+  font-size: 52pt;
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  text-align: center;
+  color: var(--primary-color);
+  margin: 6px 0 30px;
+  width: 100%;
+}
+/* Equal panels, squarer than either source. The sandbox shot is 3:2 landscape and
+   the rig is 2:3 portrait, so a WIDE equal panel would crop the portrait to a thin
+   mid-band. A squarer panel splits the cropping roughly evenly between the two —
+   each loses about a third of its long edge — which is the fairest compromise if
+   the panels have to match. Centred, so it reads as a deliberate diptych. */
+.beforeafter {
+  display: grid;
+  grid-template-columns: 404px 404px;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+}
+.beforeafter figure { margin: 0; }
+.beforeafter img,
+.beforeafter .shot {
+  width: 100%;
+  height: 384px;
+  box-sizing: border-box;
+  object-fit: cover;
+  border-radius: var(--box-radius);
+  display: block;
+}
+/* Bias each crop toward its subject rather than the geometric centre. */
+.beforeafter figure:first-child img { object-position: 54% center; }  /* the child */
+.beforeafter figure:last-child  img { object-position: center 42%; }  /* head + derrick */
+/* Placeholder styling only — an <img> ignores all of this except the sizing above. */
+.beforeafter .shot {
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  border: 2px dashed var(--deep-blue);
+  background: rgba(64,102,141,0.08);
+}
+.beforeafter .shot i { font-size: 40pt; color: var(--deep-blue); }
+.beforeafter .shot p { font-size: 13pt; color: var(--muted-color); margin: 0; }
+.beforeafter figcaption {
+  font-family: var(--mono-font);
+  font-size: 15pt;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  text-align: center;
+  margin-top: 16px;
+}
+
+/* the two free levels sit side by side on the bottom row, so the ladder reads
+   as a base you build up from rather than six equal steps */
+.ladder .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ladder .pair .rung { grid-template-columns: 46px 1fr auto; gap: 14px; }
+.ladder .pair .rung .nm { font-size: 21pt; }
+.ladder .pair .rung .nm .paren { font-size: 14pt; }
+.ladder .pair .rung .cost { font-size: 14pt; }
+
+/* --- faded time-series behind a slide's content ------------------------ */
+.reveal .slides section > svg.bgchart {
+  position: absolute;
+  left: 0; right: 0; bottom: 34px;
+  width: 100%; height: 430px;
+  opacity: 0.17;
+  pointer-events: none;
+  z-index: 0;
+}
+.reveal .slides section > svg.bgchart ~ * { position: relative; z-index: 1; }
+
+/* --- closing takeaways -------------------------------------------------- */
+.takeaways { width: 100%; display: flex; flex-direction: column; gap: 20px; }
+.takeaways .tk { display: grid; grid-template-columns: 46px 1fr; align-items: baseline; gap: 20px; }
+.takeaways .tk .n {
+  font-family: var(--mono-font); font-size: 17pt; font-weight: 600;
+  color: var(--primary-color); margin: 0; text-align: right;
+}
+.takeaways .tk p:last-child { font-size: 26pt; font-weight: 600; margin: 0; line-height: 1.25; }
+.takeaways .tk:last-child p:last-child { color: var(--good); }
+
+/* the right-hand column carries the description, not a cost tag */
+.rung .cost.desc { color: var(--muted-color); font-size: 16pt; }
+.ladder .pair .rung .cost.desc { font-size: 14pt; }

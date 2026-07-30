@@ -1,0 +1,44 @@
+# Productionizing Agents
+# Pinned to minor versions: workshops break when a transitive dep ships a breaking change
+# mid-session. Bump deliberately, re-run scripts/preflight.py, then commit.
+
+# --- core agent stack ---
+langchain>=1.0,<2.0
+langgraph>=1.0,<2.0
+deepagents>=0.2.0                    # the harness we build on in Module 1
+langchain-anthropic>=1.0,<2.0
+langchain-openai>=1.0,<2.0          # OpenAI provider, and any OpenAI-compatible endpoint (e.g. GLM)
+
+# --- the application layer, exposed over MCP (Module 1) ---
+# NOTE the upper bound on mcp. As of langchain-mcp-adapters 0.3.1 the adapter imports
+# `RequestContext` from `mcp.shared.context`, which mcp 2.0 removed — installing mcp 2.x
+# gives you an ImportError the first time you touch MCP. Drop the pin once the adapter
+# releases 2.x support. This is exactly the class of breakage the version pinning note at
+# the top of this file is about.
+mcp>=1.9,<2.0                        # the MCP server SDK (FastMCP lives here)
+langchain-mcp-adapters>=0.3,<0.4     # turns MCP tools into LangChain tools
+
+# --- observability + evaluation ---
+langsmith[pytest]>=0.4.0
+agentevals>=0.0.8                    # trajectory evaluators (Module 2)
+
+# --- shipping it (Module 3) ---
+# `langgraph dev` runs the agent as a local REST server; `langgraph deploy` ships it to
+# LangSmith Cloud. The local front end in frontend/ talks to either one.
+langgraph-cli[inmem]>=0.1.55
+
+# --- notebooks ---
+jupyterlab>=4.0
+ipywidgets>=8.1                      # progress bars in evaluate()
+
+# --- supporting ---
+pydantic>=2.7
+python-dotenv>=1.0
+rich>=13.7                           # readable console output in scripts/
+httpx>=0.27                          # direct LangSmith REST calls (alerts API)
+pandas>=2.2                          # experiment_results.to_pandas()
+pytest>=8.0
+
+# --- docs (only needed to re-render the blog post) ---
+markdown>=3.6                        # scripts/build_blog.py
+pygments>=2.17                       # syntax highlighting for the same

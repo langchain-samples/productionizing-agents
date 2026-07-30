@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Productionizing Agents</title>
+<meta name="description" content="A hands-on workshop on evaluation, monitoring, and observability for agents you actually ship.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#0b0e14;--panel:#121722;--line:#243044;--tx:#e8edf5;--dim:#93a2b8;--acc:#7FC8FF;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);
+     font:17px/1.7 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:96px 28px 120px}
+p.eyebrow{font:600 12px JetBrains Mono,monospace;letter-spacing:.16em;
+          text-transform:uppercase;color:var(--dim);margin:0 0 14px}
+h1{font-size:46px;line-height:1.08;letter-spacing:-.025em;margin:0 0 14px;font-weight:700}
+.sub{color:var(--acc);font-size:20px;font-weight:600;margin:0 0 40px}
+.card{display:block;text-decoration:none;color:inherit;background:var(--panel);
+      border:1px solid var(--line);border-radius:11px;padding:22px 24px;margin:14px 0;
+      transition:border-color .14s,transform .14s}
+.card:hover{border-color:var(--acc);transform:translateY(-2px)}
+.card h2{margin:0 0 6px;font-size:20px;font-weight:600}
+.card h2 span{color:var(--acc)}
+.card p{margin:0;color:var(--dim);font-size:15.5px;line-height:1.6}
+h3{font-size:13px;font-family:JetBrains Mono,monospace;letter-spacing:.14em;
+   text-transform:uppercase;color:var(--dim);font-weight:600;
+   margin:48px 0 10px;padding-top:26px;border-top:1px solid var(--line)}
+ul{padding-left:22px;margin:0}li{margin:8px 0;color:var(--dim)}
+li strong{color:var(--tx);font-weight:600}
+a.plain{color:var(--acc)}
+code{font:.87em JetBrains Mono,monospace;background:#1b2331;color:var(--acc);
+     padding:2px 6px;border-radius:4px}
+</style></head><body><div class="wrap">
+
+<p class="eyebrow">Hands-on workshop &middot; 2 hours</p>
+<h1>Productionizing Agents</h1>
+<p class="sub">Evaluation, monitoring, and observability for agents you actually ship.</p>
+
+<a class="card" href="docs/writing-agent-evals.html">
+  <h2>Your Agent Needs a Test Suite <span>&rarr;</span></h2>
+  <p>The written guide. What to test, in what order, what it costs, and which parts
+     people reliably skip. Every example is from a real codebase, including two bugs
+     found by the very tests being recommended.</p>
+</a>
+
+<a class="card" href="slides/index.html">
+  <h2>The deck <span>&rarr;</span></h2>
+  <p>38 slides across four modules: build, test, monitor, improve.
+     Arrow keys to navigate, <code>S</code> for speaker notes.</p>
+</a>
+
+<a class="card" href="https://github.com/langchain-samples/productionizing-agents">
+  <h2>The repository <span>&rarr;</span></h2>
+  <p>The agent, a five-level eval suite, 179 deterministic tests, and four notebooks
+     you can run. Start with <code>README.md</code>.</p>
+</a>
+
+<h3>The organizing idea</h3>
+<ul>
+  <li>You are handed <strong>one irreducibly non-deterministic component</strong>. Everything
+      you build around it should be as deterministic as you can make it.</li>
+  <li>Evals, monitoring, and self-improvement are how you handle what's left over.</li>
+</ul>
+
+<h3>Built by</h3>
+<ul>
+  <li><a class="plain" href="https://www.langchain.com/">LangChain</a> &middot;
+      runs on <a class="plain" href="https://smith.langchain.com/">LangSmith</a></li>
+</ul>
+
+</div></body></html>

@@ -1,0 +1,169 @@
+name: evals
+
+# Three tiers, priced deliberately. The whole design question for agent CI is "what do I run
+# on every commit without going broke?" — and the answer is: a lot more than people assume,
+# because Level 0 and code-only evals need no model at all.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:      # so you can force the expensive tier by hand
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # TIER 1 — every commit. No API key, no model, no LangSmith. Seconds, free.
+  #
+  # This is the tier people skip, and it catches the most per dollar: middleware
+  # behavior, tool schemas, the assembled prompt, middleware order, and the
+  # evaluators themselves. All deterministic.
+  # ---------------------------------------------------------------------------
+  deterministic:
+    name: deterministic (no LLM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Unit tests — application, middleware, harness context, evaluators
+        run: pytest tests/ -q
+
+      # A stale notebook is a real failure: participants get a build artifact that
+      # doesn't match the source anyone reviewed.
+      - name: Notebooks are up to date with notebook_src/
+        run: python scripts/build_notebooks.py --check
+
+  # ---------------------------------------------------------------------------
+  # TIER 2 — every PR that touches the agent. Model calls, but NO judge calls,
+  # so it costs cents rather than dollars.
+  #
+  # `paths` is the lever. An agent's eval suite is expensive enough that gating it
+  # on "did anything that could change behavior actually change" is worth the
+  # config. Prompt, middleware, tools, and the app layer all qualify.
+  # ---------------------------------------------------------------------------
+  code-evals:
+    name: code evaluators (no judges)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Did anything behavioral change?
+        id: changed
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "$CHANGED"
+          if echo "$CHANGED" | grep -qE '^(aria/|aria_mcp/|evals/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No agent changes — skipping model-backed evals."
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.changed.outputs.run == 'true'
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+        if: steps.changed.outputs.run == 'true'
+
+      - name: Smoke + scripted (code assertions only)
+        if: steps.changed.outputs.run == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_TRACING: "true"
+          # NOT the production project. CI runs must never pollute the traces you
+          # monitor and alert on.
+          LANGSMITH_PROJECT: aria-ci
+        run: |
+          python -m evals.runner --seed
+          python -m evals.runner --level smoke --reps 1
+          python -m evals.runner --level scripted-cheap --reps 1
+
+  # ---------------------------------------------------------------------------
+  # TIER 3 — the real gate. Judges, repetitions, and the regression dataset grown
+  # from production. Costs real money, so it runs when you ask for it.
+  #
+  # Opt in by labelling the PR `run-evals`, or dispatching manually. Teams also
+  # gate this on the prompt file specifically, since a prompt change is the single
+  # most likely thing to regress behavior.
+  # ---------------------------------------------------------------------------
+  full-evals:
+    name: full suite (judges + regressions)
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'run-evals')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Full suite with repetitions
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_TRACING: "true"
+          LANGSMITH_PROJECT: aria-ci
+          # Pin the judge. A grader that drifts between runs makes every
+          # comparison in your experiment history meaningless.
+          JUDGE_MODEL: anthropic:claude-sonnet-5
+        run: |
+          python -m evals.runner --seed
+          # reps=3 because a case that fails 1 in 3 times looks fine or broken
+          # depending on the coin flip, and you are about to make a merge decision.
+          python -m evals.runner --level scripted --reps 3
+
+      # Production failures, promoted from human review. This is the gate that
+      # matters most — it can only fail on something that already hurt someone.
+      - name: Regression gate
+        continue-on-error: true    # the dataset may not exist yet on a fresh clone
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_TRACING: "true"
+          LANGSMITH_PROJECT: aria-ci
+        run: python -m evals.runner --level regressions --reps 3
+
+      - name: Stateful evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_TRACING: "true"
+          LANGSMITH_PROJECT: aria-ci
+        run: pytest evals/test_stateful.py -q --langsmith-output
+
+  # ---------------------------------------------------------------------------
+  # NIGHTLY — the expensive tier nobody wants in the critical path.
+  # Simulated users are N model calls for the agent plus N for the user, so they
+  # are an order of magnitude more expensive than anything above.
+  # Move to a schedule: trigger and add `schedule: - cron: "0 7 * * *"`.
+  # ---------------------------------------------------------------------------
+  simulated:
+    name: simulated users (nightly)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: All personas
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+          LANGSMITH_TRACING: "true"
+          LANGSMITH_PROJECT: aria-ci
+        run: python -m evals.simulate --all --turns 6
