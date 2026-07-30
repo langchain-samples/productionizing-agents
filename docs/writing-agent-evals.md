@@ -1005,18 +1005,42 @@ traffic. Three places it goes deeper:
 | **Judge alignment, properly** | "Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **TPR/TNR rather than raw agreement**, because with class imbalance, a judge that always says Pass scores 90% and catches nothing. |
 
 The one thing there I'd flag as worth knowing even if you read nothing else is the
-**Rogan–Gladen correction**. Raw judge scores on unlabeled production traffic are biased by the
-judge's own error rates, and there's a closed form:
+**Rogan–Gladen correction**. Short version: *the pass rate your judge reports is not your pass
+rate*, and if you know how good the judge is you can recover the real one.
+
+Suppose you have aligned a judge against human labels, so you know two things about it:
+
+- **TPR = 0.92.** Of the answers that really are good, it correctly calls 92% good.
+- **TNR = 0.88.** Of the answers that really are bad, it correctly calls 88% bad.
+
+Now point it at unlabeled production traffic, where you have no human labels. It reports
+**80% Pass**. That 80% is not your quality rate, because it contains the judge's own mistakes
+in *both* directions: some genuinely bad answers were waved through, and some genuinely good
+ones were failed.
+
+Here is what 1,000 traces look like if the true rate is 85%:
+
+| | Truly good (850) | Truly bad (150) | Judge reports |
+| :-- | --: | --: | --: |
+| **Judge says Pass** | 782 *(92% of 850)* | 18 *(12% of 150)* | **800** |
+| **Judge says Fail** | 68 *(8%)* | 132 *(88%)* | 200 |
+
+The 18 bad answers it waved through nearly cancel the 68 good ones it failed, but not quite, so
+`800 / 1000` = the 80% you observed. A true rate of **85%** is what produces an observed 80% with
+*this* judge. Rogan–Gladen just runs that arithmetic backwards:
 
 ```
 θ̂ = (p_obs + TNR − 1) / (TPR + TNR − 1)
+  = (0.80  +  0.88 − 1) / (0.92 +  0.88 − 1)
+  = 0.68 / 0.80
+  = 0.85
 ```
 
-A judge at TPR 0.92 / TNR 0.88 that scores 80% of production traces as Pass implies a true rate
-of about **85%**, not 80%. If you put an evaluator score on a dashboard and alert on it, that's
-your number and it's wrong in a knowable direction. Note it matters for *absolute* rates.
-Relative comparison under one fixed judge, which is what the model bake-off above does, is
-the case that's already trustworthy.
+**Why you'd care.** If you put a raw evaluator score on a dashboard and alert on it, you are
+alerting on 80% while the truth is 85%, and the size of that gap is knowable rather than
+mysterious. It only bites on **absolute** rates. A relative comparison under one fixed judge,
+which is exactly what the bake-off above is, is already trustworthy: the same bias lands on both
+sides and cancels.
 
 Where the two overlap (code checks before judges, one judge per failure mode, binary rather
 than Likert, domain experts in the loop) they agree.

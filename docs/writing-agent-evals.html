@@ -1212,15 +1212,55 @@ traffic. Three places it goes deeper:</p>
 </tbody>
 </table>
 <p>The one thing there I'd flag as worth knowing even if you read nothing else is the
-<strong>Rogan–Gladen correction</strong>. Raw judge scores on unlabeled production traffic are biased by the
-judge's own error rates, and there's a closed form:</p>
+<strong>Rogan–Gladen correction</strong>. Short version: <em>the pass rate your judge reports is not your pass
+rate</em>, and if you know how good the judge is you can recover the real one.</p>
+<p>Suppose you have aligned a judge against human labels, so you know two things about it:</p>
+<ul>
+<li><strong>TPR = 0.92.</strong> Of the answers that really are good, it correctly calls 92% good.</li>
+<li><strong>TNR = 0.88.</strong> Of the answers that really are bad, it correctly calls 88% bad.</li>
+</ul>
+<p>Now point it at unlabeled production traffic, where you have no human labels. It reports
+<strong>80% Pass</strong>. That 80% is not your quality rate, because it contains the judge's own mistakes
+in <em>both</em> directions: some genuinely bad answers were waved through, and some genuinely good
+ones were failed.</p>
+<p>Here is what 1,000 traces look like if the true rate is 85%:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Truly good (850)</th>
+<th style="text-align: right;">Truly bad (150)</th>
+<th style="text-align: right;">Judge reports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Judge says Pass</strong></td>
+<td style="text-align: right;">782 <em>(92% of 850)</em></td>
+<td style="text-align: right;">18 <em>(12% of 150)</em></td>
+<td style="text-align: right;"><strong>800</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Judge says Fail</strong></td>
+<td style="text-align: right;">68 <em>(8%)</em></td>
+<td style="text-align: right;">132 <em>(88%)</em></td>
+<td style="text-align: right;">200</td>
+</tr>
+</tbody>
+</table>
+<p>The 18 bad answers it waved through nearly cancel the 68 good ones it failed, but not quite, so
+<code>800 / 1000</code> = the 80% you observed. A true rate of <strong>85%</strong> is what produces an observed 80% with
+<em>this</em> judge. Rogan–Gladen just runs that arithmetic backwards:</p>
 <pre><code>θ̂ = (p_obs + TNR − 1) / (TPR + TNR − 1)
+  = (0.80  +  0.88 − 1) / (0.92 +  0.88 − 1)
+  = 0.68 / 0.80
+  = 0.85
 </code></pre>
-<p>A judge at TPR 0.92 / TNR 0.88 that scores 80% of production traces as Pass implies a true rate
-of about <strong>85%</strong>, not 80%. If you put an evaluator score on a dashboard and alert on it, that's
-your number and it's wrong in a knowable direction. Note it matters for <em>absolute</em> rates.
-Relative comparison under one fixed judge, which is what the model bake-off above does, is
-the case that's already trustworthy.</p>
+<p><strong>Why you'd care.</strong> If you put a raw evaluator score on a dashboard and alert on it, you are
+alerting on 80% while the truth is 85%, and the size of that gap is knowable rather than
+mysterious. It only bites on <strong>absolute</strong> rates. A relative comparison under one fixed judge,
+which is exactly what the bake-off above is, is already trustworthy: the same bias lands on both
+sides and cancels.</p>
 <p>Where the two overlap (code checks before judges, one judge per failure mode, binary rather
 than Likert, domain experts in the loop) they agree.</p>
 <hr />
