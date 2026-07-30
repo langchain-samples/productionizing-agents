@@ -993,56 +993,14 @@ traffic. Three places it goes deeper:
 | :-- | :-- |
 | **Synthetic data, structured** | Hand-writing a dataset is fine for a dozen cases and doesn't scale to a hundred. Pick three dimensions where you expect failures, generate tuples, then use a *separate* prompt to turn each tuple into a query; one-step generation produces repetitive phrasing. |
 | **Error analysis** | The systematic version of *The limit, and the loop*. Read ~100 traces, note the *first* thing that went wrong in each, let categories **emerge** rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just *fix* it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix. |
-| **Judge alignment, properly** | "Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **TPR/TNR rather than raw agreement**, because with class imbalance, a judge that always says Pass scores 90% and catches nothing. |
-
-The one thing there I'd flag as worth knowing even if you read nothing else is the
-**Rogan–Gladen correction**. Short version: *the pass rate your judge reports is not your pass
-rate*, and if you know how good the judge is you can recover the real one.
-
-Suppose you have aligned a judge against human labels, so you know two things about it:
-
-- **TPR = 0.92.** Of the answers that really are good, it correctly calls 92% good.
-- **TNR = 0.88.** Of the answers that really are bad, it correctly calls 88% bad.
-
-Now point it at unlabeled production traffic, where you have no human labels. It reports
-**80% Pass**. That 80% is not your quality rate, because it contains the judge's own mistakes
-in *both* directions: some genuinely bad answers were waved through, and some genuinely good
-ones were failed.
-
-Here is what 1,000 traces look like if the true rate is 85%:
-
-| | Truly good (850) | Truly bad (150) | Judge reports |
-| :-- | --: | --: | --: |
-| **Judge says Pass** | 782 *(92% of 850)* | 18 *(12% of 150)* | **800** |
-| **Judge says Fail** | 68 *(8%)* | 132 *(88%)* | 200 |
-
-The 18 bad answers it waved through nearly cancel the 68 good ones it failed, but not quite, so
-`800 / 1000` = the 80% you observed. A true rate of **85%** is what produces an observed 80% with
-*this* judge. Rogan–Gladen just runs that arithmetic backwards:
-
-```
-θ̂ = (p_obs + TNR − 1) / (TPR + TNR − 1)
-  = (0.80  +  0.88 − 1) / (0.92 +  0.88 − 1)
-  = 0.68 / 0.80
-  = 0.85
-```
-
-**Why you'd care.** If you put a raw evaluator score on a dashboard and alert on it, you are
-alerting on 80% while the truth is 85%, and the size of that gap is knowable rather than
-mysterious. It only bites on **absolute** rates. A relative comparison under one fixed judge,
-which is exactly what the bake-off above is, is already trustworthy: the same bias lands on both
-sides and cancels.
-
-Where the two overlap (code checks before judges, one judge per failure mode, binary rather
-than Likert, domain experts in the loop) they agree.
+| **Judge alignment, properly** | "Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **scoring the judge separately on the answers that should pass and the ones that should fail**, rather than on raw agreement, because with class imbalance a judge that always says Pass scores 90% and catches nothing. |
 
 ---
 
 ## The short version
 
 1. **Test as much deterministic code as you can**, to isolate the one non-deterministic part.
-2. **Design your tool results to be readable by an agent.** `{}` reads as "doesn't exist" and
-   produces confident lies; an error that names the fix gets you a recovery in the same turn.
+2. **Design your tool results to be readable by an agent.**
 3. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
 4. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
    average them. If you must have a scale, anchor every point.
