@@ -18,8 +18,8 @@ dashboard is green.
 about, and none of it shows up in the places you normally look.
 
 This is a practical guide to building an eval suite for an agent: what to test, in what order,
-what it costs, and what people skip. Every example is from a real codebase, and several of the
-bugs described were found by the very tests being recommended, including two we didn't plant.
+what it costs, and what people skip. Every example is from a real codebase, including a bug that
+one of these tests caught on its first run, which nobody had planted for it.
 
 There's a [starter kit](#starter-kit) at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.
@@ -844,27 +844,6 @@ partial output, show the plan, show which tool is running) rather than discover 
 
 Offline evals can only cover failure modes you imagined. Your users will find the others, so you
 need a production loop that surfaces them before a customer does.
-
-We shipped our agent with a plausible, well-intentioned bullet in the system prompt, something
-a stakeholder had asked for after a pilot review: *"answer directly and confidently from your own
-knowledge; people are busy."* Every level of the suite passed. Then in production:
-
-```
-Q: What's the OSHA permissible exposure limit for benzene?
-A: 8-hour TWA: 1 ppm. STEL: 5 ppm. (29 CFR 1910.1028)
-
-tools called: []
-```
-
-Confident. Specific. Cites a regulation. **Correct**, as it happens, which makes it *more*
-dangerous, not less, because being right builds the trust a later wrong answer will spend. The
-failure is the missing source, not the wrong number.
-
-It even said *"this is a general industrial hygiene fact, not something from the procedure
-library"*, and gave the number anyway. It flagged the gap, then ignored it.
-
-Ask that same agent *"what should I cook for dinner?"* and it declines cleanly. **The dangerous
-out-of-scope questions are the ones that sound in-domain.**
 
 ### Closing the loop
 

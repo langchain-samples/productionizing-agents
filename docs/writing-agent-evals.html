@@ -168,8 +168,8 @@ dashboard is green.</p>
 <p><strong>A technically-correct API produced a lying agent.</strong> That's the class of failure this post is
 about, and none of it shows up in the places you normally look.</p>
 <p>This is a practical guide to building an eval suite for an agent: what to test, in what order,
-what it costs, and what people skip. Every example is from a real codebase, and several of the
-bugs described were found by the very tests being recommended, including two we didn't plant.</p>
+what it costs, and what people skip. Every example is from a real codebase, including a bug that
+one of these tests caught on its first run, which nobody had planted for it.</p>
 <p>There's a <a href="#starter-kit">starter kit</a> at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.</p>
 <h1 class="chapter" id="ch-1"><span class="cn">Chapter 1</span>Groundwork<span class="cb">What has to be true before a number means anything.</span></h1>
@@ -1045,21 +1045,6 @@ partial output, show the plan, show which tool is running) rather than discover 
 </blockquote>
 <p>Offline evals can only cover failure modes you imagined. Your users will find the others, so you
 need a production loop that surfaces them before a customer does.</p>
-<p>We shipped our agent with a plausible, well-intentioned bullet in the system prompt, something
-a stakeholder had asked for after a pilot review: <em>"answer directly and confidently from your own
-knowledge; people are busy."</em> Every level of the suite passed. Then in production:</p>
-<pre><code>Q: What's the OSHA permissible exposure limit for benzene?
-A: 8-hour TWA: 1 ppm. STEL: 5 ppm. (29 CFR 1910.1028)
-
-tools called: []
-</code></pre>
-<p>Confident. Specific. Cites a regulation. <strong>Correct</strong>, as it happens, which makes it <em>more</em>
-dangerous, not less, because being right builds the trust a later wrong answer will spend. The
-failure is the missing source, not the wrong number.</p>
-<p>It even said <em>"this is a general industrial hygiene fact, not something from the procedure
-library"</em>, and gave the number anyway. It flagged the gap, then ignored it.</p>
-<p>Ask that same agent <em>"what should I cook for dinner?"</em> and it declines cleanly. <strong>The dangerous
-out-of-scope questions are the ones that sound in-domain.</strong></p>
 <h3 id="closing-the-loop">Closing the loop</h3>
 <figure>
 <svg class="ring" viewBox="0 0 820 330" role="img" aria-label="Production traces flow through online evaluators to a human review queue, where assertions are written, run red, then fixed and shipped back to production.">
