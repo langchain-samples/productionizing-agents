@@ -178,15 +178,19 @@ print(Path("aria/agent_v1.py").read_text().split("@tool")[1].split("@tool")[0][:
 # single most valuable thing you can have when debugging an agent: **the ability to say
 # "the tools are correct" and mean it.**
 #
-# When your agent gives a wrong answer, there are two candidate causes:
+# When your agent gives a wrong answer, there are four candidate causes:
 #
-# 1. The model reasoned badly.
-# 2. The tools returned something wrong, empty, or misleading.
+# 1. The context was wrong, and it misled the model.
+# 2. A tool errored, or returned something misleading.
+# 3. The harness misbehaved.
+# 4. The model reasoned badly.
 #
-# If you can't rule out (2) cheaply, every debugging session investigates both. And these
-# aren't independent, bad tool output *causes* bad reasoning, so you get to watch the
-# model make a reasonable inference from garbage and then argue with yourself about
-# whether the model is dumb.
+# Only (4) is non-deterministic, slow, and expensive to test. The first three are ordinary
+# software, and they run in milliseconds with no API key **if you set your codebase up so
+# they can.** If you can't rule those three out cheaply, every debugging session
+# investigates all four. And they aren't independent, bad tool output *causes* bad
+# reasoning, so you get to watch the model make a reasonable inference from garbage and
+# then argue with yourself about whether the model is dumb.
 #
 # You are already dealing with one non-deterministic component. Do not add a second
 # poorly-understood one underneath it.

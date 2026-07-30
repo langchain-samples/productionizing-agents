@@ -195,14 +195,18 @@ you're starting fresh, or you already have something in production.</p>
 <p>Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.</p>
 <h3 id="get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</h3>
-<p>When your agent gives a wrong answer there are exactly two candidates:</p>
+<p>When your agent gives a wrong answer there are four candidates:</p>
 <ol>
+<li>The context was wrong, and it misled the model.</li>
+<li>A tool errored, or returned something misleading.</li>
+<li>The harness misbehaved.</li>
 <li>The model reasoned badly.</li>
-<li>The tools returned something wrong, empty, or misleading.</li>
 </ol>
-<p>If you can't cheaply rule out (2), <strong>every debugging session investigates both.</strong> And these
-aren't independent: bad tool output <em>causes</em> bad reasoning, so you get to watch the model make
-a reasonable inference from garbage and you spend the session blaming the model.</p>
+<p>Only (4) is non-deterministic, slow, and expensive to test. The first three are ordinary
+software, and they run in milliseconds with no API key <strong>if you set your codebase up so they
+can.</strong> If you can't cheaply rule those three out, every debugging session investigates all
+four. And they aren't independent: bad tool output <em>causes</em> bad reasoning, so you get to watch
+the model make a reasonable inference from garbage and spend the session blaming the model.</p>
 <p>The fix is a boundary:</p>
 <pre><code>app/               THE APPLICATION: no LLM import anywhere in it
   repository.py      data access, validation, business rules

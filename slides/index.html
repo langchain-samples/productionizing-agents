@@ -255,10 +255,13 @@
           </div>
         </div>
         <aside class="notes">
-          Practice 1. When your agent gives a wrong answer there are two candidates: the
-          model reasoned badly, or the tools returned something wrong. If you can't rule out
-          the second cheaply, EVERY debugging session investigates both, and they're not
-          independent, because bad tool output causes bad reasoning.
+          Practice 1. When your agent gives a wrong answer there are four candidates: the
+          context was wrong and misled the model, a tool errored or returned something
+          misleading, the harness misbehaved, or the model reasoned badly. Only the last one
+          is non-deterministic, slow, and expensive to test. The first three are ordinary
+          software, IF you set the codebase up so they can be tested. If you can't rule
+          those three out cheaply, EVERY debugging session investigates all four, and
+          they're not independent, because bad tool output causes bad reasoning.
 
           So: application logic in its own package, with its OWN TEST SUITE, exposed over
           MCP. aria_mcp/ has no langchain import anywhere in it, but the thing to say out

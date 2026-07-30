@@ -45,14 +45,18 @@ guessing which half moved.
 
 ### Get your application logic out of the agent
 
-When your agent gives a wrong answer there are exactly two candidates:
+When your agent gives a wrong answer there are four candidates:
 
-1. The model reasoned badly.
-2. The tools returned something wrong, empty, or misleading.
+1. The context was wrong, and it misled the model.
+2. A tool errored, or returned something misleading.
+3. The harness misbehaved.
+4. The model reasoned badly.
 
-If you can't cheaply rule out (2), **every debugging session investigates both.** And these
-aren't independent: bad tool output *causes* bad reasoning, so you get to watch the model make
-a reasonable inference from garbage and you spend the session blaming the model.
+Only (4) is non-deterministic, slow, and expensive to test. The first three are ordinary
+software, and they run in milliseconds with no API key **if you set your codebase up so they
+can.** If you can't cheaply rule those three out, every debugging session investigates all
+four. And they aren't independent: bad tool output *causes* bad reasoning, so you get to watch
+the model make a reasonable inference from garbage and spend the session blaming the model.
 
 The fix is a boundary:
 
