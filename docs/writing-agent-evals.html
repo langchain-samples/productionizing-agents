@@ -35,6 +35,16 @@ tr:last-child td{border-bottom:none}
 hr{border:0;border-top:1px solid var(--line);margin:56px 0}
 ul,ol{padding-left:24px}li{margin:7px 0}
 h2,h3{scroll-margin-top:24px}
+/* --- chapter dividers --- */
+h1.chapter{display:block;font-size:34px;line-height:1.15;letter-spacing:-.02em;
+           font-weight:700;margin:76px 0 10px;padding-top:34px;
+           border-top:2px solid var(--acc);scroll-margin-top:24px}
+h1.chapter .cn{display:block;font:600 11px JetBrains Mono,monospace;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--acc);margin-bottom:12px}
+h1.chapter .cb{display:block;font:400 16px/1.6 Inter,sans-serif;color:var(--dim);
+               margin-top:10px;letter-spacing:0}
+/* The first h2 after a chapter divider shouldn't add a second rule. */
+h1.chapter + h2{border-top:none;padding-top:0;margin-top:44px}
 
 pre .k,pre .kn,pre .kd,pre .kc,pre .ow{color:#C78EAD;font-weight:600}
 pre .kt{color:#7FC8FF}
@@ -96,6 +106,12 @@ figure svg{display:block;width:100%;height:auto}
 #toc .lbl{font:600 11px JetBrains Mono,monospace;letter-spacing:.14em;
           text-transform:uppercase;color:var(--dim);margin:0 0 14px 10px}
 #toc ol{list-style:none;margin:0;padding:0}
+#toc .chap{margin:22px 0 8px;padding:0 9px}
+#toc .chap:first-child{margin-top:0}
+#toc .chap .n{margin:0;font:600 9.5px JetBrains Mono,monospace;letter-spacing:.18em;
+              text-transform:uppercase;color:var(--acc);opacity:.85}
+#toc .chap .t{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--tx);
+              padding-bottom:7px;border-bottom:1px solid var(--line)}
 #toc a{display:block;color:var(--dim);text-decoration:none;font-size:13.5px;
        line-height:1.4;padding:6px 9px;border-radius:6px;
        border-left:2px solid transparent;transition:color .12s,background .12s}
@@ -140,7 +156,7 @@ pre .copy:hover{color:var(--acc);border-color:var(--acc)}
 pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media (hover:none){pre .copy{opacity:1}}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
-</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-mental-model">The mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-the-level-nobody-writes">Level 0, the level nobody writes</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</a></div><ol class="sub"><li><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></li><li><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</a></div><ol class="sub"><li><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></li><li><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#your-evaluators-can-make-mistakes-align-them">Your evaluators can make mistakes. Align them.</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
+</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-mental-model">The mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#what-are-you-actually-testing">What are you actually testing?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-the-level-nobody-writes">Level 0, the level nobody writes</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-1-and-2-smoke-and-scripted">Levels 1 and 2: smoke and scripted</a></div><ol class="sub"><li><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></li><li><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#levels-3-and-4-stateful-and-simulated">Levels 3 and 4: stateful and simulated</a></div><ol class="sub"><li><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></li><li><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#one-judge-one-question-and-the-answer-is-yes-or-no">One judge, one question, and the answer is yes or no</a></li><li><a href="#your-evaluators-can-make-mistakes-align-them">Your evaluators can make mistakes. Align them.</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
 <h3 id="how-to-save-and-produce-incredible-agents">How to save $$$ and produce incredible agents</h3>
 <p>A user asks our refinery assistant about pump "P-101". The real pumps are <strong>P-101A</strong> and
 <strong>P-101B</strong>, an A/B pair, which is how essentially every critical pump is installed. The tool
@@ -156,7 +172,8 @@ what it costs, and what people skip. Every example is from a real codebase, and 
 bugs described were found by the very tests being recommended, including two we didn't plant.</p>
 <p>There's a <a href="#starter-kit">starter kit</a> at the end with a concrete first week for two cases:
 you're starting fresh, or you already have something in production.</p>
-<hr />
+<h1 class="chapter" id="ch-1"><span class="cn">Chapter 1</span>Groundwork<span class="cb">What has to be true before a number means anything.</span></h1>
+
 <h2 id="two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</h2>
 <p>Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.</p>
@@ -389,7 +406,8 @@ never flakes; red costs money and returns a probability.</figcaption>
 <p><strong>The rule: push every property as far down the ladder as it will go.</strong> At Level 0 a property
 costs nothing and never flakes; at Level 4 the same property costs a dollar and returns a
 probability.</p>
-<hr />
+<h1 class="chapter" id="ch-2"><span class="cn">Chapter 2</span>Writing the tests<span class="cb">The five levels, bottom to top, and the evaluators that grade them.</span></h1>
+
 <h2 id="level-0-the-level-nobody-writes">Level 0, the level nobody writes</h2>
 <p>This is the highest value per second in the entire suite. Two kinds.</p>
 <h3 id="test-your-middleware-directly">Test your middleware directly</h3>
@@ -883,7 +901,8 @@ every tool schema is tokens on every turn, and more tools means more chances to 
 one.</p>
 <p>One of our tools exists purely because a workflow demanded it (<em>"close out that pump work order
 I raised earlier"</em> → you need a way to list them). That's the direction you want.</p>
-<hr />
+<h1 class="chapter" id="ch-3"><span class="cn">Chapter 3</span>Running it, and closing the loop<span class="cb">Cadence, reading the results, and the failures no suite will catch.</span></h1>
+
 <h2 id="running-them">Running them</h2>
 <h3 id="repetitions">Repetitions</h3>
 <p>Your agent is non-deterministic. A single pass gives one sample per case, so a case that fails
@@ -1110,7 +1129,8 @@ learn.</strong></p>
 <p>Skip red and you never learn whether the assertion discriminates. A surprising fraction of
 hand-written assertions pass trivially against the broken agent, because they describe something
 it already did.</p>
-<hr />
+<h1 class="chapter" id="ch-4"><span class="cn">Appendix</span>Reference<span class="cb">A concrete first week, what to read next, and the whole post in twelve lines.</span></h1>
+
 <h2 id="starter-kit">Starter kit</h2>
 <h3 id="if-youre-starting-out">If you're starting out</h3>
 <p>Do these four things this week, in this order. Total cost: one afternoon and roughly zero

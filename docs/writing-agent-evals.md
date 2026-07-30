@@ -26,6 +26,8 @@ you're starting fresh, or you already have something in production.
 
 ---
 
+<h1 class="chapter" id="ch-1"><span class="cn">Chapter 1</span>Groundwork<span class="cb">What has to be true before a number means anything.</span></h1>
+
 ## Two things to do before you write a single eval
 
 Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
@@ -184,6 +186,8 @@ costs nothing and never flakes; at Level 4 the same property costs a dollar and 
 probability.
 
 ---
+
+<h1 class="chapter" id="ch-2"><span class="cn">Chapter 2</span>Writing the tests<span class="cb">The five levels, bottom to top, and the evaluators that grade them.</span></h1>
 
 ## Level 0, the level nobody writes
 
@@ -717,6 +721,8 @@ I raised earlier"* → you need a way to list them). That's the direction you wa
 
 ---
 
+<h1 class="chapter" id="ch-3"><span class="cn">Chapter 3</span>Running it, and closing the loop<span class="cb">Cadence, reading the results, and the failures no suite will catch.</span></h1>
+
 ## Running them
 
 ### Repetitions
@@ -919,6 +925,8 @@ hand-written assertions pass trivially against the broken agent, because they de
 it already did.
 
 ---
+
+<h1 class="chapter" id="ch-4"><span class="cn">Appendix</span>Reference<span class="cb">A concrete first week, what to read next, and the whole post in twelve lines.</span></h1>
 
 ## Starter kit
 

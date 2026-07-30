@@ -60,6 +60,16 @@ tr:last-child td{border-bottom:none}
 hr{border:0;border-top:1px solid var(--line);margin:56px 0}
 ul,ol{padding-left:24px}li{margin:7px 0}
 h2,h3{scroll-margin-top:24px}
+/* --- chapter dividers --- */
+h1.chapter{display:block;font-size:34px;line-height:1.15;letter-spacing:-.02em;
+           font-weight:700;margin:76px 0 10px;padding-top:34px;
+           border-top:2px solid var(--acc);scroll-margin-top:24px}
+h1.chapter .cn{display:block;font:600 11px JetBrains Mono,monospace;letter-spacing:.18em;
+               text-transform:uppercase;color:var(--acc);margin-bottom:12px}
+h1.chapter .cb{display:block;font:400 16px/1.6 Inter,sans-serif;color:var(--dim);
+               margin-top:10px;letter-spacing:0}
+/* The first h2 after a chapter divider shouldn't add a second rule. */
+h1.chapter + h2{border-top:none;padding-top:0;margin-top:44px}
 """
 
 # Sidebar table of contents + per-block copy buttons. Both are progressive: the page is
@@ -75,6 +85,12 @@ CHROME_CSS = """
 #toc .lbl{font:600 11px JetBrains Mono,monospace;letter-spacing:.14em;
           text-transform:uppercase;color:var(--dim);margin:0 0 14px 10px}
 #toc ol{list-style:none;margin:0;padding:0}
+#toc .chap{margin:22px 0 8px;padding:0 9px}
+#toc .chap:first-child{margin-top:0}
+#toc .chap .n{margin:0;font:600 9.5px JetBrains Mono,monospace;letter-spacing:.18em;
+              text-transform:uppercase;color:var(--acc);opacity:.85}
+#toc .chap .t{margin:2px 0 0;font-size:13px;font-weight:600;color:var(--tx);
+              padding-bottom:7px;border-bottom:1px solid var(--line)}
 #toc a{display:block;color:var(--dim);text-decoration:none;font-size:13.5px;
        line-height:1.4;padding:6px 9px;border-radius:6px;
        border-left:2px solid transparent;transition:color .12s,background .12s}
@@ -316,18 +332,33 @@ def build_toc(markup: str) -> str:
     `h2` is a top-level entry, `h3`s fold under the preceding one. Any `h3` before the
     first `h2` is the subtitle, not a section, so it's skipped.
     """
-    heads = re.findall(r"<h([23]) id=\"([^\"]+)\">(.*?)</h\1>", markup, re.DOTALL)
+    heads = re.findall(
+        r"<h1 class=\"chapter\" id=\"([^\"]+)\">.*?<span class=\"cn\">([^<]*)</span>"
+        r"([^<]*)<span|<h([23]) id=\"([^\"]+)\">(.*?)</h\4>",
+        markup,
+        re.DOTALL,
+    )
 
     groups: list[dict] = []
-    for level, anchor, raw in heads:
+    for ch_anchor, ch_num, ch_title, level, anchor, raw in heads:
+        if ch_anchor:  # a chapter divider: a label in the sidebar, not a link
+            groups.append({"chapter": True, "num": ch_num.strip(),
+                           "label": ch_title.strip()})
+            continue
         label = _html.unescape(re.sub(r"<[^>]+>", "", raw)).strip()
         if level == "2":
             groups.append({"anchor": anchor, "label": label, "kids": []})
-        elif groups:
+        elif groups and not groups[-1].get("chapter"):
             groups[-1]["kids"].append({"anchor": anchor, "label": label})
 
     out = ['<nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol>']
     for g in groups:
+        if g.get("chapter"):
+            out.append(
+                f'<li class="chap"><p class="n">{_html.escape(g["num"])}</p>'
+                f'<p class="t">{_html.escape(g["label"])}</p></li>'
+            )
+            continue
         car = '<button class="car" type="button" aria-label="Toggle section">&#9654;</button>'
         if not g["kids"]:
             car = '<span class="car none">&#9654;</span>'
@@ -359,6 +390,8 @@ def main() -> int:
         extensions=["extra", "toc", "sane_lists"],
     )
     body = highlight_blocks(body)
+    # A chapter divider draws its own rule, so drop the section `---` just above it.
+    body = re.sub(r"<hr\s*/?>\s*(?=<h1 class=\"chapter\")", "", body)
     toc = build_toc(body)
 
     OUT.write_text(
