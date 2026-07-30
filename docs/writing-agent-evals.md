@@ -614,8 +614,6 @@ before celebrating: 100% agreement on 20 examples is overfitting, not success.
 
 ## Part 8: Assertions, so non-engineers can write tests
 
-This is the idea with the highest ceiling in the whole post.
-
 Instead of writing a correct answer by hand, describe **what a correct answer looks like** in
 free-form English, one claim per row:
 
