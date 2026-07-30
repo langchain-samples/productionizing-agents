@@ -1043,15 +1043,14 @@ than Likert, domain experts in the loop) they agree.
 1. **Test as much deterministic code as you can**, to isolate the one non-deterministic part.
 2. **Design your tool results to be readable by an agent.** `{}` reads as "doesn't exist" and
    produces confident lies; an error that names the fix gets you a recovery in the same turn.
-3. **Five levels, by how much of the world is real.** Push every property as far down as it goes.
-4. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
-5. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
+3. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
+4. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
    average them. If you must have a scale, anchor every point.
-6. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
-7. **Pin the judge. Align the judge.**
-8. **Assertions let domain experts write tests.** That's what keeps the loop moving.
-9. **Always watch the test fail first.**
-10. **Every case is one you thought of.** Build the production loop that finds the rest.
+5. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
+6. **Pin the judge. Align the judge.**
+7. **Assertions let domain experts write tests.** That's what keeps the loop moving.
+8. **Always watch the test fail first.**
+9. **Every case is one you thought of.** Build the production loop that finds the rest.
 
 And if you keep five things:
 
