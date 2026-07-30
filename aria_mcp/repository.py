@@ -81,7 +81,7 @@ class Repository:
 
         Returns at most `limit` procedures, best match first, each with a truncated body
         and full provenance. Returns `[]` only when the query is well-formed but genuinely
-        matches nothing — which is a real answer, unlike a malformed query.
+        matches nothing, which is a real answer, unlike a malformed query.
 
         Raises:
             ARIALookupError: if the query is too short to be meaningful, or `limit` is
@@ -154,7 +154,7 @@ class Repository:
         if not _TAG_PATTERN.match(wanted):
             raise ARIALookupError(
                 f"{tag!r} is not a valid equipment tag. Expected a letter prefix, a "
-                f"hyphen, three digits, and an optional trailing letter — for example "
+                f"hyphen, three digits, and an optional trailing letter, for example "
                 f"'P-101A' or 'V-205'. Did the user mean a tank? Tanks use get_tank_status."
             )
 
@@ -209,7 +209,7 @@ class Repository:
         The returned record includes `data_quality_warnings`: a list of strings describing
         anything a competent operator would want flagged (suspect gauge, receipt in
         progress, proximity to the high-high alarm). We compute these here, in tested
-        code, rather than hoping the model notices — see Module 1 on determinism.
+        code, rather than hoping the model notices, see Module 1 on determinism.
 
         Raises:
             ARIALookupError: if the tag is not a known tank.
@@ -264,7 +264,7 @@ class Repository:
 
     @staticmethod
     def _score(proc: dict[str, Any], terms: list[str]) -> int:
-        """Weighted keyword score. Crude on purpose — it is exactly reproducible.
+        """Weighted keyword score. Crude on purpose, it is exactly reproducible.
 
         A real deployment would use a vector store here. The lesson is unchanged: the
         retrieval layer is application code with its own tests and its own quality bar,

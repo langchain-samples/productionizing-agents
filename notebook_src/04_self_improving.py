@@ -1,12 +1,12 @@
-"""Module 4 source — see scripts/build_notebooks.py."""
+"""Module 4 source: see scripts/build_notebooks.py."""
 
 # %% [markdown]
-# # Module 4 — Continually Improve Your Agent 24/7
+# # Module 4: Continually Improve Your Agent 24/7
 #
 # ### Closing the loop: production failure → regression test → fix
 #
 # **30 minutes.** Module 3 found a real bug that our entire offline suite passed over. Finding
-# it once is luck. This module is about making sure it can't come back — and building the
+# it once is luck. This module is about making sure it can't come back, and building the
 # machinery that finds the next one without you.
 #
 # > **A bug you find twice is a process failure.**
@@ -76,7 +76,7 @@ print(Path("scripts/setup_automations.py").read_text().split('"""')[1].split("WH
 
 # %% [markdown]
 # **The 5% random sample is not waste.** Rule 1 can only ever surface failure modes you already
-# wrote an evaluator for — it has exactly the same blind spot as your offline suite. Rule 2 is
+# wrote an evaluator for, it has exactly the same blind spot as your offline suite. Rule 2 is
 # your only channel for finding the failure nobody has named yet.
 #
 # Budget reviewer attention deliberately: mostly flagged traces, with a steady trickle of random
@@ -95,11 +95,11 @@ else:
 # %% [markdown]
 # ⚠️ **Automation rules poll independently.** If you want a webhook to include an evaluator's
 # score, nothing guarantees the evaluator ran first. The fix is a filter on the downstream rule
-# so it only matches traces that already carry the score — making the dependency explicit
+# so it only matches traces that already carry the score, making the dependency explicit
 # instead of hoping. Within a single rule, actions run in a fixed order: annotation queue →
 # dataset → webhook → online evaluator → code evaluator → alert.
 #
-# Also worth knowing: rules have a **Logs** tab. Use it when a rule "isn't working" — usually
+# Also worth knowing: rules have a **Logs** tab. Use it when a rule "isn't working", usually
 # it is working and the filter doesn't match what you think it matches.
 
 # %% [markdown]
@@ -111,7 +111,7 @@ else:
 # Open the trace where ARIA answered the OSHA benzene question. Confirm what you're looking at:
 # a confident, specific, correct-as-it-happens regulatory answer with **zero tool calls**.
 #
-# Now — and this is the part that matters — instead of writing a correct answer by hand, describe
+# Now, and this is the part that matters, instead of writing a correct answer by hand, describe
 # what a correct answer *looks like*.
 #
 # ### Assertions
@@ -139,7 +139,7 @@ print(json.dumps({
 
 # %% [markdown]
 # Then **Add to Dataset & Next** (`⌘/Ctrl + Enter`). That saves the example to
-# `aria-regressions` — with the run's *inputs* and your *assertions* as the outputs. Note the
+# `aria-regressions`, with the run's *inputs* and your *assertions* as the outputs. Note the
 # actual (bad) output is deliberately **not** saved: assertions describe what correct looks
 # like, not what this run produced.
 #
@@ -156,7 +156,7 @@ print(json.dumps({
 # **That's the difference between a loop that runs and a loop that stalls waiting on an
 # engineer.**
 #
-# Note the fourth assertion — *"naming the governing standard is acceptable"*. Assertions capture
+# Note the fourth assertion, *"naming the governing standard is acceptable"*. Assertions capture
 # nuance a boolean can't. Without it, a reviewer reading only the first three might conclude ARIA
 # should refuse to say the word "OSHA," which would be an over-correction.
 #
@@ -173,13 +173,13 @@ src = inspect.getsource(grade_against_assertions)
 print(src[src.index('    assertions = '):][:1400])
 
 # %% [markdown]
-# One judge call per assertion, returning **one feedback score per claim** — so each shows up as
+# One judge call per assertion, returning **one feedback score per claim**, so each shows up as
 # its own column in the experiment table. You see *which* criterion regressed, not just that
 # something did.
 
 # %% [markdown]
 # ---
-# ## 3. RED — watch the regression test fail
+# ## 3. RED, watch the regression test fail
 #
 # The reviewed case is now a dataset row. Run it against the agent that produced it.
 
@@ -192,7 +192,7 @@ else:
     print("Skipped. Run: python -m evals.runner --level regressions")
 
 # %% [markdown]
-# It fails. Of course it does — nothing has changed yet. That's the point:
+# It fails. Of course it does: nothing has changed yet. That's the point:
 #
 # > **A regression test you haven't seen fail is not a test. It's a hope.**
 #
@@ -202,7 +202,7 @@ else:
 
 # %% [markdown]
 # ---
-# ## 4. GREEN — fix it
+# ## 4. GREEN, fix it
 #
 # We know exactly where the bug is. `aria/agent_v2.py`, last bullet of the system prompt:
 
@@ -212,7 +212,7 @@ from aria.agent_v2 import SCOPE_BOUNDARY, SYSTEM_PROMPT
 print("THE BUG:")
 show(SYSTEM_PROMPT.split("- You are a broad refinery knowledge resource")[1][:400])
 print("\n" + "=" * 90 + "\n")
-print("THE FIX — remove that bullet, add this:")
+print("THE FIX: remove that bullet, add this:")
 show(SCOPE_BOUNDARY)
 
 # %% [markdown]
@@ -256,7 +256,7 @@ BEFORE (shipped)
 AFTER (scope_guard=True)
     Q: What's the OSHA permissible exposure limit for benzene?
     A: I don't have a sourced answer for that. I can't state OSHA exposure limits from
-       memory — that's a hard boundary for me, since I'm only authoritative on what the
+       memory, that's a hard boundary for me, since I'm only authoritative on what the
        procedure library and equipment register actually return. For the benzene PEL, check
        with your HSE department or the governing OSHA standard (29 CFR 1910.1028) directly.
     tools called: []
@@ -281,7 +281,7 @@ print("""
 
 # %% [markdown]
 # This is the payoff for Module 2 that's easy to undersell. **Evals aren't only for catching
-# bugs before you ship — they're for making change safe.** The same reason you want unit tests
+# bugs before you ship, they're for making change safe.** The same reason you want unit tests
 # before a refactor:
 #
 # - You'll want to swap models. New ones ship constantly, cheaper and faster.
@@ -289,7 +289,7 @@ print("""
 # - With coding agents you can restructure the whole codebase in an afternoon.
 #
 # **Even a perfect agent today is probably out of date next month.** The eval suite is what lets
-# you keep up without breaking things — and without a good suite, you simply won't try, because
+# you keep up without breaking things, and without a good suite, you simply won't try, because
 # trying is too risky. That timidity costs more than the bugs do.
 
 # %% [markdown]
@@ -299,7 +299,7 @@ print("""
 # We've been trusting LLM judges. Should we?
 #
 # An unaligned judge is worse than no judge: it produces confident numbers you act on. So measure
-# it the only way you can — **against human labels.**
+# it the only way you can, **against human labels.**
 #
 # ### Align Evaluator
 #
@@ -307,7 +307,7 @@ print("""
 #
 # 1. **Select** runs or experiments the evaluator scored.
 # 2. **Label** them yourself in an annotation queue. Start with ~20, balanced between pass and
-#    fail — a set that's all one label teaches you nothing.
+#    fail, a set that's all one label teaches you nothing.
 # 3. **Test** the evaluator prompt against your labels in the **Evaluator Playground**. You get
 #    an **alignment score**: the % where the judge agreed with you.
 # 4. **Refine and repeat.**
@@ -324,13 +324,13 @@ print("""
 # ⚠️ **Evaluator prompt edits are not saved by default.** Save when the alignment score improves,
 # or you'll lose the version that worked.
 #
-# ### Few-shot corrections — the automatic version
+# ### Few-shot corrections, the automatic version
 #
 # Add `{{Few-shot examples}}` to your judge's prompt (mustache format, run-level evaluators
 # only). LangSmith auto-creates a corrections dataset. Then every time you **correct a score**
 # in the UI, that correction is inserted into the judge's prompt as a few-shot example.
 #
-# **Attach an explanation to every correction** — it fills the `few_shot_explanation` variable,
+# **Attach an explanation to every correction**, it fills the `few_shot_explanation` variable,
 # and it's what actually teaches the judge. A correction with no explanation is a data point; a
 # correction with one is a lesson.
 #
@@ -339,10 +339,10 @@ print("""
 
 # %% [markdown]
 # ---
-# ## 6. LangSmith Engine — the loop, automated
+# ## 6. LangSmith Engine, the loop, automated
 #
 # > ⚠️ **Facilitator demo.** Engine is enabled per *organization* and most attendees won't have
-# > it. It also **scans every 6 hours**, so there is no live demo — the traces have to be seeded
+# > it. It also **scans every 6 hours**, so there is no live demo, the traces have to be seeded
 # > the day before. Run this on your screen.
 #
 # Everything in sections 1–5 was the loop **built by hand**: we wrote online evaluators, wired
@@ -357,7 +357,7 @@ print("""
 #    reopen if it resurfaces  ◀──  deploy an evaluator  ◀──  create dataset examples
 # ```
 #
-# Note the last arrow. **If a closed issue comes back, Engine reopens it** — which is a
+# Note the last arrow. **If a closed issue comes back, Engine reopens it**, which is a
 # mechanical version of the rule we opened this module with: *a bug you find twice is a process
 # failure.*
 #
@@ -371,7 +371,7 @@ print("""
 # | **A custom evaluator** | Deployed to catch the regression |
 # | **Ground-truth dataset examples** | Built from the production trace inputs, with **proposed assertions** you review and edit |
 #
-# That last row should look familiar. It's exactly the artifact we hand-wrote in section 2 —
+# That last row should look familiar. It's exactly the artifact we hand-wrote in section 2.
 # Engine drafts it and asks a human to approve.
 
 # %% [markdown]
@@ -397,7 +397,7 @@ print("""
 # **That alignment isn't a coincidence.** These categories were derived from what actually goes
 # wrong with production agents, which is the same reason we planted these specific defects.
 # If you're deciding what to monitor and you don't have Engine, **that table is a free
-# checklist** — it's a well-researched answer to "what should I be watching for?"
+# checklist**, it's a well-researched answer to "what should I be watching for?"
 
 # %% [markdown]
 # ### Seeding it (the day-before job)
@@ -441,7 +441,7 @@ print("""
 #
 # **Don't read Engine as a replacement for sections 1–5.** Read it as evidence that the loop is
 # worth building, because someone built a product out of it. And the judgment call from the next
-# section still applies with Engine in the picture: it *proposes* the fix and *opens* the PR — a
+# section still applies with Engine in the picture: it *proposes* the fix and *opens* the PR, a
 # human still reviews and merges it.
 
 # %% [markdown]
@@ -458,14 +458,14 @@ print("""
 # | **Continuous** | Alerts on regression, errors, cost, run-count drop | Yes |
 # | **Nightly** | Full eval suite incl. `simulate` on the current build | Yes |
 # | **Nightly** | Insights report over the day's traces | Yes |
-# | **Weekly** | Human reviews the queue (30 min, batched) | **No — keep the human** |
+# | **Weekly** | Human reviews the queue (30 min, batched) | **No: keep the human** |
 # | **Weekly** | Re-check judge alignment | **No** |
 # | **On change** | `regressions` + `scripted` gate in CI | Yes |
 #
 # ### What to be skeptical of
 #
 # The tempting next step is to close the loop entirely: let an agent read the failures, rewrite
-# the prompt, run the evals, and ship if they pass. **Don't**, yet — at least not for anything
+# the prompt, run the evals, and ship if they pass. **Don't**, yet, at least not for anything
 # safety-adjacent. Two reasons:
 #
 # 1. **Your evals are an incomplete proxy for "good."** An optimizer will find the gap between
@@ -481,7 +481,7 @@ print("""
 # %%
 print(Path(".github/workflows/evals.yml").read_text()
       if Path(".github/workflows/evals.yml").exists()
-      else "(CI workflow — see .github/workflows/evals.yml)")
+      else "(CI workflow: see .github/workflows/evals.yml)")
 
 # %% [markdown]
 # ---

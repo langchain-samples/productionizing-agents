@@ -14,7 +14,7 @@ execution counts. Two people running the same notebook produce a 400-line diff w
 semantic change, review is impossible, and merge conflicts are unresolvable. The .py
 sources are the artifact you version; the notebooks are a build output.
 
-Stdlib only — no jupytext install required, which matters when a participant is fighting
+Stdlib only: no jupytext install required, which matters when a participant is fighting
 their environment five minutes before the session starts.
 
     python scripts/build_notebooks.py          # build all
@@ -41,7 +41,7 @@ RAW_MARKER = "# %% [raw]"
 def parse_cells(text: str) -> list[tuple[str, str]]:
     """Split percent-format source into (cell_type, source) pairs.
 
-    Anything before the first marker is ignored — that is where the module docstring lives.
+    Anything before the first marker is ignored, that is where the module docstring lives.
     """
     cells: list[tuple[str, str]] = []
     cell_type: str | None = None
@@ -76,7 +76,7 @@ def parse_cells(text: str) -> list[tuple[str, str]]:
 def uncomment(source: str) -> str:
     """Strip the leading `# ` from a markdown cell's lines.
 
-    Markdown cells are written as comments so the .py file stays valid Python — which means
+    Markdown cells are written as comments so the .py file stays valid Python, which means
     your editor, linter, and formatter all work on the workshop content.
     """
     lines = []
@@ -123,7 +123,7 @@ def build(source: Path, *, check: bool) -> bool:
     """Build one notebook. Returns True if the output was already current."""
     cells = parse_cells(source.read_text(encoding="utf-8"))
     if not cells:
-        raise SystemExit(f"{source}: no `# %%` cell markers found — nothing to build.")
+        raise SystemExit(f"{source}: no `# %%` cell markers found, nothing to build.")
 
     notebook = to_notebook(cells)
     rendered = json.dumps(notebook, indent=1, ensure_ascii=False) + "\n"
@@ -136,7 +136,7 @@ def build(source: Path, *, check: bool) -> bool:
         return True
 
     if check:
-        print(f"  ! {target.relative_to(ROOT)} is stale — run scripts/build_notebooks.py")
+        print(f"  ! {target.relative_to(ROOT)} is stale, run scripts/build_notebooks.py")
         return False
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)

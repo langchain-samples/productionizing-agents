@@ -20,7 +20,7 @@ prototype you should. The reason to put a protocol boundary here as you producti
 
 2.  It makes the surface independently testable and independently deployable. `pytest
     tests/test_repository.py` runs in milliseconds with no API keys. The MCP server can be
-    versioned, load-tested, and monitored like any other service — because it is one.
+    versioned, load-tested, and monitored like any other service, because it is one.
 
 3.  One application, many consumers. The same server serves this agent, a different
     agent, an internal Claude Code / IDE integration, and a human with an MCP client.
@@ -61,7 +61,7 @@ mcp = FastMCP(
 
 
 # ---------------------------------------------------------------------------------------
-# PER-ARGUMENT DESCRIPTIONS — a gotcha that costs people days
+# PER-ARGUMENT DESCRIPTIONS: a gotcha that costs people days
 # ---------------------------------------------------------------------------------------
 # A tool's docstring becomes its *tool-level* description automatically. The per-argument
 # descriptions do NOT come along for free, and the two ecosystems fix it differently:
@@ -69,7 +69,7 @@ mcp = FastMCP(
 #   LangChain @tool     ->  @tool(parse_docstring=True)
 #                           Parses the Google-style `Args:` section and attaches each entry
 #                           to its parameter. WITHOUT IT, the properties in your JSON schema
-#                           are bare `{"title": "Tag", "type": "string"}` — the model gets
+#                           are bare `{"title": "Tag", "type": "string"}`, the model gets
 #                           your prose only as an undifferentiated blob in the description,
 #                           not attached to the argument it describes.
 #
@@ -83,7 +83,7 @@ mcp = FastMCP(
 #     tool.args_schema.model_json_schema()["properties"]
 #
 # If your properties have no `description` keys, the model is flying blind on arguments and
-# you will see it as "the model keeps passing the wrong format" — which reads like a model
+# you will see it as "the model keeps passing the wrong format", which reads like a model
 # problem and is actually a plumbing problem.
 #
 # The descriptions live in constants so the two transports can be asserted identical.
@@ -100,7 +100,7 @@ LIMIT_DESC = "Maximum procedures to return, 1-5. Default 5."
 PROCEDURE_ID_DESC = 'An id like "SOP-CSE-003". Case-insensitive.'
 EQUIPMENT_TAG_DESC = (
     'An equipment tag like "P-101A", "V-205", "C-401", "K-501". Case-insensitive. Note '
-    'that many pumps are installed in A/B pairs — "P-101" alone is not a tag and the '
+    'that many pumps are installed in A/B pairs. "P-101" alone is not a tag and the '
     "error will tell you which suffixes exist."
 )
 UNIT_DESC = (
@@ -133,7 +133,7 @@ SR_PROCEDURES_DESC = "Governing procedures for the shutdown and subsequent work.
 CWO_ID_DESC = 'The id to close, e.g. "WO-90001". Case-insensitive. Must exist.'
 CWO_NOTES_DESC = (
     "What was actually done, at least 15 characters. These notes become the asset's "
-    "maintenance history and the next person to work on this equipment reads them — record "
+    "maintenance history and the next person to work on this equipment reads them, record "
     "findings, parts used, and anything left outstanding."
 )
 CWO_BY_DESC = (
@@ -151,7 +151,7 @@ def _error(exc: ARIALookupError) -> dict[str, Any]:
     recovery hint and can retry in the same turn. Raising would surface the call as an
     error in LangSmith, which is better for your dashboards.
 
-    We chose recovery, and we get the observability back a different way — the `error`
+    We chose recovery, and we get the observability back a different way, the `error`
     key is a filterable field on the trace, so Module 3's monitoring watches
     `outputs` for it. Pick one and be consistent; the failure mode to avoid is doing
     both inconsistently across tools, which makes your error rate meaningless.
@@ -179,7 +179,7 @@ def search_procedures(
 
     Returns:
         `{"results": [...], "count": n}` where each result has `id`, `title`, `revision`,
-        `effective_date`, `applies_to`, `body` (possibly truncated), and `citation` — a
+        `effective_date`, `applies_to`, `body` (possibly truncated), and `citation`, a
         preformatted string you should quote verbatim rather than assembling yourself.
         `{"results": [], "count": 0}` means the library genuinely has nothing on that
         topic; say so plainly rather than answering from general knowledge.
@@ -199,7 +199,7 @@ def get_procedure(
     """Retrieve the complete, untruncated text of one procedure by its id.
 
     Use this after `search_procedures` when you need every step, or when the user names a
-    procedure directly. Never guess an id — if you are not certain, search instead. The
+    procedure directly. Never guess an id, if you are not certain, search instead. The
     error message from a wrong id lists every valid id, so a wrong guess is recoverable,
     but it costs a turn.
 
@@ -209,7 +209,7 @@ def get_procedure(
     Returns:
         The full procedure record including `body`, `revision`, `effective_date`, and
         `citation`. Some procedures carry a `notes` field describing what changed in the
-        current revision — read it, because it usually exists precisely because an earlier
+        current revision, read it, because it usually exists precisely because an earlier
         revision said something that is now wrong.
     """
     try:
@@ -227,14 +227,14 @@ def get_equipment(
 
     Tells you what the asset is, what it is in service on, its hazards, its area
     electrical classification, its current status, its PM and inspection dates, its open
-    work orders, and — importantly — `applicable_procedures`, the list of procedure ids
+    work orders, and, importantly, `applicable_procedures`, the list of procedure ids
     that govern work on it. Reach for those ids rather than searching blind.
 
     Tanks are NOT here. Use `get_tank_status` for anything starting with "T-".
 
     Args:
         tag: An equipment tag like "P-101A", "V-205", "C-401", "K-501". Case-insensitive.
-            Note that many pumps are installed in A/B pairs — "P-101" alone is not a tag
+            Note that many pumps are installed in A/B pairs. "P-101" alone is not a tag
             and the error will tell you which suffixes exist.
 
     Returns:
@@ -255,7 +255,7 @@ def list_equipment(
 
     Use this to orient yourself when the user refers to equipment vaguely ("the crude
     charge pumps", "the amine drum") and you need to resolve it to a tag. It returns
-    summaries only — follow up with `get_equipment` for the details on the one you want.
+    summaries only, follow up with `get_equipment` for the details on the one you want.
 
     Args:
         unit: Optional unit name, e.g. "Crude Unit 1", "Naphtha Hydrotreater", "Reformer",
@@ -281,7 +281,7 @@ def get_tank_status(
     dates, and any data-quality problems.
 
     Pay attention to `data_quality_warnings`. It is a precomputed list of conditions that
-    make the level reading unreliable or the situation hazardous — a suspect automatic
+    make the level reading unreliable or the situation hazardous, a suspect automatic
     gauge, a receipt in progress, or a level close to the high-high alarm. If that list is
     non-empty you must surface every warning in it to the user. Reporting a level from a
     suspect gauge as though it were fact is exactly the failure this tool exists to
@@ -312,7 +312,7 @@ def create_work_order(
 
     Use this when the user asks you to raise, schedule, or write up work. Always look up
     the equipment first and include the governing procedure ids from its
-    `applicable_procedures` — a work order that does not reference its procedures makes the
+    `applicable_procedures`, a work order that does not reference its procedures makes the
     planner go find them again.
 
     Args:
@@ -329,7 +329,7 @@ def create_work_order(
     Returns:
         The created work order including its assigned `id`, plus `created: true`. If an
         identical request was already made this session you get the original back with
-        `created: false` and `duplicate_of` set — that is idempotency working, not an
+        `created: false` and `duplicate_of` set, that is idempotency working, not an
         error, and you should tell the user the work order already exists rather than
         trying again.
     """
@@ -358,7 +358,7 @@ def request_equipment_shutdown(
 
     This is a consequential action. Taking a crude charge pump out of service is a
     production decision, and on a criticality-A asset with no running spare it can force a
-    unit rate cut. It files a request for supervisor approval — it does not shut anything
+    unit rate cut. It files a request for supervisor approval, it does not shut anything
     down.
 
     Requirements, all enforced:
@@ -377,7 +377,7 @@ def request_equipment_shutdown(
 
     Returns:
         The filed request with `status: "pending_supervisor_approval"` and an
-        `impact_assessment` list. Surface every item in that list to the user — it names
+        `impact_assessment` list. Surface every item in that list to the user, it names
         the production consequence, which is the thing the approver most needs to know.
     """
     from aria_mcp.work_orders import get_store
@@ -402,7 +402,7 @@ def complete_work_order(
     """Close out an existing work order as complete.
 
     Use this when the user reports that work has been finished. You must know the work order
-    id — call `list_work_orders` if the user refers to the work without giving an id, and ask
+    id, call `list_work_orders` if the user refers to the work without giving an id, and ask
     them to confirm which one rather than guessing.
 
     A work order can only be closed once. If it is already complete, say so; do not close it
@@ -412,7 +412,7 @@ def complete_work_order(
         work_order_id: The id to close, e.g. "WO-90001". Case-insensitive. Must exist.
         completion_notes: What was actually done, at least 15 characters. These notes become
             the asset's maintenance history and the next person to work on this equipment
-            reads them — record findings, parts used, and anything left outstanding.
+            reads them, record findings, parts used, and anything left outstanding.
         completed_by: Name or badge number of the human who did or verified the work.
             Required; you cannot sign off work yourself. Ask if the user has not said.
 

@@ -38,7 +38,7 @@ Then edit `.env`. You need **two** things:
 | `LANGSMITH_API_KEY` | smith.langchain.com → Settings → API Keys |
 | One model provider | `ANTHROPIC_API_KEY` (recommended) or `OPENAI_API_KEY` |
 
-⚠️ **Set `LANGSMITH_PROJECT` to something unique** — your name or initials. If everyone leaves
+⚠️ **Set `LANGSMITH_PROJECT` to something unique**, your name or initials. If everyone leaves
 the default you'll all be looking at each other's traces in Module 3, and the monitoring
 charts become meaningless.
 
@@ -63,7 +63,7 @@ python scripts/preflight.py
 Nine checks, cheapest first, and it keeps going after a failure so you get the whole picture
 in one pass. It prints the fix for anything that's wrong.
 
-**`ALL CHECKS PASSED` means you're ready.** Warnings are usually fine — read them.
+**`ALL CHECKS PASSED` means you're ready.** Warnings are usually fine, read them.
 
 ## 5. Go
 
@@ -118,7 +118,7 @@ python -m http.server 8080 --directory frontend
 
 ### Notebook cells say a file doesn't exist
 
-The kernel started outside the repo root. Re-run the setup cell at the top — it does the
+The kernel started outside the repo root. Re-run the setup cell at the top, it does the
 `chdir` and `sys.path` work.
 
 ---
@@ -129,13 +129,13 @@ You can still do most of Modules 1 and 2:
 
 | | Works? |
 | :-- | :-- |
-| Module 1 — everything except viewing traces | ✅ |
-| Module 2 — Level 0 (harness), the middleware and evaluator unit tests | ✅ |
-| Module 2 — Levels 1–2 (need datasets and experiments) | ❌ |
-| Module 2 — Level 3 pytest (runs; results just aren't recorded) | ⚠️ |
+| Module 1: everything except viewing traces | ✅ |
+| Module 2: Level 0 (harness), the middleware and evaluator unit tests | ✅ |
+| Module 2: Levels 1–2 (need datasets and experiments) | ❌ |
+| Module 2: Level 3 pytest (runs; results just aren't recorded) | ⚠️ |
 | Modules 3 and 4 | ❌ platform features |
 
-Set `LANGSMITH_TRACING=false` and the agent runs normally. `pytest tests/` — all 179 — needs
+Set `LANGSMITH_TRACING=false` and the agent runs normally. `pytest tests/`, all 179, needs
 no key at all. For Modules 3 and 4, **pair up with someone who has a key.**
 
 ## No model provider key
@@ -156,17 +156,17 @@ You'll be reading rather than running for the model-backed cells. Pair up.
 
 | | LangSmith | Model key | Plan |
 | :-- | :--: | :--: | :-- |
-| `pytest tests/` (179) | — | — | any |
-| Level 0 harness / context assertions | — | — | any |
+| `pytest tests/` (179) | - | - | any |
+| Level 0 harness / context assertions | - | - | any |
 | Agent invocation | optional | ✅ | any |
-| MCP server | — | — | any |
+| MCP server | - | - | any |
 | Datasets, experiments, Levels 1–4 | ✅ | ✅ | any |
 | Online evaluators, alerts, automations | ✅ | ✅ | any |
-| Annotation queues + assertions | ✅ | — | any |
+| Annotation queues + assertions | ✅ | - | any |
 | `langgraph deploy` | ✅ | ✅ | **Plus+** |
 | `langgraph dev` (the fallback) | optional | ✅ | any |
 | Insights | ✅ | ✅ | **Plus+** |
-| Engine | ✅ | — | **Plus+**, org-enabled |
+| Engine | ✅ | - | **Plus+**, org-enabled |
 
 The two Plus-only features (Insights, Engine) are facilitator demos in the notebooks, not
-participant exercises — so a Developer-tier account isn't a blocker for the session.
+participant exercises, so a Developer-tier account isn't a blocker for the session.

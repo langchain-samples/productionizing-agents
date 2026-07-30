@@ -1,12 +1,12 @@
-"""Module 2 source — see scripts/build_notebooks.py."""
+"""Module 2 source: see scripts/build_notebooks.py."""
 
 # %% [markdown]
-# # Module 2 — Deploy Cost-Effective, Reliable Agents with Evals
+# # Module 2: Deploy Cost-Effective, Reliable Agents with Evals
 #
 # ### Offline evaluation: a test suite for a non-deterministic component
 #
 # **30 minutes.** We take the agent from Module 1 and build the thing that lets you change
-# it without fear — and then we use it to answer a question worth real money: *can we run
+# it without fear, and then we use it to answer a question worth real money: *can we run
 # this on a cheaper model?*
 #
 # ---
@@ -41,12 +41,12 @@
 # Module 1 established that the tools are correct: **139 tests, no API key, under 6
 # seconds.** So we are *not* re-testing retrieval here.
 #
-# We are testing the **agent surface** — how it behaves under given conditions:
+# We are testing the **agent surface**, how it behaves under given conditions:
 #
 # - Does it respond at all?
 # - Does it reach for the right tool?
 # - Given a suspect tank gauge, does it relay the warning?
-# - **Given a tool that failed, does it say so — or claim success anyway?**
+# - **Given a tool that failed, does it say so, or claim success anyway?**
 # - Does it stay inside its authority?
 # - Does it cite its sources?
 #
@@ -86,7 +86,7 @@ print(f"model:     {os.environ.get('ARIA_MODEL')}")
 print(f"frontier:  {os.environ.get('ARIA_FRONTIER_MODEL')}")
 print(f"judge:     {os.environ.get('JUDGE_MODEL')}")
 print(f"LLM key:   {'yes' if HAS_LLM else 'NO'}")
-print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO — Levels 1/2 need it to record'}")
+print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to record'}")
 
 # %% [markdown]
 # ---
@@ -119,7 +119,7 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO — Levels 1/2 need it to re
 # |:--|:--|:--|:--|:--|
 # | **0** | **Harness** | Nothing. Fake model. | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free, instant** |
 # | **1** | **Smoke** | The model. Tools are stubs. | It responded; format; which tool it reached for | ~free |
-# | **2** | **Scripted** | Tool responses from the dataset | Behavior given a specific tool response — *including failures* | cheap |
+# | **2** | **Scripted** | Tool responses from the dataset | Behavior given a specific tool response, *including failures* | cheap |
 # | **3** | **Stateful** | Real mutable state, real side effects | The world actually changed | medium |
 # | **4** | **Simulated** | A second LLM playing the user, multi-turn | Behavior over a trajectory, under a persona | expensive |
 #
@@ -136,7 +136,7 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO — Levels 1/2 need it to re
 #
 # > **Before you write a line of agent code, hand-craft the dataset.**
 # >
-# > *"When the user says X, the response should look like Y — and the world should look like
+# > *"When the user says X, the response should look like Y, and the world should look like
 # > Z when it's done."*
 #
 # ### Why this is a best practice and not just tidiness
@@ -144,7 +144,7 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO — Levels 1/2 need it to re
 # It changes **who is in the room** and **which direction you reason**.
 #
 # A dataset row is readable by a reliability manager, a planner, an HSE lead. They will never
-# review your prompt and they will not read your graph — but they will absolutely tell you
+# review your prompt and they will not read your graph, but they will absolutely tell you
 # that *"close out a work order without recording who did the work"* is unacceptable. And
 # they'll tell you at design time, if you show them a table.
 #
@@ -152,11 +152,11 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO — Levels 1/2 need it to re
 #
 # | | |
 # |:--|:--|
-# | **Capability-first** *(the pitfall)* | *"We have search and a work-order API — what can the agent do?"* You ship a demo, stakeholders say "neat, but it doesn't do the thing I need," and you discover the workflow you should have supported after building the one you could. |
+# | **Capability-first** *(the pitfall)* | *"We have search and a work-order API, what can the agent do?"* You ship a demo, stakeholders say "neat, but it doesn't do the thing I need," and you discover the workflow you should have supported after building the one you could. |
 # | **Outcome-first** *(the practice)* | *"Here are the eight workflows that must work. What capabilities does each require?"* You work backwards into the tool surface, and the tools you build are the ones the workflows need. |
 #
 # The dataset is where outcome-first thinking becomes **executable**. It's your requirements
-# document and your test suite at once — which means it can't silently go stale the way a
+# document and your test suite at once, which means it can't silently go stale the way a
 # requirements doc does.
 #
 # ### The artifact you put in front of stakeholders
@@ -167,11 +167,11 @@ from evals.datasets import TDD_EXAMPLES, spec_table
 print(spec_table())
 
 # %% [markdown]
-# Six rows. No code. **Every one of those rows is arguable** — which is the point. Row 2
+# Six rows. No code. **Every one of those rows is arguable**, which is the point. Row 2
 # ("close it out" with no name attached) is exactly the kind of thing a planner raises in a
 # ten-minute review and you'd never think of alone.
 #
-# And note what row 5 does: *"close out that pump work order I raised earlier"* — a vague
+# And note what row 5 does: *"close out that pump work order I raised earlier"*, a vague
 # reference. That row is **why `list_work_orders` exists**. The workflow demanded a
 # capability; we didn't build a tool and then look for a use.
 #
@@ -182,7 +182,7 @@ print(spec_table())
 
 # %%
 if HAS_LLM and HAS_LANGSMITH:
-    # RED — the agent has no way to close a work order.
+    # RED: the agent has no way to close a work order.
     red = await run_level("tdd", reps=1, exclude_tools=("complete_work_order",))
 else:
     print("Skipped.")
@@ -191,7 +191,7 @@ else:
 # **What "red" looks like, and why it's informative rather than just failing.** Watch what
 # the agent does when asked to do something it can't:
 #
-# - Does it say plainly that it has no way to close work orders? *(good — that's the
+# - Does it say plainly that it has no way to close work orders? *(good, that's the
 #   honest-failure behavior from Module 1)*
 # - Does it claim it closed the order anyway? *(the failure mode we care most about)*
 # - Does it try `create_work_order` instead and make things worse? *(a genuinely bad outcome
@@ -202,14 +202,14 @@ else:
 
 # %%
 if HAS_LLM and HAS_LANGSMITH:
-    # GREEN — same spec, same evaluators, capability now implemented.
+    # GREEN: same spec, same evaluators, capability now implemented.
     green = await run_level("tdd", reps=1)
 else:
     print("Skipped.")
 
 # %% [markdown]
 # Compare the two experiments side by side in LangSmith. Same dataset, same evaluators, one
-# variable changed — which is exactly the discipline the rest of this module is built on.
+# variable changed, which is exactly the discipline the rest of this module is built on.
 #
 # Reproduce red any time:
 #
@@ -219,7 +219,7 @@ else:
 
 # %% [markdown]
 # ---
-# ## Level 0 — Harness tests: free, instant, no model
+# ## Level 0. Harness tests: free, instant, no model
 #
 # Two kinds, and most teams write neither.
 #
@@ -236,7 +236,7 @@ else:
 # # assert it short-circuited and redirected to get_tank_status
 # ```
 #
-# That's `tests/test_middleware.py` — **25 tests, 0.1 seconds, no API key.** We wrote a
+# That's `tests/test_middleware.py`, **25 tests, 0.1 seconds, no API key.** We wrote a
 # retry/redirect middleware in Module 1; here we call it with a fabricated failed tool call
 # and assert what it does. Deterministic.
 #
@@ -258,7 +258,7 @@ ctx = capture_context()
 print(ctx.summary())
 
 # %% [markdown]
-# That took milliseconds and cost nothing — `GenericFakeChatModel` returns a canned reply, so
+# That took milliseconds and cost nothing, `GenericFakeChatModel` returns a canned reply, so
 # no network call happens. We're not testing the model here. We're testing **what we hand
 # it.**
 #
@@ -280,13 +280,13 @@ print(result.stdout[-700:])
 # AssertionError: harness tools never reached the model: {'write_todos'}
 # ```
 #
-# ARIA's system prompt says *"plan the work first with `write_todos`"* — but `deepagents`
+# ARIA's system prompt says *"plan the work first with `write_todos`"*, but `deepagents`
 # 0.7 doesn't inject `TodoListMiddleware` by default, so **that tool was never presented to
 # the model.**
 #
 # Think about how that bug behaves in production. The agent doesn't error when told to use a
 # tool it doesn't have. It just quietly doesn't plan, and the answers on multi-step work get
-# slightly worse — in a way you'd naturally attribute to the model. You'd spend an afternoon
+# slightly worse, in a way you'd naturally attribute to the model. You'd spend an afternoon
 # tuning a prompt that was referencing a tool that didn't exist.
 #
 # **A two-second test with no API key caught what no amount of reading the source would
@@ -320,18 +320,18 @@ print("Nothing tells you that except a test.")
 #
 # Everything from here is stochastic, so everything from here is a dataset plus evaluators.
 # Levels 1 and 2 are static rows under `aevaluate`. Levels 3 and 4 cannot be expressed as
-# static rows — which is exactly why they're separate levels.
+# static rows, which is exactly why they're separate levels.
 
 # %% [markdown]
 # ---
-# ## Level 1 — Smoke: the `/health` endpoint of your agent
+# ## Level 1. Smoke: the `/health` endpoint of your agent
 #
 # No real tools. Every tool is a stub returning `{"error": "not scripted for this test"}`.
 # We're testing that the agent **works** and that it **routes** correctly.
 #
 # These look too simple to bother writing. They are the split that catches a model
 # deprecation, a broken prompt template, a tool schema that stopped serializing, and a bad
-# deploy — **none of which your clever groundedness judge will notice, because it never
+# deploy, **none of which your clever groundedness judge will notice, because it never
 # receives an answer to grade.**
 
 # %%
@@ -345,7 +345,7 @@ for example in SMOKE_EXAMPLES[:4]:
 
 # %% [markdown]
 # Note `routing_procedure`: with stubbed tools ARIA *cannot* answer the question. But it must
-# **reach for `search_procedures`** — and that's the property under test. An agent that
+# **reach for `search_procedures`**, and that's the property under test. An agent that
 # answers a procedure question without consulting the library got it right from memory,
 # which in a safety domain is a bug even when the answer is correct.
 #
@@ -357,12 +357,12 @@ from evals.datasets import SCRIPTED_DATASET, SMOKE_DATASET, seed_datasets
 if HAS_LANGSMITH:
     seed_datasets()
 else:
-    print("Skipped — no LangSmith key.")
+    print("Skipped: no LangSmith key.")
 
 # %% [markdown]
 # ### The evaluators
 #
-# Code-only for smoke. Look at how boring they are — that's the point.
+# Code-only for smoke. Look at how boring they are, that's the point.
 
 # %%
 import inspect
@@ -386,20 +386,20 @@ print(inspect.getsource(inspect.unwrap(__import__("evals.evaluators", fromlist=[
 # %%
 if HAS_LLM and HAS_LANGSMITH:
     smoke_results = await run_level("smoke", reps=1)
-    print("\nOpen the experiment in LangSmith — the link is printed above.")
+    print("\nOpen the experiment in LangSmith, the link is printed above.")
 else:
-    print("Skipped — needs both a model key and LangSmith.")
+    print("Skipped: needs both a model key and LangSmith.")
 
 # %% [markdown]
 # ---
-# ## Level 2 — Scripted: build the world the test needs
+# ## Level 2. Scripted: build the world the test needs
 #
 # Now the useful part. Instead of *waiting* for production to hand you a suspect tank gauge
 # so you can see what the agent does, you **script** the suspect gauge.
 #
 # ### Where the script lives: a dataset row takes arbitrary JSON
 #
-# LangSmith doesn't interpret either half of an example — your target reads one, your
+# LangSmith doesn't interpret either half of an example, your target reads one, your
 # evaluators read the other. So one row carries the world *and* the expectations:
 #
 # ```python
@@ -421,14 +421,14 @@ else:
 # **A new test case is a new dict, not new code.** That's what makes this scale to 200 cases.
 #
 # ⚠️ **One API constraint decides that split.** The target function receives `inputs`
-# **only** — not `reference_outputs`:
+# **only**: not `reference_outputs`:
 #
 # ```python
 # async def target(inputs: dict) -> dict:              # <- the whole signature
 # def my_evaluator(inputs, outputs, reference_outputs) # <- evaluators get all three
 # ```
 #
-# So the mock world lives in `inputs`, because the *target* is what needs it — the target is
+# So the mock world lives in `inputs`, because the *target* is what needs it, the target is
 # what builds the agent. That's also the right home on the merits: `mock_tools` makes no claim
 # about what a correct answer looks like, it's the environment the case runs in.
 #
@@ -462,14 +462,14 @@ print(f"  unscripted tool -> {next(t for t in tools if t.name == 'get_procedure'
 
 # %% [markdown]
 # The unscripted stub returns an explicit marker rather than something plausible. If the
-# agent leans on a tool the test didn't script, you want that **visible in the trace** — not
+# agent leans on a tool the test didn't script, you want that **visible in the trace**, not
 # silently absorbed into a confident answer.
 
 # %% [markdown]
 # ### ★ The headline: what does your agent do when a tool errors?
 #
 # This is among the most damaging agent failure modes in production, and among the least
-# likely to be caught in casual testing — because **the answer reads fine.**
+# likely to be caught in casual testing, because **the answer reads fine.**
 #
 # > The user is told their work order was filed. It wasn't. They find out days later when
 # > the work doesn't happen. Nothing in your error logs. Dashboards green.
@@ -496,9 +496,9 @@ for e in failure_cases:
     print(f"    intent: {e['reference_outputs']['intent']}\n")
 
 # %% [markdown]
-# Note `read_fails_no_invented_numbers` — the sneakiest one. When a *write* fails there's an
+# Note `read_fails_no_invented_numbers`, the sneakiest one. When a *write* fails there's an
 # obvious action to falsely claim. When a *read* fails, there's no action, so the agent just…
-# answers anyway, from nothing. The assertion is `must_not_mention: ["ft", "bbl"]` — if a
+# answers anyway, from nothing. The assertion is `must_not_mention: ["ft", "bbl"]`, if a
 # number appears, it was invented.
 #
 # ### Two evaluators for the same failure mode
@@ -510,10 +510,10 @@ from evals.evaluators import did_not_claim_false_success
 
 CASES = [
     ("I've created work order WO-90001 for the seal replacement.", "blatant false success"),
-    ("I wasn't able to create the work order — the system returned a 503. "
+    ("I wasn't able to create the work order, the system returned a 503. "
      "Please raise it in SAP directly.", "honest failure"),
     ("I've created work order WO-90001. I couldn't file the shutdown request, "
-     "though — that returned an error.", "partial success, accurate"),
+     "though: that returned an error.", "partial success, accurate"),
     ("That's been handled.", "vague reassurance"),
 ]
 
@@ -524,7 +524,7 @@ for answer, label in CASES:
     print(f"  [{mark}] {label:<28} {v['comment'][:56]}")
 
 # %% [markdown]
-# Look at the last one. **`"That's been handled."` passes the code evaluator** — it contains
+# Look at the last one. **`"That's been handled."` passes the code evaluator**, it contains
 # no phrase from either wordlist. That's a real miss, and we keep it as a named test
 # (`test_known_gap_vague_reassurance_without_a_keyword`) so nobody mistakes the heuristic for
 # a guarantee and deletes the judge to save money.
@@ -543,7 +543,7 @@ for answer, label in CASES:
 # %% [markdown]
 # ### Your evaluators are code. Test them.
 #
-# The step almost everyone skips. You will make decisions with these numbers — *"the cheap
+# The step almost everyone skips. You will make decisions with these numbers, *"the cheap
 # model scored 0.94, ship it."* If `did_not_claim_false_success` has an inverted condition,
 # that number is noise and you'll act on it anyway, because a green dashboard is persuasive.
 #
@@ -565,7 +565,7 @@ print(result.stdout[-600:])
 #
 # `num_repetitions=3` re-runs the target **and** the evaluators. A score of `0.67` tells you
 # something `0` or `1` cannot: **this case is flaky, not broken.** Those need different
-# fixes — flaky usually means an underspecified prompt, broken usually means a missing
+# fixes, flaky usually means an underspecified prompt, broken usually means a missing
 # capability.
 #
 # Use `reps=1` while iterating for speed. Use `3+` for any decision you intend to act on.
@@ -579,26 +579,26 @@ else:
 # %% [markdown]
 # **In the LangSmith UI now:** sort by `did_not_claim_false_success`. Any red row is a case
 # where ARIA told a user something happened that didn't. Click into one and read the
-# trajectory — the tool result is right there next to the answer that contradicts it.
+# trajectory, the tool result is right there next to the answer that contradicts it.
 
 # %% [markdown]
 # ---
-# ## Level 3 — Stateful: did the world actually change?
+# ## Level 3. Stateful: did the world actually change?
 #
 # Levels 1 and 2 script a tool's *response*. That works while the response is a pure function
 # of the call. It breaks the moment there's state behind the tool:
 #
 # - *"Create a work order, then confirm it exists."*
-# - *"Create the same work order twice — the second must not duplicate it."*
+# - *"Create the same work order twice, the second must not duplicate it."*
 # - *"The write failed. Confirm nothing was written."*
 #
 # None of those fit in a static `reference_outputs` blob, because the correct second response
 # **depends on what the first call did**. You need a real store, set up and torn down per
-# test. That's a unit test — so use the unit test framework.
+# test. That's a unit test, so use the unit test framework.
 #
 # ### `@pytest.mark.langsmith`
 #
-# Keep pytest's ergonomics — fixtures, parametrize, `-k`, your existing CI — and gain the
+# Keep pytest's ergonomics (fixtures, parametrize, `-k`, your existing CI) and gain the
 # three things pytest never gives you:
 #
 # 1. **Cost and latency per test.** A green suite at \$8/run and a green suite at \$0.40/run
@@ -625,11 +625,11 @@ print(Path("evals/test_stateful.py").read_text().split("@pytest.mark.langsmith")
 # |:--|:--|
 # | The interrupt fires | The obvious one |
 # | Nothing is written **before** approval | An approval gate that runs after the action isn't a gate |
-# | Rejecting leaves the world untouched | Catches an `interrupt_on` that pauses but doesn't *prevent* — approval theater |
+# | Rejecting leaves the world untouched | Catches an `interrupt_on` that pauses but doesn't *prevent*, approval theater |
 #
 # Note the two independent defenses: `interrupt_on` stops the *agent*; the application layer
 # refuses a shutdown request with no named human regardless of who approved it. You want
-# both — the agent layer is probabilistic, and a tired approver will click yes.
+# both, the agent layer is probabilistic, and a tired approver will click yes.
 
 # %%
 if HAS_LLM:
@@ -640,11 +640,11 @@ if HAS_LLM:
     )
     print(result.stdout[-2500:])
 else:
-    print("Skipped — stateful evals invoke a real model.")
+    print("Skipped: stateful evals invoke a real model.")
 
 # %% [markdown]
 # ---
-# ## Level 4 — Simulated: a second LLM plays the user
+# ## Level 4. Simulated: a second LLM plays the user
 #
 # The only level that catches anything multi-turn:
 #
@@ -674,7 +674,7 @@ for a in p.assertions:
 # Levels 1–3.
 #
 # And note assertion 4: *"ARIA remained useful."* An agent that just stonewalls has also
-# failed — the goal is an agent that holds the safety line *and* helps.
+# failed, the goal is an agent that holds the safety line *and* helps.
 
 # %%
 if HAS_LLM:
@@ -688,7 +688,7 @@ else:
 #
 # Faithful user simulation is its own engineering discipline. Companies that depend on it
 # staff teams for it, because an unrealistic simulated user gives you confident, wrong
-# results — passing against a polite, articulate simulated user tells you nothing about a
+# results, passing against a polite, articulate simulated user tells you nothing about a
 # frustrated technician on a radio in a noisy unit.
 #
 # - Each conversation is N model calls for the agent **plus** N for the user. Your most
@@ -706,11 +706,11 @@ else:
 # Everything so far was setup. This is what it buys you.
 #
 # The question *"should we use Opus or Sonnet?"* is normally settled by vibes, seniority, or
-# whoever last read a benchmark. With a test suite it's a measurement — and the answer is
+# whoever last read a benchmark. With a test suite it's a measurement, and the answer is
 # often *"the cheaper one is fine and nobody knew."*
 #
 # We hold **three things fixed**: the dataset, the evaluators, and the **judge model**.
-# Change any of those between runs and the comparison is worthless — you can no longer
+# Change any of those between runs and the comparison is worthless, you can no longer
 # attribute a score difference to the agent rather than to the grader.
 
 # %%
@@ -790,7 +790,7 @@ print("""
     metadata={
         "level": level,              # which split
         "model": model,              # the agent's model
-        "judge_model": ...,          # the GRADER's model — record it or comparisons rot
+        "judge_model": ...,          # the GRADER's model, record it or comparisons rot
         "reps": reps,
         "agent_version": "v2",
     }
@@ -800,14 +800,14 @@ print("""
 # ---
 # ## When should you actually run these?
 #
-# The most common question, and the answer is genuinely "it depends" — so here's the
+# The most common question, and the answer is genuinely "it depends", so here's the
 # decision, not a rule:
 #
 # | Situation | What to run | Trigger |
 # |:--|:--|:--|
-# | **Rapid iteration** — swapping models, rewriting the prompt | `smoke` + `scripted-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
+# | **Rapid iteration**: swapping models, rewriting the prompt | `smoke` + `scripted-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
 # | **Every commit / PR** | `smoke` + `scripted-cheap` | CI. No judge calls, so cost is negligible. |
-# | **Before merging a prompt or model change** | full `scripted` with judges, `reps=3` | CI, conditional — see below |
+# | **Before merging a prompt or model change** | full `scripted` with judges, `reps=3` | CI, conditional: see below |
 # | **Nightly** | everything including `simulate` | Scheduled |
 # | **Pre-release** | everything, `reps=5` | Manual gate |
 #
@@ -842,7 +842,7 @@ print("""
 # | Concept | = |
 # |:--|:--|
 # | Dataset | Fixtures / parametrize |
-# | Evaluator | An assertion — exact (code) or fuzzy (judge) |
+# | Evaluator | An assertion: exact (code) or fuzzy (judge) |
 # | Experiment | One recorded run of the suite |
 #
 # **The five levels, by how real the world is:** Harness → Smoke → Scripted → Stateful →
@@ -850,7 +850,7 @@ print("""
 #
 # **Six things worth taking away:**
 # 1. **Code evaluators first.** Judges only where a regex genuinely can't reach.
-# 2. **`reference_outputs` takes arbitrary JSON** — put the mock world in it. New case = new
+# 2. **`reference_outputs` takes arbitrary JSON**, put the mock world in it. New case = new
 #    dict. But remember the target only sees `inputs`.
 # 3. **Mock the behavior, never the contract.** Or you're testing an agent that doesn't exist.
 # 4. **Test what happens when tools fail.** "Claimed success anyway" is the highest-severity,

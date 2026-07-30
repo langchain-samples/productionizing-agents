@@ -5,7 +5,7 @@
 
 WHY THIS FILE EXISTS SEPARATELY
 -------------------------------
-`build_agent()` takes arguments. A deployment cannot — the server imports one module-level
+`build_agent()` takes arguments. A deployment cannot, the server imports one module-level
 graph object. So this file is where the production *configuration decisions* get made and
 frozen, which is a useful place to have them all visible in one screen:
 
@@ -17,14 +17,14 @@ frozen, which is a useful place to have them all visible in one screen:
 DO NOT PASS A CHECKPOINTER HERE
 ------------------------------
 The platform supplies a durable Postgres checkpointer, and it does not merely ignore a custom
-one — it **refuses to load the graph at all**:
+one, it **refuses to load the graph at all**:
 
     GraphLoadError: Failed to load graph 'aria' from ./aria/graph.py: Heads up! Your graph
     includes a custom checkpointer (InMemorySaver). With LangGraph API, persistence is handled
     automatically by the platform...
 
 Worth knowing because it collides with human-in-the-loop. `build_agent(require_approval=True)`
-normally *requires* a checkpointer — that guard exists so an approval gate can never be
+normally *requires* a checkpointer, that guard exists so an approval gate can never be
 silently absent. Deployment is the one legitimate case where the caller has persistence but
 cannot pass it, so it gets an explicit opt-out rather than a loophole:
 
@@ -53,7 +53,7 @@ SCOPE_GUARD = os.environ.get("ARIA_SCOPE_GUARD", "").strip().lower() in {"1", "t
 graph = build_agent(
     scope_guard=SCOPE_GUARD,
     require_approval=True,
-    # The platform owns persistence. See the note above — passing one is a load error.
+    # The platform owns persistence. See the note above, passing one is a load error.
     platform_persistence=True,
 )
 

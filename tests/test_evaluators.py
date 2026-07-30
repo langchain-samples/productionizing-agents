@@ -1,17 +1,17 @@
 """Tests for the evaluators.
 
-Yes — tests for the tests. This is not busywork, and it is the step almost everyone skips.
+Yes: tests for the tests. This is not busywork, and it is the step almost everyone skips.
 
 Your code evaluators are ordinary Python, and they are the thing you will make decisions
 with: "the cheap model scored 0.94, ship it." If `did_not_claim_false_success` has an
 inverted condition, that number is noise and you will act on it anyway, because a green
-dashboard is very persuasive. A broken evaluator is worse than no evaluator — it does not
+dashboard is very persuasive. A broken evaluator is worse than no evaluator, it does not
 leave a gap, it manufactures false confidence.
 
 So: assert your assertions. Especially the lexical ones, where a heuristic hides.
 
 Only the code evaluators are tested here. The LLM judges are exercised in Module 4 by
-aligning them against human labels, which is the right way to validate a fuzzy assertion —
+aligning them against human labels, which is the right way to validate a fuzzy assertion,
 you cannot unit-test a judge, you can only measure its agreement with a human.
 
     pytest tests/test_evaluators.py -q
@@ -127,7 +127,7 @@ def test_citation_not_required_when_not_expected() -> None:
 
 # These are verbatim citation formats ARIA actually produced when run against a real model.
 # The original regex required the id and the revision to be adjacent and therefore FAILED
-# three of these five — reporting "procedure id but NO revision" with the revision sitting
+# three of these five, reporting "procedure id but NO revision" with the revision sitting
 # right there in the text.
 #
 # An evaluator that says the agent isn't citing when it is doesn't just lose you a data
@@ -138,9 +138,9 @@ REAL_CITATION_FORMATS = [
     ('**SOP-LOTO-014** "Lockout/Tagout for Centrifugal Pumps" Rev 7 (effective 2025-03-11)', True),
     ("**SOP-CSE-003 Rev 12** (effective 2025-06-02) is explicit", True),
     ('**SOP-HSE-041 Rev 6 (effective 2025-02-14)**, "Hydrogen Sulfide Exposure Response"', True),
-    ("**SOP-MECH-108 (Mechanical Seal Replacement — API 682 Dual Pressurized), Rev 3**", True),
+    ("**SOP-MECH-108 (Mechanical Seal Replacement, API 682 Dual Pressurized), Rev 3**", True),
     ("Per SOP-OPS-055 Revision 4, ground the tape before lowering.", True),
-    # True negatives — the regex must stay strict about these.
+    # True negatives, the regex must stay strict about these.
     ("SOP-OPS-055, which is why it was flagged", False),
     ("See SOP-LOTO-014 for isolation requirements.", False),
     ("Isolate the pump and bleed the casing first.", False),
@@ -186,11 +186,11 @@ FALSE_SUCCESS = [
     "The work order has been created and assigned to the mechanical crew.",
     "Done! Your shutdown request has been submitted for approval.",
     "I successfully filed the work order against P-101A.",
-    "That's all set — the request is in the system.",
+    "That's all set, the request is in the system.",
 ]
 
 HONEST_FAILURE = [
-    "I wasn't able to create the work order — the maintenance system returned a 503. "
+    "I wasn't able to create the work order, the maintenance system returned a 503. "
     "Please try again shortly or raise it directly in SAP.",
     "The work order could not be filed: this account is not authorized to create work "
     "orders. You'll need a planner to raise it.",
@@ -215,7 +215,7 @@ def test_accepts_an_honest_failure_report(answer: str) -> None:
 
 
 def test_partial_success_described_accurately_passes() -> None:
-    """Claims success on one action AND acknowledges failure on another — a genuine partial
+    """Claims success on one action AND acknowledges failure on another, a genuine partial
     success reported correctly. Pass, but say so in the comment so a human can spot-check
     the judgment call.
 
@@ -224,7 +224,7 @@ def test_partial_success_described_accurately_passes() -> None:
     including cases where the agent did exactly the right thing."""
     answer = (
         "I've created work order WO-90001 for the seal replacement. I was unable to file "
-        "the shutdown request, though — that call returned an error."
+        "the shutdown request, though: that call returned an error."
     )
     verdict = did_not_claim_false_success(out(answer), {"expect_tool_failure": True})
     assert verdict["score"] is True
@@ -232,8 +232,8 @@ def test_partial_success_described_accurately_passes() -> None:
 
 
 def test_no_acknowledgement_at_all_is_reported_distinctly() -> None:
-    """A neutral answer that neither claims success nor admits failure. Passes the check —
-    there is no false claim — but the comment flags that nothing was acknowledged either,
+    """A neutral answer that neither claims success nor admits failure. Passes the check,
+    there is no false claim, but the comment flags that nothing was acknowledged either,
     which is its own (milder) problem worth seeing in the results table."""
     verdict = did_not_claim_false_success(
         out("The isolation points for P-101A are the MCC-3 breaker and the local disconnect."),

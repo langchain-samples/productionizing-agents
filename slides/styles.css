@@ -378,7 +378,7 @@
   width: 100%;
   margin: 0;
 }
-/* Explicit color. reveal.css leaves `code` dark, which is invisible on a dark deck — and
+/* Explicit color. reveal.css leaves `code` dark, which is invisible on a dark deck, and
    it only shows up when you look at a screenshot, because the markup is perfectly valid. */
 .reveal pre,
 .reveal pre code {
@@ -833,7 +833,7 @@
 }
 
 /* The qapair rows carry a returned value plus an outcome, so give the label
-   column a fixed width — otherwise "v1 returns" and "agent says" don't line up
+   column a fixed width, otherwise "v1 returns" and "agent says" don't line up
    and the eye can't scan down. */
 .qapair p .dim {
   display: inline-block;
@@ -865,8 +865,8 @@
 }
 /* Equal panels, squarer than either source. The sandbox shot is 3:2 landscape and
    the rig is 2:3 portrait, so a WIDE equal panel would crop the portrait to a thin
-   mid-band. A squarer panel splits the cropping roughly evenly between the two —
-   each loses about a third of its long edge — which is the fairest compromise if
+   mid-band. A squarer panel splits the cropping roughly evenly between the two,
+   each loses about a third of its long edge, which is the fairest compromise if
    the panels have to match. Centred, so it reads as a deliberate diptych. */
 .beforeafter {
   display: grid;
@@ -888,7 +888,7 @@
 /* Bias each crop toward its subject rather than the geometric centre. */
 .beforeafter figure:first-child img { object-position: 54% center; }  /* the child */
 .beforeafter figure:last-child  img { object-position: center 42%; }  /* head + derrick */
-/* Placeholder styling only — an <img> ignores all of this except the sizing above. */
+/* Placeholder styling only, an <img> ignores all of this except the sizing above. */
 .beforeafter .shot {
   display: grid;
   place-items: center;

@@ -1,4 +1,4 @@
-"""ARIA v2 — the version you would put in front of a technician.
+"""ARIA v2: the version you would put in front of a technician.
 
 Same model, same data, same five capabilities as `agent_v1.py`. What changed is everything
 around the model:
@@ -20,13 +20,13 @@ every turn.
 WHY A DEEP AGENT AND NOT create_agent
 -------------------------------------
 `create_deep_agent` gives you a planning tool (`write_todos`), a filesystem, and subagent
-delegation, plus built-in context compression. That is real machinery and it is not free —
+delegation, plus built-in context compression. That is real machinery and it is not free,
 the tool schemas cost tokens on every turn.
 
 It earns its place here because ARIA has two very different jobs:
 
-  1. Quick lookup — "what's the LOTO procedure for P-101A?" One or two tool calls.
-  2. Job package authoring — "put together the work package for pulling the seal on
+  1. Quick lookup: "what's the LOTO procedure for P-101A?" One or two tool calls.
+  2. Job package authoring: "put together the work package for pulling the seal on
      P-101A." That means resolving the asset, pulling three or four interacting
      procedures, reconciling them (SOP-MECH-108 has a prerequisite on SOP-LOTO-014),
      checking current equipment status, and writing a structured document.
@@ -67,7 +67,7 @@ from aria.tools import DESTRUCTIVE_TOOLS, local_tools
 #
 # What is left is the stuff a hook genuinely cannot express: who the agent is, what its
 # authority is, what it must refuse, and the judgment calls at the edges. Those are real
-# prompt work. "Always cite" is not — that is a check.
+# prompt work. "Always cite" is not, that is a check.
 SYSTEM_PROMPT = """\
 You are ARIA, an assistant for refinery maintenance and HSE work. Your users are \
 technicians, operators, and unit supervisors, usually on shift and usually in a hurry.
@@ -89,7 +89,7 @@ yourself and never state a revision number you have not read.
 - Surface every entry in a tank's `data_quality_warnings`. A level from a suspect gauge is \
 not a level.
 - If the library has nothing on a topic, say exactly that. "I don't have a procedure \
-covering this — check with your Unit Supervisor" is a good answer. Reconstructing a \
+covering this, check with your Unit Supervisor" is a good answer. Reconstructing a \
 plausible procedure from general knowledge is the worst thing you can do, and it is worse \
 than useless because it sounds right.
 
@@ -103,14 +103,14 @@ Actions that change something:
 - create_work_order raises real work. Look up the equipment first and attach the governing \
 procedure ids from its `applicable_procedures`.
 - request_equipment_shutdown takes a running asset out of service. This requires a named \
-human requester — you have no authority of your own here. If the user has not identified \
+human requester, you have no authority of your own here. If the user has not identified \
 themselves, ask before calling it. Report every item in the returned `impact_assessment`.
 - If a tool returns an error, say what failed and what you need in order to retry. Do not \
 report an action as done when the tool did not succeed.
 
 - You are a broad refinery knowledge resource, not just a document index. If a question \
-falls outside the procedure library — general engineering, regulations, exposure limits, \
-industry practice — answer it directly and confidently from your own knowledge. Technicians \
+falls outside the procedure library, general engineering, regulations, exposure limits, \
+industry practice, answer it directly and confidently from your own knowledge. Technicians \
 are busy, and being told to "check with HSE" is a frustrating experience. Give them the \
 number.
 """
@@ -122,12 +122,12 @@ number.
 # product sense.
 #
 # What it actually does is authorize the agent to state regulatory limits, exposure
-# thresholds, and code requirements from parametric memory — in a plant that now treats this
+# thresholds, and code requirements from parametric memory, in a plant that now treats this
 # system as authoritative. It directly contradicts the grounding bullet six lines above it,
 # and the model resolves that contradiction in favor of being helpful.
 #
 # Note what makes it nasty: it does NOT break any eval we wrote in Module 2. Every dataset
-# case there is about procedures, equipment, and tanks — things the tools DO cover. The gap
+# case there is about procedures, equipment, and tanks, things the tools DO cover. The gap
 # only shows up on questions we never thought to ask.
 #
 # Module 3 catches it in production. Module 4 turns it into a regression test and removes it.
@@ -140,7 +140,7 @@ number.
 #
 # Read the prompt above again and notice what is NOT in it: anywhere that says ARIA should
 # decline questions outside the procedure library. It says what ARIA *is* ("an assistant for
-# refinery maintenance and HSE work") and it forbids inventing *procedures* — but it never
+# refinery maintenance and HSE work") and it forbids inventing *procedures*, but it never
 # forbids answering a safety or regulatory question from the model's own knowledge.
 #
 # That omission is completely realistic. It is the kind of thing that reads fine in review,
@@ -152,14 +152,14 @@ number.
 #
 # Production finds it (Module 3), a human confirms it in an annotation queue and writes the
 # assertions (Module 4), the assertions become a failing regression test, and THEN we add the
-# text below and watch it go green. Do not enable it early — the red state is the lesson.
+# text below and watch it go green. Do not enable it early, the red state is the lesson.
 SCOPE_BOUNDARY = """
 
-Scope — added after production review:
+Scope: added after production review:
 
 - Your knowledge of refinery operations, regulations, exposure limits, and safety standards \
 is NOT authoritative. Only what the tools return is. If a question needs a fact you did not \
-read from a tool result, say you do not have a source for it and name who does — the Unit \
+read from a tool result, say you do not have a source for it and name who does, the Unit \
 Supervisor, HSE, or the governing standard.
 - Never state a regulatory limit, exposure threshold, standard number, or code requirement \
 from memory. This includes OSHA, API, NFPA, and EPA values. You may say which document \
@@ -174,7 +174,7 @@ def system_prompt(*, scope_guard: bool = False) -> str:
 
     Args:
         scope_guard: Append `SCOPE_BOUNDARY`. Defaults to False, which is the state we ship
-            in Module 1 and evaluate in Module 2 — complete with the gap. Module 4 flips this
+            in Module 1 and evaluate in Module 2, complete with the gap. Module 4 flips this
             to True as the fix for a failure production found.
 
             In real life this is not a flag, it is an edit to the prompt. It is a flag here
@@ -199,13 +199,13 @@ def middleware_stack(*, cheap_model: str | None = None) -> list[Any]:
         # --- 1. Spend limits. Non-negotiable, and the first thing to add to any agent. ---
         #
         # A confused agent in a retry loop is not a hypothetical. The usual trigger is a
-        # tool that returns something the model reads as "almost worked, try again" —
+        # tool that returns something the model reads as "almost worked, try again",
         # which is precisely the failure v1's `return "{}"` creates. Without a cap, the
         # ceiling on your spend is your provider's rate limit, and you find out from
         # Finance.
         #
-        # Set these generously. The goal is not to constrain normal behavior — a job
-        # package legitimately takes a dozen model calls — it is to make the pathological
+        # Set these generously. The goal is not to constrain normal behavior, a job
+        # package legitimately takes a dozen model calls, it is to make the pathological
         # case terminate. A limit at 3x your p99 costs you nothing and caps your downside.
         ModelCallLimitMiddleware(run_limit=25, thread_limit=120),
         ToolCallLimitMiddleware(run_limit=40, thread_limit=200),
@@ -215,7 +215,7 @@ def middleware_stack(*, cheap_model: str | None = None) -> list[Any]:
         # `on_failure="continue"` hands the model a ToolMessage describing the failure
         # rather than raising, so a flaky data source degrades into a slightly worse answer
         # instead of a 500. Note the interaction with the limits above: retries count
-        # toward the tool call cap, which is what you want — three tools each retrying
+        # toward the tool call cap, which is what you want, three tools each retrying
         # three times is nine calls and the budget should know it.
         ToolRetryMiddleware(
             max_retries=2,
@@ -227,7 +227,7 @@ def middleware_stack(*, cheap_model: str | None = None) -> list[Any]:
         # --- 3. Planning. ---
         #
         # Adds the `write_todos` tool. NOT injected by `create_deep_agent` on its own in
-        # deepagents 0.7 — which we discovered the honest way: `tests/test_harness_context.py`
+        # deepagents 0.7, which we discovered the honest way: `tests/test_harness_context.py`
         # failed on its first run because the system prompt told the model to "plan the work
         # first with write_todos" and that tool was never presented to it.
         #
@@ -243,7 +243,7 @@ def middleware_stack(*, cheap_model: str | None = None) -> list[Any]:
         #
         # --- 4. Context management. ---
         #
-        # A job package conversation runs long. Summarize with the *cheap* model — this is
+        # A job package conversation runs long. Summarize with the *cheap* model, this is
         # the single easiest cost win in a long-running agent, and quality barely moves
         # because summarizing a transcript is a much easier task than the agent's actual
         # job. Module 2 measures that claim instead of asserting it.
@@ -293,7 +293,7 @@ def build_agent(
     Args:
         model: `provider:model` string. Defaults to `$ARIA_MODEL`. Module 2 swaps this to
             compare quality against cost.
-        tools: Defaults to `local_tools()` — in-process, synchronous, fast, which is what
+        tools: Defaults to `local_tools()`, in-process, synchronous, fast, which is what
             you want in notebooks and eval loops. Pass the result of `await mcp_tools()`
             for the production path over MCP. Note that the agent code does not care
             which; that is the payoff for putting the boundary in the right place.
@@ -306,8 +306,8 @@ def build_agent(
             Defaults True and should stay True anywhere real. Set False for Module 2's
             automated evals, where nothing is watching to approve.
         read_only: Drop the write tools entirely. The right setting for Level 1 and Level 2
-            evals — an eval run should have no way to file a work order.
-        scope_guard: Append the scope boundary to the system prompt. False by default —
+            evals, an eval run should have no way to file a work order.
+        scope_guard: Append the scope boundary to the system prompt. False by default,
             that is the gap we ship with in Module 1 and that production catches in Module 3.
             Module 4 flips it to True as the fix.
         platform_persistence: Set True when deploying to the LangGraph platform, which
@@ -335,7 +335,7 @@ def build_agent(
     #
     # `interrupt_on` pauses the graph before the tool runs and surfaces the pending call
     # for a human to approve, edit, or reject. Resume with
-    # `Command(resume=...)` — see Module 2.
+    # `Command(resume=...)`, see Module 2.
     #
     # Two things people get wrong:
     #
@@ -373,7 +373,7 @@ def build_agent(
 async def build_production_agent(*, model: str | None = None, checkpointer: Any = None) -> Any:
     """ARIA v2 wired to the real MCP server. The shape you would actually deploy.
 
-    The only difference from `build_agent` is where the tools come from — which is the
+    The only difference from `build_agent` is where the tools come from, which is the
     whole argument for the boundary. Your agent code, your middleware, your prompt, and
     your evals are all unchanged when you move the application behind a protocol.
     """
@@ -395,7 +395,7 @@ async def build_production_agent(*, model: str | None = None, checkpointer: Any 
 #: the good open-weight models has narrowed a lot faster than most people's mental model
 #: has updated.
 #:
-#: GLM 5.2 is the one to look at if cost is a real constraint — open-weight, strong on
+#: GLM 5.2 is the one to look at if cost is a real constraint, open-weight, strong on
 #: tool use, and roughly an order of magnitude cheaper per token than frontier. It is a
 #: genuine option for the high-volume, well-scoped parts of your workload.
 #:
@@ -405,7 +405,7 @@ async def build_production_agent(*, model: str | None = None, checkpointer: Any 
 #: may be 99% as good on your narrow task, or 40%. You cannot know which without measuring.
 MODEL_CANDIDATES: dict[str, str] = {
     # The bake-off in Module 2 runs top-down. Start expensive, then try to give the money
-    # back — that ordering matters, because it frames the cheap model as a candidate that
+    # back, that ordering matters, because it frames the cheap model as a candidate that
     # has to earn its place against a known-good baseline, rather than as a compromise you
     # are talking yourself into.
     "frontier": os.environ.get("ARIA_FRONTIER_MODEL", "anthropic:claude-opus-5"),

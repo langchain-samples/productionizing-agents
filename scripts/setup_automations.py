@@ -15,7 +15,7 @@ WHAT THIS BUILDS
 WHY TWO RULES AND NOT ONE
 -------------------------
 The first rule routes traces your online evaluators already flagged. That is the obvious one,
-and it is not sufficient — it can only ever surface failure modes you thought to write an
+and it is not sufficient, it can only ever surface failure modes you thought to write an
 evaluator for. It has exactly the same blind spot as your offline suite.
 
 The second rule samples 5% of *everything*, unconditionally. That is your only channel for
@@ -29,7 +29,7 @@ what you can learn.
 A NOTE ON RULE ORDERING
 -----------------------
 Automation rules poll independently. If you want a webhook to include an evaluator's score,
-the evaluator must have already run — and nothing guarantees that ordering. The fix is to put
+the evaluator must have already run, and nothing guarantees that ordering. The fix is to put
 a filter on the downstream rule so it only matches traces that already carry the score, which
 makes the dependency explicit instead of hoping. Within a single rule, actions run in a fixed
 order: annotation queue, dataset, webhook, online evaluator, code evaluator, alert.
@@ -67,7 +67,7 @@ def ensure_dataset(client: Any, *, dry_run: bool) -> Any:
     """The dataset reviewed traces get promoted into.
 
     Separate from the Module 2 datasets on purpose. `aria-regressions` has a different
-    provenance — every row is something that actually happened in production — and that makes
+    provenance, every row is something that actually happened in production, and that makes
     it the most valuable dataset you own. Cases you invented are guesses about what users do;
     these are evidence.
     """
@@ -99,7 +99,7 @@ def ensure_queue(client: Any, *, dry_run: bool) -> Any:
     """A single-run annotation queue.
 
     Single-run (not pairwise) matters: **assertions are only available on single-run queues.**
-    Assertions are the whole point — they are how a reviewer turns "it shouldn't have done
+    Assertions are the whole point, they are how a reviewer turns "it shouldn't have done
     that" into a regression test without writing any code.
     """
     existing = next(
@@ -138,7 +138,7 @@ def ensure_rules(client: Any, project: str, queue: Any, *, dry_run: bool) -> Non
         {
             "display_name": "aria: flagged failures -> triage",
             # Filter syntax mirrors the trace filter builder in the UI. Build it there first,
-            # then copy it here — hand-writing these is a waste of an afternoon.
+            # then copy it here, hand-writing these is a waste of an afternoon.
             #
             # Any of: the out_of_scope judge fired, the agent told the user something broke,
             # or the run raised.

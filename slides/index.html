@@ -35,12 +35,12 @@
         <aside class="notes">
           OPENING LINE, more or less verbatim:
 
-          "Building an agent in a sandbox is child's play. Everyone in this room has done it —
+          "Building an agent in a sandbox is child's play. Everyone in this room has done it,
           you wire up a model, give it some tools, it works on your laptop, it demos well.
           Doing it in production is grown-up work. That's the whole two hours."
 
           Then set expectations: 30 Build, 30 Test, 30 Monitor, 10 Improve, 20 Q&A. Everything
-          in this deck runs — there's a repo with the agent, 179 tests, four notebooks and a
+          in this deck runs, there's a repo with the agent, 179 tests, four notebooks and a
           working deployment.
 
           The promise: take one agent from "works on my laptop" to "I'd let this face a
@@ -61,7 +61,7 @@
         <aside class="notes">
           Cumulative, not four separate talks. Module 1 builds ARIA. Module 2 evaluates what
           Module 1 produced. Module 3 monitors it in production. Module 4 feeds production
-          failures back into Module 2's dataset — and that loop is the actual lesson.
+          failures back into Module 2's dataset, and that loop is the actual lesson.
           Module 1 is the ONLY module where we write agent code.
         </aside>
       </section>
@@ -75,7 +75,7 @@
         <p class="lede">Best practices and common pitfalls</p>
         <aside class="notes">
           The only module where we build. Two versions of the same agent in the repo:
-          agent_v1.py is what almost everyone ships first — it works, and it has eight
+          agent_v1.py is what almost everyone ships first, it works, and it has eight
           problems. agent_v2.py is what you'd put in front of a technician.
         </aside>
       </section>
@@ -90,7 +90,7 @@
           </div>
         </div>
         <aside class="notes">
-          Asset Reliability Information Assistant — a maintenance and HSE assistant for a
+          Asset Reliability Information Assistant, a maintenance and HSE assistant for a
           refinery. Answers procedure questions, looks up equipment, reads tank levels,
           raises and closes work orders.
 
@@ -109,29 +109,29 @@
           <img src="assets/agent-anatomy.png" alt="ReAct loop with execution environment, context management, steering and delegation" class="figimg">
         </div>
         <aside class="notes">
-          LEFT SIDE — the loop itself. Request comes in, the model picks an ACTION, the tool
+          LEFT SIDE: the loop itself. Request comes in, the model picks an ACTION, the tool
           returns an OBSERVATION, repeat until there's a Result. That's ReAct, and it's
           essentially every production agent once you strip the branding. It has been the
           same shape for a while.
 
-          RIGHT SIDE — this is what actually changed, and it's where all the engineering is.
+          RIGHT SIDE: this is what actually changed, and it's where all the engineering is.
           Four categories:
 
-          EXECUTION ENVIRONMENT — filesystem, sandboxes. Somewhere for the agent to do work
+          EXECUTION ENVIRONMENT: filesystem, sandboxes. Somewhere for the agent to do work
           that isn't your context window.
 
-          CONTEXT MANAGEMENT — skills, memory, summarization, context offloading, prompt
+          CONTEXT MANAGEMENT: skills, memory, summarization, context offloading, prompt
           caching. Everything here is about what the model sees on this turn. Module 2's
           Level 0 tests assert on exactly this: what actually got assembled.
 
-          STEERING — human-in-the-loop. Our `request_equipment_shutdown` gate.
+          STEERING: human-in-the-loop. Our `request_equipment_shutdown` gate.
 
-          DELEGATION — planning, subagents. The `write_todos` tool and the `task` tool.
+          DELEGATION: planning, subagents. The `write_todos` tool and the `task` tool.
 
           THE POINT TO MAKE: the loop is the easy part, and it's not where your reliability
           comes from. Everything on the right is code you own and can test.
 
-          Deep Agents ships most of the right-hand column already wired — planning, a
+          Deep Agents ships most of the right-hand column already wired, planning, a
           filesystem, subagents, compression. That's why we build on it rather than
           assembling this ourselves.
         </aside>
@@ -143,14 +143,14 @@
         <h1>Building best practices</h1>
         <p class="lede">From 3 years of agents in production</p>
         <aside class="notes">
-          Breath point. We've met ARIA and we've seen the anatomy — now the practices.
+          Breath point. We've met ARIA and we've seen the anatomy, now the practices.
 
           Five of them, and each exists because of a specific, common failure:
-            0. Design for workflows, not capabilities  — kitchen-sink tool surfaces
-            1. Separate your concerns                  — debugging two systems at once
-            2. Design tools for agent consumption      — {} becoming "doesn't exist"
-            3. Middleware, not prompts                 — "ALWAYS cite" holding ~90% of the time
-            4. Set limits                              — the overnight bill
+            0. Design for workflows, not capabilities  · kitchen-sink tool surfaces
+            1. Separate your concerns                  · debugging two systems at once
+            2. Design tools for agent consumption      · {} becoming "doesn't exist"
+            3. Middleware, not prompts                 · "ALWAYS cite" holding ~90% of the time
+            4. Set limits                              · the overnight bill
           Then model choice, and two gotchas that bite everyone.
         </aside>
       </section>
@@ -178,11 +178,11 @@
           </div>
         </div>
         <aside class="notes">
-          Practice 0 — before you write any code.
+          Practice 0: before you write any code.
 
           START BY BEING FAIR TO THE INSTINCT. When we design agents we naturally think
           about everything the agent COULD do, and reach for giving it all the tools. That
-          comes from good product sense — you're trying to make it capable and useful. It is
+          comes from good product sense, you're trying to make it capable and useful. It is
           not a dumb impulse.
 
           But it puts the reasoning the wrong way round. You end up with a pile of
@@ -198,7 +198,7 @@
           Two things fall out of that, both of which you can see in this repo:
           - `list_work_orders` exists because a workflow needed it ("close out that pump
             work order I raised earlier"), not because a tool was looking for a use.
-          - Fewer tools is also cheaper and more reliable — every tool schema is tokens on
+          - Fewer tools is also cheaper and more reliable, every tool schema is tokens on
             every single turn, and more tools means more chances to pick the wrong one.
 
           Next slide is how you write those workflows down so they're executable.
@@ -217,7 +217,7 @@
         <aside class="notes">
           The executable form of outcome-first thinking. A table, before any code.
 
-          Our example — closing out a work order, six rows:
+          Our example: closing out a work order, six rows:
           - "Close WO-90001, seal replaced, T. Alvarez badge 8823" -> closes it -> complete
           - "Close WO-90001, the seal work is finished" -> asks WHO did the work -> unchanged
           - "Close WO-90001 again" -> says already closed -> original record preserved
@@ -226,7 +226,7 @@
           Why this is a best practice, not tidiness: a reliability manager can read that
           table and argue with it. They'll never review your prompt. Row 2 is the kind of
           edge a planner raises in ten minutes and you'd never think of alone. Row 4 is WHY
-          list_work_orders exists — the workflow demanded a capability.
+          list_work_orders exists, the workflow demanded a capability.
 
           And it doubles as your test suite, so unlike a requirements doc it can't go stale.
         </aside>
@@ -257,11 +257,11 @@
         <aside class="notes">
           Practice 1. When your agent gives a wrong answer there are two candidates: the
           model reasoned badly, or the tools returned something wrong. If you can't rule out
-          the second cheaply, EVERY debugging session investigates both — and they're not
+          the second cheaply, EVERY debugging session investigates both, and they're not
           independent, because bad tool output causes bad reasoning.
 
           So: application logic in its own package, with its OWN TEST SUITE, exposed over
-          MCP. aria_mcp/ has no langchain import anywhere in it — but the thing to say out
+          MCP. aria_mcp/ has no langchain import anywhere in it, but the thing to say out
           loud is not "no LLM," it's "properly tested API." Absence of an LLM is trivially
           achievable and worth nothing on its own. What earns you the boundary is that the
           left-hand box has tests you trust, so you can take it off the suspect list.
@@ -271,16 +271,16 @@
           up with business logic smeared across a system prompt.
 
           Four reasons for the protocol boundary specifically:
-          1. It forces the separation to be real — no reaching into agent state.
+          1. It forces the separation to be real, no reaching into agent state.
           2. Independently testable and deployable. It's a service.
-          3. One application, many consumers — this agent, another agent, an IDE, a human.
+          3. One application, many consumers, this agent, another agent, an IDE, a human.
           4. A place to enforce authorization, where it can be audited.
 
           AND THE PAYOFF, which is worth saying out loud here: run `pytest tests/ -q` live.
           The whole application suite goes green in about six seconds with no API key and no
           model call. That means when ARIA misbehaves you get to say "the tools are correct"
           and mean it, with a green run behind you. The only remaining variable is the model.
-          That's the prize — not the number of tests.
+          That's the prize, not the number of tests.
         </aside>
       </section>
 
@@ -307,7 +307,7 @@
           It is also how you get a confidently lying agent. Your caller changed; the rules
           changed with it.
 
-          A user asks about "P-101". The real pumps are P-101A and P-101B — an A/B pair,
+          A user asks about "P-101". The real pumps are P-101A and P-101B, an A/B pair,
           like every critical pump in a refinery.
 
           v1 returns {}. The model reads that as "that equipment doesn't exist" and tells
@@ -320,14 +320,14 @@
           The takeaway, and say it in these words: write your error messages for the model
           that will read them.
 
-          THEN GENERALISE VERBALLY — five rules for an API whose caller is a model. Say these
+          THEN GENERALISE VERBALLY: five rules for an API whose caller is a model. Say these
           over the slide; they don't need their own slide:
 
           1. An unknown identifier is an ERROR, not []. Empty reads as "doesn't exist".
           2. Errors CARRY THE FIX. That's what's on screen.
           3. Output is BOUNDED. Unbounded tool output is a context-window incident waiting
              for your largest customer.
-          4. Output is DETERMINISTIC — stable sort order, or your evals flake for reasons
+          4. Output is DETERMINISTIC: stable sort order, or your evals flake for reasons
              that have nothing to do with the model.
           5. PROVENANCE travels with the data. Every procedure we return carries its id,
              revision and a pre-formatted citation. You cannot evaluate groundedness if
@@ -335,7 +335,7 @@
 
           And a sixth that earns a sentence: BUSINESS RULES GO IN CODE. Tank T-043's gauge is
           flagged suspect, so its level must not be quoted as fact. v1 hands the model raw
-          JSON and hopes it notices. Often it does — and "often" is not a safety property. It
+          JSON and hopes it notices. Often it does, and "often" is not a safety property. It
           degrades silently on a model upgrade. v2 computes `data_quality_warnings` in tested
           code. Anything you can compute, compute; don't ask the model to notice.
         </aside>
@@ -352,13 +352,13 @@
           doesn't address the cause.
           "Use at most 4 tool calls": it cannot reliably count its own tool calls.
 
-          Every one of those is a middleware in v2 — a guarantee instead of a request. And
+          Every one of those is a middleware in v2, a guarantee instead of a request. And
           you stop paying for it in tokens on every single turn.
 
           The tell: ARIA v2's system prompt is SHORTER than v1's, and more reliable.
 
           Heuristic: if a rule can be expressed in code, it belongs in a hook.
-          And go shopping in the built-ins first — Summarization, PII, HumanInTheLoop,
+          And go shopping in the built-ins first. Summarization, PII, HumanInTheLoop,
           ToolRetry, ModelFallback, ToolCallLimit, TodoList.
         </aside>
       </section>
@@ -384,10 +384,10 @@
         </div>
         <aside class="notes">
           This is what you get before writing a line of middleware yourself. Read straight off
-          `create_deep_agent` — I checked the source rather than the docs, and then captured the
+          `create_deep_agent`. I checked the source rather than the docs, and then captured the
           composed stack at runtime to be sure.
 
-          ON BY DEFAULT — five, every time:
+          ON BY DEFAULT: five, every time:
             FilesystemMiddleware      ls, read_file, write_file, edit_file, glob, grep
             SubAgentMiddleware        the `task` tool, plus a general-purpose subagent it
                                       inserts for you even if you define none
@@ -395,7 +395,7 @@
             PatchToolCallsMiddleware  repairs malformed tool calls before they fail
             AnthropicPromptCaching    cache breakpoints; no-ops on non-Anthropic models
 
-          ONE ARGUMENT AWAY — pass the parameter and the middleware appears:
+          ONE ARGUMENT AWAY: pass the parameter and the middleware appears:
             skills=[...]        -> SkillsMiddleware
             memory=[...]        -> MemoryMiddleware
             interrupt_on={...}  -> HumanInTheLoopMiddleware   (this is ARIA's shutdown gate)
@@ -406,7 +406,7 @@
 
           ONE THING THAT IS *NOT* IN THERE, and it matters in Module 2: there is no
           TodoListMiddleware. `write_todos` is not injected by default. Our prompt told the
-          model to plan with it anyway — and a Level 0 test caught that in two seconds. So
+          model to plan with it anyway, and a Level 0 test caught that in two seconds. So
           "the harness gives you a lot" and "check what it actually gave you" are both true.
 
           Note also what ISN'T here: call limits. No cap on model or tool calls ships by
@@ -441,14 +441,14 @@
           checkpointer.
 
           A confused agent in a retry loop is not hypothetical. The usual trigger is a tool
-          returning something the model reads as "almost worked, try again" — which is
+          returning something the model reads as "almost worked, try again", which is
           exactly what v1's return "{}" creates. THE TWO PITFALLS COMPOUND: a bad API
           surface makes the runaway loop likely; no limit makes it unbounded.
 
           Without a cap, the ceiling on your spend is your provider's rate limit. You find
           out from Finance.
 
-          Set them GENEROUSLY. The goal isn't to constrain normal behavior — a job package
+          Set them GENEROUSLY. The goal isn't to constrain normal behavior, a job package
           legitimately takes a dozen model calls. It's to make the pathological case
           terminate. A limit at 3x your p99 costs nothing and caps your downside.
         </aside>
@@ -465,7 +465,7 @@
           </video>
         </div>
         <aside class="notes">
-          Practice 4 — model choice. This one ANIMATES; let it loop at least twice before
+          Practice 4: model choice. This one ANIMATES; let it loop at least twice before
           you start talking, then talk over it.
 
           Two axes: capability up, price to the right, and note the x-axis DOUBLES at each
@@ -476,21 +476,21 @@
           The dashed lines left behind are where the frontier sat in Jul 25 and Jan 26.
 
           Say it plainly: a model choice you made a year ago is not the choice you would
-          make today — and nobody goes back to check.
+          make today, and nobody goes back to check.
 
           READ THREE POINTS OFF IT:
           - Claude Opus 5, top right. Most capable, and you pay for it.
-          - GLM 5.2 sits ON the frontier at a fraction of the price — open-weight, strong on
+          - GLM 5.2 sits ON the frontier at a fraction of the price, open-weight, strong on
             tool use. If cost is a real constraint, this is the one to go and try.
           - Nemotron 3 Ultra is free and lands around 38. Free is not zero-capability.
 
           Everything on that frontier line is a defensible choice. Everything BELOW it is
-          strictly dominated — something else is cheaper AND smarter.
+          strictly dominated, something else is cheaper AND smarter.
 
           THEN THE LINE THAT MATTERS, and it's the bridge into Module 2:
           "Cost-effective" is a property of a model ON A TASK, not a property of a model.
           This chart is a public benchmark. A model at 90% of frontier here might be 99% as
-          good as Opus on your narrow task — or 40%. You cannot read that off this chart.
+          good as Opus on your narrow task, or 40%. You cannot read that off this chart.
 
           Which is exactly why you want the bake-off in Module 2. Don't take the frontier on
           faith. Don't take US on faith. Measure it on YOUR dataset.
@@ -526,8 +526,8 @@
           Experiment = one pytest invocation, but recorded.
 
           The ONE genuinely new idea: an evaluator can be FUZZY.
-            code evaluator:  assert "SOP-LOTO-014 Rev 7" in answer   — exact, free, instant
-            LLM-as-judge:    assert grounded_in(sources)             — fuzzy, costs a call
+            code evaluator:  assert "SOP-LOTO-014 Rev 7" in answer   · exact, free, instant
+            LLM-as-judge:    assert grounded_in(sources)             · fuzzy, costs a call
 
           That's it. A judge is an assertion you can't write as a regex.
 
@@ -554,7 +554,7 @@
           Then the line to land:
 
           Even if you ship the perfect agent today, it's probably out of date next month.
-          New models ship constantly — cheaper, faster, better. You'll want to swap them.
+          New models ship constantly: cheaper, faster, better. You'll want to swap them.
           You'll want to rewrite the prompt. With coding agents you can restructure the
           whole codebase in an afternoon.
 
@@ -591,20 +591,20 @@
           Now that Module 1 is done, look at what you're actually testing. Four layers, and
           exactly ONE of them is stochastic.
 
-          Read the right column out loud. Stochastic, slow, costs money — then free, free,
+          Read the right column out loud. Stochastic, slow, costs money, then free, free,
           free. One row out of four is expensive to test. Three quarters of your system can
           be verified with ordinary unit tests: instant, deterministic, no API key.
 
           WHAT LIVES WHERE:
           - Model: behavior given our system prompt, tool docstrings, and anything we inject
-            dynamically — files, skills, memories. Datasets and evaluators. This is the
+            dynamically, files, skills, memories. Datasets and evaluators. This is the
             costly column.
           - Tools: the application surface. Module 1 already covered this.
           - Middleware + Harness: our guards, harness tools, context assembly, limits,
             interrupts. Ordinary unit tests. Free.
 
-          THE MISTAKE: most teams build ONLY for the top row — every test is an agent
-          invocation — then wonder why the suite is slow, flaky and expensive. A large share
+          THE MISTAKE: most teams build ONLY for the top row, every test is an agent
+          invocation, then wonder why the suite is slow, flaky and expensive. A large share
           of what you want to verify needs no model at all. That's Level 0, and it's the
           level nobody writes.
 
@@ -637,14 +637,14 @@
           whole agent, so "how many components" isn't the interesting axis. The useful axis
           is how much of the world is real.
 
-          0 HARNESS — nothing real, fake model. Middleware, the assembled prompt, tool
+          0 HARNESS: nothing real, fake model. Middleware, the assembled prompt, tool
             schemas, middleware order.
-          1 SMOKE — the model is real, tools are stubs. Did it respond? Format? Which tool
+          1 SMOKE: the model is real, tools are stubs. Did it respond? Format? Which tool
             did it reach for? This is your /health endpoint.
-          2 SCRIPTED — tool responses come from the dataset. Behavior given a specific
+          2 SCRIPTED: tool responses come from the dataset. Behavior given a specific
             response, INCLUDING failures.
-          3 STATEFUL — real mutable state, real side effects. Did the world actually change?
-          4 SIMULATED — a second LLM plays the user. Multi-turn, under a persona.
+          3 STATEFUL: real mutable state, real side effects. Did the world actually change?
+          4 SIMULATED: a second LLM plays the user. Multi-turn, under a persona.
 
           The rule: push every property as far DOWN that ladder as it will go. A property
           you assert at Level 0 costs nothing and never flakes. The same property at Level 4
@@ -667,7 +667,7 @@
 
             python -m evals.runner --level tdd --exclude-tool complete_work_order
 
-          What "red" looks like, and why it's informative rather than just failing — watch
+          What "red" looks like, and why it's informative rather than just failing, watch
           what the agent does when asked to do something it can't:
           - Does it say plainly it has no way to close work orders? (good)
           - Does it claim it closed the order anyway? (the failure we care most about)
@@ -769,12 +769,12 @@
         </div>
         <p class="kicker">5&times; cheaper &middot; 1.7&times; faster &middot; similar score</p>
         <aside class="notes">
-          THE PAYOFF for everything in this module. Two panels, on purpose — the scales are
+          THE PAYOFF for everything in this module. Two panels, on purpose, the scales are
           wildly different and that difference IS the message. Squeezing both onto one axis
           would hide it.
 
           "Should we use Opus or Sonnet?" is normally settled by vibes, seniority, or
-          whoever last read a benchmark. With a suite it's a measurement — and the answer is
+          whoever last read a benchmark. With a suite it's a measurement, and the answer is
           often "the cheaper one is fine and nobody knew."
 
           Mean score 0.94 -> 0.93. Cost per run $0.0841 -> $0.0163. Latency p50 31.4s -> 18.2s.
@@ -848,7 +848,7 @@
           between runs, or between models.
 
           If you cannot write the anchor for each point, you don't have a scale. You have a
-          vibe with a number attached — and it WILL get treated as data.
+          vibe with a number attached, and it WILL get treated as data.
         </aside>
       </section>
 
@@ -867,7 +867,7 @@
           Two techniques worth knowing:
           1. Tag your tests and run subsets. If cost is a constraint, don't run everything
              every time.
-          2. Make CI conditional on what changed — the prompt file, the model config, or a
+          2. Make CI conditional on what changed, the prompt file, the model config, or a
              "run-evals" label on the PR.
 
           But the honest headline: when you're getting started, the most valuable thing
@@ -902,8 +902,8 @@
         </div>
         <aside class="notes">
           Both speak the same API and both trace to the same LangSmith project, so the rest
-          of the module is identical either way. If the deploy doesn't work for you today —
-          no Plus plan, Docker not running, corporate network — use the local one and lose
+          of the module is identical either way. If the deploy doesn't work for you today,
+          no Plus plan, Docker not running, corporate network, use the local one and lose
           nothing.
 
           There's also a front end in frontend/index.html. Open it in a browser, no build
@@ -932,13 +932,13 @@
           <p class="kicker">Same evaluators. Real traffic. 10% sampled.</p>
         </div>
         <aside class="notes">
-          The bridge from Module 2. Everything we built runs on a DATASET — cases we thought
+          The bridge from Module 2. Everything we built runs on a DATASET, cases we thought
           of. Point the SAME evaluators at production traffic and they become online
           evaluators: they score real traces, as they happen, on inputs nobody wrote down.
 
           Three things to say:
 
-          1. THE EVALUATORS ARE THE SAME CODE. Groundedness, out-of-scope, honest-failure —
+          1. THE EVALUATORS ARE THE SAME CODE. Groundedness, out-of-scope, honest-failure,
              you already wrote them. This is a config change, not a project.
 
           2. SAMPLE, DON'T AUDIT. Every judged trace is a model call. At 100% sampling your
@@ -948,7 +948,7 @@
 
           3. WHAT YOU GET THAT OFFLINE CANNOT GIVE YOU: coverage of inputs you never
              imagined. Your dataset only contains cases you thought of. Production contains
-             the rest — and that's where the interesting failures live.
+             the rest, and that's where the interesting failures live.
 
           Then the four numbers on the next slide: evaluator scores, error rate, latency,
           cost. Scores are the one people forget to chart.
@@ -981,7 +981,7 @@
           </div>
         </div>
         <aside class="notes">
-          EVALUATOR SCORES FIRST. This is the one that's specific to agents — the other three
+          EVALUATOR SCORES FIRST. This is the one that's specific to agents, the other three
           you already monitor on any service. Your online evaluators produce a feedback score
           per trace, and LangSmith charts the average over time. That line dropping is your
           earliest signal that quality regressed, and it moves BEFORE anyone files a ticket.
@@ -996,7 +996,7 @@
           needs it.
 
           Agent latency is not API latency. ARIA's p50 is ~26 seconds: several model calls,
-          several tool calls per question. That's a product decision to make consciously —
+          several tool calls per question. That's a product decision to make consciously,
           stream partial output, show the todo list, show which tool is running. Don't
           discover it from a complaint.
 
@@ -1027,12 +1027,12 @@
             Metric: Feedback score / Key: out_of_scope / Average / >= 0.05 / 15 min
 
           PREVIEW IT BEFORE SAVING. The UI replays your threshold over historical data and
-          shows which points would have fired, in red. Use it — an alert that fires
+          shows which points would have fired, in red. Use it, an alert that fires
           constantly gets muted within a week, and a muted alert is worse than none because
           it looks like coverage.
 
           Slack for degradation. PagerDuty for outages. Reserve the pager for things a human
-          must act on NOW — that discipline is what keeps it meaningful.
+          must act on NOW, that discipline is what keeps it meaningful.
 
           Today: configure and preview, but don't wire the notification. OAuth flows and
           corporate firewalls teach you nothing and eat ten minutes.
@@ -1096,12 +1096,11 @@
           </svg>
         </div>
         <aside class="notes">
-          Every node here is the loop. In 10 minutes we cover the two parts that matter most
-          — assertions, and Engine — and the notebook has the rest.
+          Every node here is the loop. In 10 minutes we cover the two parts that matter most (assertions, and Engine) and the notebook has the rest.
 
           ONE THING NOT ON THE DIAGRAM, and it's the non-obvious bit. Two automation rules
           feed that queue, not one:
-            Rule 1: 100% of what your evaluators FLAGGED. Obvious, and not sufficient — it
+            Rule 1: 100% of what your evaluators FLAGGED. Obvious, and not sufficient, it
                     has exactly the same blind spot as your offline suite.
             Rule 2: 5% of EVERYTHING, no filter. Your only channel for finding the failure
                     nobody has named yet.
@@ -1133,7 +1132,7 @@
           </div>
         </div>
         <aside class="notes">
-          FACILITATOR DEMO — attendees likely don't have it, and it scans every 6 hours so
+          FACILITATOR DEMO: attendees likely don't have it, and it scans every 6 hours so
           there's no live demo. Seed the traces the day before:
             python scripts/generate_traffic.py --engine-warmup
 
@@ -1141,7 +1140,7 @@
           product. It scans your projects on a schedule and: detects a RECURRING issue,
           diagnoses the root cause, proposes a fix (can open a PR against Deep Agents /
           LangChain / LangGraph code), deploys an evaluator to catch the regression, creates
-          ground-truth dataset examples WITH PROPOSED ASSERTIONS — and if a closed issue
+          ground-truth dataset examples WITH PROPOSED ASSERTIONS, and if a closed issue
           resurfaces, it REOPENS it.
 
           That last one is a mechanical version of the rule this module opened with.
@@ -1151,27 +1150,27 @@
           Incorrect tool args, Wrong tool, Feature gap, Agent looping, Context explosion,
           PII leak, Task evasion, System prompt drift.
 
-          That alignment isn't a coincidence — those categories came from what actually goes
+          That alignment isn't a coincidence, those categories came from what actually goes
           wrong with production agents. If you DON'T have Engine, that list is a free,
           well-researched monitoring checklist.
 
           Caveats: enabled per organization, billed in LCUs so set a spend limit, and a
           human still reviews and merges the PR.
 
-          NOTE HOW FAR IT GOES. Engine doesn't stop at triage — it proposes the actual code
+          NOTE HOW FAR IT GOES. Engine doesn't stop at triage, it proposes the actual code
           change and OPENS A PULL REQUEST against your connected repo. It understands Deep
           Agents, LangChain and LangGraph code. So the human's job is not authoring the fix;
           it's reviewing a diff and merging it.
 
           THAT IS ALSO THE JUDGMENT CALL. The merge is the gate, and you should keep it.
-          Letting anything auto-merge on green evals is tempting. Don't — not yet, not for
+          Letting anything auto-merge on green evals is tempting. Don't, not yet, not for
           anything safety-adjacent. Two reasons:
           1. Your evals are an INCOMPLETE PROXY for "good." An optimizer will find the gap
              between your metric and your intent. This whole workshop exists because our
              suite had exactly such a gap.
           2. The failure is SILENT. A prompt that games your evaluators looks like progress
              on every chart you have.
-          So: let it find, diagnose, write the fix, and open the PR — that's the expensive
+          So: let it find, diagnose, write the fix, and open the PR, that's the expensive
           part and none of the risk. Reading a one-line prompt diff before merging is not
           your bottleneck.
 
@@ -1203,25 +1202,25 @@
         </div>
         <aside class="notes">
           Where to go after this. Hamel Husain has published a set of skills for coding
-          agents that pick up roughly where we stop. If today was the 201, that's the 301 —
+          agents that pick up roughly where we stop. If today was the 201, that's the 301,
           and it's free.
 
           Fair framing: his material assumes what we spent today building. It starts from a
           pipeline that already exists and a stream of real traces. Ours is how you get
-          there. They're complementary halves, not competing advice — and where they overlap
+          there. They're complementary halves, not competing advice, and where they overlap
           (code checks before judges, one judge per failure mode, binary not Likert, domain
           experts in the loop) they agree, which is worth saying out loud.
 
           THREE THINGS HE GOES DEEPER ON:
 
-          1. SYNTHETIC DATA, structured. We hand-wrote our dataset — fine for twelve cases,
+          1. SYNTHETIC DATA, structured. We hand-wrote our dataset, fine for twelve cases,
              doesn't scale to a hundred. His method: pick three dimensions where you expect
              failures, generate tuples, then a SEPARATE prompt turns each tuple into a query.
              Two steps, because doing it in one produces repetitive phrasing. This is how you
              pressure-test before you have users.
 
           2. ERROR ANALYSIS. The honest gap in today's session. We handed you four online
-             evaluators — out-of-scope, hallucination, perceived error, completion — and I
+             evaluators (out-of-scope, hallucination, perceived error, completion) and I
              picked those by thinking about it. His process derives them from evidence: read
              ~100 traces, note the FIRST thing that went wrong in each, let the categories
              EMERGE rather than starting from a list, group into five to ten, label
@@ -1233,7 +1232,7 @@
              Only build an evaluator for what survives the fix.
 
           3. JUDGE ALIGNMENT, properly. We said "label 20 examples and iterate." He's right
-             that that leaks — if you iterate against the same examples you drew few-shots
+             that that leaks, if you iterate against the same examples you drew few-shots
              from, your alignment number is inflated. Proper version: train / dev / test
              split, and measure TPR and TNR rather than raw agreement, because with class
              imbalance a judge that always says Pass scores 90% and catches nothing.
@@ -1241,7 +1240,7 @@
              And the one worth knowing about even if you do nothing else: Rogan-Gladen bias
              correction. If your judge is TPR 0.92, TNR 0.88, and it scores 80% of production
              traffic as Pass, the TRUE rate is about 85%. That's the dashboard from Module 3
-             — those numbers are biased in a knowable, correctable direction.
+, those numbers are biased in a knowable, correctable direction.
 
              Note it matters for ABSOLUTE rates. Our bake-off compared two models under one
              judge, and relative comparison under a fixed judge is the case that's already
@@ -1264,7 +1263,7 @@
           </div>
         </div>
         <aside class="notes">
-          THE FIVE, in your own words — say them slowly, one at a time.
+          THE FIVE, in your own words: say them slowly, one at a time.
 
           1. ISOLATE & TEST DETERMINISTIC CODE AS MUCH AS POSSIBLE. Three of the four layers
              are yours. Most people spend all their effort on the one that isn't.
@@ -1273,21 +1272,21 @@
           3. KEEP YOUR AGENT THIN. Application behind a tested boundary, rules in middleware,
              the agent layer as small as you can make it.
           4. ENGINEER FOR CHANGE. Models ship every week and the frontier moves left. The
-             suite isn't there to stop you changing things — it's what lets you.
+             suite isn't there to stop you changing things, it's what lets you.
           5. BUILD ON THE SHOULDERS OF GIANTS, AND RIDE THE WAVE. Don't rebuild the harness,
              the middleware, or the eval platform. Take what exists and spend your effort on
              the part only you can do: your domain, your data, your definition of correct.
 
           Where we ended up:
-          1. Built ARIA — app logic behind a tested MCP boundary, rules as middleware, limits
-          2. A test suite across five levels — and used it to answer "can we run this cheaper?"
+          1. Built ARIA: app logic behind a tested MCP boundary, rules as middleware, limits
+          2. A test suite across five levels, and used it to answer "can we run this cheaper?"
           3. Shipped it, monitored it, caught a real safety-relevant bug the suite missed
           4. Turned that bug into a permanent regression test, and built the loop that finds
              the next one
 
           The full sentence:
           You get one irreducibly non-deterministic component. Make everything around it as
-          deterministic as you can, measure what's left, watch it in production — and make
+          deterministic as you can, measure what's left, watch it in production, and make
           sure everything you learn there becomes something you can never learn again.
 
           The repo has all of it: 179 tests, four notebooks, five eval levels, a traffic
@@ -1306,7 +1305,7 @@
             (Answer: limits, then Level 0 context assertions. Both cheap, both immediate.)
           - What would your out-of-scope failure look like? What's the question a user asks
             that your agent shouldn't answer but probably would?
-          - Who in your org would write the assertions? That's the real adoption question —
+          - Who in your org would write the assertions? That's the real adoption question,
             if it's an engineer, the loop stalls.
           - What's your equivalent of the P-101 / P-101A problem? Every domain has an
             identifier users get slightly wrong.
@@ -1344,7 +1343,7 @@
           Automations are filter + sampling rate + action. Four actions: add to dataset, add
           to annotation queue, trigger webhook, extend retention.
 
-          Rule 1 routes everything your online evaluators flagged. Obvious — and NOT
+          Rule 1 routes everything your online evaluators flagged. Obvious, and NOT
           SUFFICIENT. It can only surface failure modes you already wrote an evaluator for.
           Exactly the same blind spot as your offline suite.
 
@@ -1356,7 +1355,7 @@
           ceiling on what you can learn.
 
           Practical: rules poll independently, so nothing guarantees an evaluator ran before
-          a webhook fires. Put a filter on the downstream rule. And rules have a Logs tab —
+          a webhook fires. Put a filter on the downstream rule. And rules have a Logs tab,
           use it when a rule "isn't working", because usually it is and the filter doesn't
           match what you think.
         </aside>
@@ -1383,7 +1382,7 @@
           We've been trusting LLM judges. Should we? An unaligned judge is worse than no
           judge: it produces confident numbers you act on.
 
-          Measure it the only way you can — against HUMAN LABELS.
+          Measure it the only way you can, against HUMAN LABELS.
 
           Select scored runs -> label ~20 yourself, balanced between pass and fail -> test
           the evaluator prompt in the Evaluator Playground -> get an alignment score ->
@@ -1399,7 +1398,7 @@
 
           THE AUTOMATIC VERSION: add {{Few-shot examples}} to the judge prompt. Every score
           you CORRECT in the UI gets inserted as a few-shot example. Attach an explanation
-          to every correction — that's what teaches it. A judge that improves as a side
+          to every correction, that's what teaches it. A judge that improves as a side
           effect of people using the product, with no engineering time at all.
         </aside>
       </section>
@@ -1424,7 +1423,7 @@
           and merging.
 
           BE SKEPTICAL OF REMOVING THAT LAST STEP. Auto-merging on green evals is tempting.
-          Don't — not yet, not for anything safety-adjacent. Two reasons:
+          Don't: not yet, not for anything safety-adjacent. Two reasons:
 
           1. Your evals are an INCOMPLETE PROXY for "good." An optimizer will find the gap
              between your metric and your intent, because that's what optimizers do. This
@@ -1432,7 +1431,7 @@
           2. The failure is SILENT. A prompt that games your evaluators looks like progress
              on every chart you have.
 
-          The high-value automation is everything up to the merge — detect, diagnose, write
+          The high-value automation is everything up to the merge, detect, diagnose, write
           the fix, prove the test fails then passes, open the PR. That's most of the work and
           none of the risk. Reading the diff before merging is not your bottleneck.
         </aside>
@@ -1456,7 +1455,7 @@
       transition: 'fade',
       transitionSpeed: 'fast',
       center: false,
-      // Press S for the speaker view — every slide's substance lives in its notes.
+      // Press S for the speaker view, every slide's substance lives in its notes.
       plugins: [ RevealChart, RevealNotes ],
       chart: {
         defaults: Object.assign({

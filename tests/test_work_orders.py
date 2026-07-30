@@ -131,7 +131,7 @@ def test_reset_clears_everything(store: WorkOrderStore) -> None:
     store.create_work_order("P-101A", "Replace the mechanical seal on this pump")
     store.reset()
     assert store.list_work_orders() == []
-    # Including the idempotency cache — otherwise the next test's identical write is
+    # Including the idempotency cache, otherwise the next test's identical write is
     # silently treated as a duplicate and the assertion fails for a baffling reason.
     again = store.create_work_order("P-101A", "Replace the mechanical seal on this pump")
     assert again["created"] is True
@@ -139,7 +139,7 @@ def test_reset_clears_everything(store: WorkOrderStore) -> None:
 
 # --------------------------------------------------------------------- closeout (TDD)
 #
-# These were written BEFORE `complete_work_order` existed — see the spec in
+# These were written BEFORE `complete_work_order` existed, see the spec in
 # `evals/datasets.py:TDD_EXAMPLES`. Every edge case below is one that surfaced while writing
 # the spec rows rather than while writing the implementation, which is the entire argument for
 # the ordering: "what if they close it twice?" is a cheap design question and an expensive
@@ -176,7 +176,7 @@ def test_closing_twice_is_refused_and_preserves_the_original_record(
     """The row a planner will ask about in the spec review.
 
     Re-closing would overwrite the asset's maintenance history with a second person's notes.
-    The error says to raise a new work order instead — the error carries the fix.
+    The error says to raise a new work order instead, the error carries the fix.
     """
     store.complete_work_order(open_order["id"], CLOSEOUT_NOTES, "T. Alvarez, badge 8823")
 
@@ -264,7 +264,7 @@ def test_shutdown_request_computes_impact_for_critical_assets(store: WorkOrderSt
 def test_agent_cannot_request_a_shutdown_on_its_own_authority(store: WorkOrderStore) -> None:
     """The application-layer half of the human-in-the-loop story. `interrupt_on` stops the
     agent and asks a person; this stops the request being valid at all without a named
-    human. You want both — an approver clicking through a dialog can bypass the first."""
+    human. You want both, an approver clicking through a dialog can bypass the first."""
     for impostor in ["ARIA", "aria", "agent", "assistant", "", "   "]:
         with pytest.raises(ARIALookupError, match="must name the human"):
             store.request_equipment_shutdown("P-101A", GOOD_REASON, impostor)

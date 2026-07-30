@@ -7,7 +7,7 @@ local adapter keeps the old signature, and now your evals measure a tool surface
 longer exists in production. Your experiment results become confidently wrong.
 
 This test is the thing that makes the duplication safe. It is slower than the rest of the
-suite because it spawns the real server over stdio — worth it, and still under a second.
+suite because it spawns the real server over stdio, worth it, and still under a second.
 
     pytest tests/test_tool_parity.py -q
 """
@@ -91,7 +91,7 @@ def test_same_arguments_for_every_tool(local_surface, mcp_surface) -> None:
 
 def test_the_expected_five_tools_exist(local_surface) -> None:
     """Pin the surface. If someone adds a sixth tool, this test failing is the prompt to
-    go update the eval dataset and the trajectory evaluator too — which is the actual
+    go update the eval dataset and the trajectory evaluator too, which is the actual
     work, and the part that gets forgotten."""
     assert sorted(local_surface) == [
         "complete_work_order",
@@ -139,7 +139,7 @@ def test_error_shape_matches_across_transports(tool_name, args) -> None:
 
     This is the one that actually catches bugs. The local adapter returns a dict; MCP
     returns content blocks containing serialized JSON. If the error text does not survive
-    that round trip, the agent loses its ability to recover from a bad tag — and you would
+    that round trip, the agent loses its ability to recover from a bad tag, and you would
     only notice in production, because your evals run on the local path.
     """
     import asyncio

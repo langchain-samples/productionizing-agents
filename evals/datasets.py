@@ -1,4 +1,4 @@
-"""ARIA's eval datasets — the parameterized cases our test suite runs over.
+"""ARIA's eval datasets: the parameterized cases our test suite runs over.
 
 A dataset example is one test case:
 
@@ -24,7 +24,7 @@ a new dict rather than new code. Ours carries:
 SPLITS
 ------
 `SMOKE` and `SCRIPTED` map to the two levels that run under `aevaluate`. Levels 3 and 4 are
-pytest and simulation respectively, and live in `test_stateful.py` and `simulate.py` — they
+pytest and simulation respectively, and live in `test_stateful.py` and `simulate.py`, they
 cannot be expressed as static rows, which is precisely why they are separate levels.
 """
 
@@ -50,7 +50,7 @@ REGRESSIONS_DATASET = os.environ.get("ARIA_REGRESSIONS_DATASET", "aria-regressio
 # ===================================================================== LEVEL 1: SMOKE
 #
 # No real tools. Every tool is a stub returning an explicit "not scripted" marker. We are
-# testing that the agent WORKS and that it ROUTES correctly — not that it retrieves well.
+# testing that the agent WORKS and that it ROUTES correctly, not that it retrieves well.
 #
 # This is the `/health` endpoint of your agent. It looks too simple to be worth writing,
 # and it is the split that catches a model deprecation, a broken prompt template, a tool
@@ -79,7 +79,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
     {
         "inputs": {"question": "What is the lockout procedure for P-101A?"},
         "reference_outputs": {
-            # Routing check. With stubbed tools it cannot answer — but it must REACH for
+            # Routing check. With stubbed tools it cannot answer, but it must REACH for
             # the right tool, and that is the property under test.
             "expect_tool_calls": ["search_procedures"],
             "intent": "attempt to look up the procedure rather than answer from memory",
@@ -112,7 +112,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
     # We did not think of one. That gap is the setup for Module 4: production catches ARIA
     # answering an OSHA exposure-limit question from memory, a human writes the assertions in
     # an annotation queue, and only then does it become a regression test. Resist the urge to
-    # add it here — the missing test is the point.
+    # add it here, the missing test is the point.
 ]
 
 
@@ -148,7 +148,7 @@ _LOTO = {
         "1. Obtain a signed work permit from the Unit Operator.\n"
         "2. Verify de-energized at the local disconnect and at MCC-3.\n"
         "3. Apply a personal lock and danger tag at both points.\n"
-        "5. Bleed the casing. Verify zero pressure on the gauge AND by cracking the vent — "
+        "5. Bleed the casing. Verify zero pressure on the gauge AND by cracking the vent, "
         "a gauge reading alone is not acceptable verification."
     ),
 }
@@ -260,7 +260,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
     # reported success. Four flavors, because they fail differently.
     {
         "inputs": {
-            "question": "Raise an urgent work order on P-101A — the inboard seal is leaking.",
+            "question": "Raise an urgent work order on P-101A, the inboard seal is leaking.",
             "mock_tools": {"get_equipment": _P101A, "create_work_order": TOOL_ERROR},
         },
         "reference_outputs": {
@@ -276,8 +276,8 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "question": "File a routine work order on P-311 for a vibration survey.",
             "mock_tools": {
                 "get_equipment": {**_P101A, "tag": "P-311", "description": "Reformate Product Pump"},
-                # A raised exception, not a returned error. Different code path — it goes
-                # through ToolRetryMiddleware — and worth its own case.
+                # A raised exception, not a returned error. Different code path, it goes
+                # through ToolRetryMiddleware, and worth its own case.
                 "create_work_order": TOOL_TIMEOUT,
             },
         },
@@ -342,7 +342,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "mock_tools": {"get_equipment": _P101A},
         },
         "reference_outputs": {
-            # A pure question must not produce a write. Obvious, and worth asserting —
+            # A pure question must not produce a write. Obvious, and worth asserting,
             # over-eager tool use on the write path is a real and expensive failure.
             "forbid_tool_calls": ["create_work_order", "request_equipment_shutdown"],
             "must_mention": ["A"],
@@ -385,7 +385,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
 #
 # Each row is a sentence any stakeholder can read and argue with:
 #
-#     "When a user says X, the response should look like Y — and the world should look
+#     "When a user says X, the response should look like Y, and the world should look
 #      like Z when it's done."
 #
 # WHY THIS IS A BEST PRACTICE AND NOT JUST TIDINESS
@@ -401,7 +401,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
 #
 # It also inverts the failure mode most agent projects start with:
 #
-#     CAPABILITY-FIRST (the pitfall)      "We have search and a work-order API — what can
+#     CAPABILITY-FIRST (the pitfall)      "We have search and a work-order API, what can
 #                                          the agent do?" You ship a demo, stakeholders say
 #                                          "that's neat, but it doesn't do the thing I
 #                                          actually need," and you discover the workflow you
@@ -419,7 +419,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
 #
 # HOW WE USE IT IN MODULE 2
 # -------------------------
-# The capability specified below — closing out a work order — was genuinely absent when
+# The capability specified below, closing out a work order, was genuinely absent when
 # these rows were written. The workshop runs the spec against an agent that lacks the tool
 # (RED), then against one that has it (GREEN). Reproduce the red state any time with:
 #
@@ -435,7 +435,7 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
         #      THE WORLD has that work order marked complete with notes and a named human
         "inputs": {
             "question": (
-                "Close out WO-90001 — seal replaced, new cartridge installed, bump tested "
+                "Close out WO-90001, seal replaced, new cartridge installed, bump tested "
                 "and no leaks. Barrier fluid was discolored so I flagged it to Reliability. "
                 "This is T. Alvarez, badge 8823."
             )
@@ -470,10 +470,10 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
         # ---- IDEMPOTENCY, SPECIFIED UP FRONT ------------------------------------------
         # "What if they close it twice?" is an obvious question at design time and an
         # incident report if you only ask it later. Closing twice would overwrite the
-        # original completion record — the asset's maintenance history.
+        # original completion record, the asset's maintenance history.
         "inputs": {
             "question": (
-                "Close out WO-90001 again — replaced the seal, tested, all good. "
+                "Close out WO-90001 again, replaced the seal, tested, all good. "
                 "T. Alvarez, badge 8823."
             ),
             "world_before": {"WO-90001": "complete"},
@@ -499,7 +499,7 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
     },
     {
         # ---- VAGUE REFERENCE ----------------------------------------------------------
-        # Real users don't quote ids. This row is why `list_work_orders` exists — the
+        # Real users don't quote ids. This row is why `list_work_orders` exists, the
         # workflow demanded it, we didn't build it and then look for a use.
         "inputs": {
             "question": "Close out that pump work order I raised earlier. T. Alvarez, badge 8823."
@@ -557,7 +557,7 @@ def spec_table() -> str:
 #
 # So the mock world has to live in `inputs`, because the *target* is what needs it: it builds
 # the agent. That is not a workaround, it is the correct home for it. `mock_tools` makes no
-# claim about what a right answer looks like — it is the environment the case runs in, which
+# claim about what a right answer looks like, it is the environment the case runs in, which
 # is the definition of an input. `reference_outputs` holds only expectations, which is the
 # only thing evaluators grade against.
 #
@@ -581,7 +581,7 @@ def seed_datasets(*, client: Any = None, overwrite: bool = False) -> dict[str, A
 
     Args:
         client: A `langsmith.Client`. Created if omitted.
-        overwrite: Delete and rebuild. Use when you have edited existing examples —
+        overwrite: Delete and rebuild. Use when you have edited existing examples.
             LangSmith versions datasets, so the safe default is to add rather than mutate.
 
     Returns:
@@ -603,12 +603,12 @@ def seed_datasets(*, client: Any = None, overwrite: bool = False) -> dict[str, A
         (
             SMOKE_DATASET,
             SMOKE_EXAMPLES,
-            "Level 1 — smoke. Stubbed tools. Does ARIA respond, route, and stay in scope?",
+            "Level 1, smoke. Stubbed tools. Does ARIA respond, route, and stay in scope?",
         ),
         (
             SCRIPTED_DATASET,
             SCRIPTED_EXAMPLES,
-            "Level 2 — scripted. Tool responses supplied by reference_outputs, including "
+            "Level 2, scripted. Tool responses supplied by reference_outputs, including "
             "injected failures. Does ARIA behave correctly given a specific world?",
         ),
     ):

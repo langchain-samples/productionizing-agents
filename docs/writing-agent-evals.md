@@ -375,7 +375,7 @@ async def target(inputs: dict) -> dict:   # the whole signature
 ```
 
 Evaluators get `inputs`, `outputs` and `reference_outputs`. The target gets one. So the mock
-world has to live in `inputs` — the target is what builds the agent. That isn't a workaround:
+world has to live in `inputs`, the target is what builds the agent. That isn't a workaround:
 `mock_tools` makes no claim about what a correct answer looks like, it's the environment the case
 runs in, which is what an input is.
 
@@ -625,7 +625,7 @@ it would produce. Then pin the real formats as test cases.
 
 Aligning is straightforward and nobody does it: label ~20 examples yourself, balanced between
 pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
-read the misaligned cases and **group them** — failure modes cluster, and two or three explain
+read the misaligned cases and **group them**, failure modes cluster, and two or three explain
 most of the gap. Then put those failure modes in the prompt. And add more labels
 before celebrating: 100% agreement on 20 examples is overfitting, not success.
 

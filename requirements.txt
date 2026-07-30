@@ -11,7 +11,7 @@ langchain-openai>=1.0,<2.0          # OpenAI provider, and any OpenAI-compatible
 
 # --- the application layer, exposed over MCP (Module 1) ---
 # NOTE the upper bound on mcp. As of langchain-mcp-adapters 0.3.1 the adapter imports
-# `RequestContext` from `mcp.shared.context`, which mcp 2.0 removed — installing mcp 2.x
+# `RequestContext` from `mcp.shared.context`, which mcp 2.0 removed, installing mcp 2.x
 # gives you an ImportError the first time you touch MCP. Drop the pin once the adapter
 # releases 2.x support. This is exactly the class of breakage the version pinning note at
 # the top of this file is about.

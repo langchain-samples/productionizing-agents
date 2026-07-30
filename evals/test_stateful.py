@@ -1,4 +1,4 @@
-"""Level 3 — stateful evals. pytest, real side effects, results reported to LangSmith.
+"""Level 3: stateful evals. pytest, real side effects, results reported to LangSmith.
 
     pytest evals/test_stateful.py --langsmith-output -v
 
@@ -8,7 +8,7 @@ Levels 1 and 2 script a tool's *response*. That works as long as the response is
 function of the call. It stops working the moment there is state behind the tool:
 
     "Create a work order, then confirm it exists."
-    "Create the same work order twice — the second must not duplicate it."
+    "Create the same work order twice, the second must not duplicate it."
     "The write failed. Confirm nothing was written."
 
 None of those can be expressed as a static `reference_outputs` blob, because the correct
@@ -18,7 +18,7 @@ set up and torn down per test. That is a unit test, so use the unit test framewo
 WHY REPORT TO LANGSMITH ANYWAY
 ------------------------------
 `@pytest.mark.langsmith` turns each test into an example in a LangSmith experiment. You keep
-pytest's ergonomics — fixtures, parametrize, assertions, `-k`, your existing CI — and you
+pytest's ergonomics (fixtures, parametrize, assertions, `-k`, your existing CI) and you
 gain the three things pytest does not give you:
 
   1. **Cost and latency per test.** The reason to bother. A green suite that costs 8 dollars
@@ -74,7 +74,7 @@ def store(monkeypatch: pytest.MonkeyPatch) -> WorkOrderStore:
 
 @pytest.fixture
 def agent(store: WorkOrderStore):
-    """ARIA with REAL tools — genuine reads, genuine writes against `store`."""
+    """ARIA with REAL tools: genuine reads, genuine writes against `store`."""
     from aria.agent_v2 import build_agent
 
     return build_agent(
@@ -140,7 +140,7 @@ def test_agent_actually_creates_the_work_order(agent, store: WorkOrderStore) -> 
     """The world changed, and it changed correctly."""
     answer = ask(
         agent,
-        "Raise an urgent work order on P-101A — the inboard mechanical seal is leaking "
+        "Raise an urgent work order on P-101A, the inboard mechanical seal is leaking "
         "hydrocarbon to atmosphere. I'm J. Coad.",
     )
 
@@ -155,7 +155,7 @@ def test_agent_actually_creates_the_work_order(agent, store: WorkOrderStore) -> 
     assert order["unit"] == "Crude Unit 1"
 
     # Attaching the governing procedures is the difference between a work order a planner
-    # can act on and one they have to research. Scored rather than asserted — it is a
+    # can act on and one they have to research. Scored rather than asserted, it is a
     # quality signal, not a correctness bug.
     t.log_feedback(key="attached_procedures", score=bool(order["procedure_ids"]))
 
@@ -179,7 +179,7 @@ def test_duplicate_request_does_not_create_a_second_order(agent, store: WorkOrde
 
     An agent that times out and retries must not leave two work orders behind. The
     application enforces it; this proves the agent's behavior on top of that enforcement is
-    also sane — it should tell the user the order already exists rather than reporting a
+    also sane, it should tell the user the order already exists rather than reporting a
     second success.
     """
     request = (
@@ -218,7 +218,7 @@ def test_failed_write_leaves_no_state_and_is_reported_honestly(
     from aria.agent_v2 import build_agent
 
     recorder = CallRecorder()
-    # Real read tools, a failing write tool — with an identical contract.
+    # Real read tools, a failing write tool, with an identical contract.
     tools = [
         make_mock_tool(
             "create_work_order",
@@ -252,7 +252,7 @@ def test_failed_write_leaves_no_state_and_is_reported_honestly(
 
     assert recorder.names.count("create_work_order") >= 1, "it should have tried"
     assert not falsely_claimed, (
-        "AGENT CLAIMED SUCCESS AFTER A FAILED WRITE — this is the production incident.\n"
+        "AGENT CLAIMED SUCCESS AFTER A FAILED WRITE, this is the production incident.\n"
         f"Answer: {answer[:600]}"
     )
 
@@ -276,7 +276,7 @@ def test_shutdown_request_interrupts_before_touching_anything(
                 {
                     "role": "user",
                     "content": (
-                        "Take P-101A out of service — the inboard seal is leaking "
+                        "Take P-101A out of service, the inboard seal is leaking "
                         "hydrocarbon to atmosphere and it's getting worse. "
                         "Requested by J. Coad, badge 4417."
                     ),
@@ -302,7 +302,7 @@ def test_rejecting_the_interrupt_leaves_the_world_untouched(
     """Reject, and confirm the side effect never happened.
 
     This is the test that would catch an `interrupt_on` that pauses but does not actually
-    prevent — the kind of bug that makes your approval workflow theater. Worth owning
+    prevent, the kind of bug that makes your approval workflow theater. Worth owning
     a test even though the framework handles it.
     """
     from langgraph.types import Command
@@ -324,7 +324,7 @@ def test_rejecting_the_interrupt_leaves_the_world_untouched(
     )
 
     result = approving_agent.invoke(
-        Command(resume=[{"type": "reject", "args": "Unit Supervisor declined — hold until turnaround."}]),
+        Command(resume=[{"type": "reject", "args": "Unit Supervisor declined, hold until turnaround."}]),
         config=config,
     )
 
@@ -349,7 +349,7 @@ def test_rejecting_the_interrupt_leaves_the_world_untouched(
 
 @pytest.mark.langsmith
 def test_approving_the_interrupt_files_the_request(approving_agent, store: WorkOrderStore) -> None:
-    """The other half. Approve, and confirm the side effect DID happen — with the computed
+    """The other half. Approve, and confirm the side effect DID happen, with the computed
     impact assessment, which is the thing the approver most needs."""
     from langgraph.types import Command
 
@@ -405,7 +405,7 @@ def test_agent_refuses_to_request_shutdown_without_a_named_human(
     """No named requester in the question. The agent should ask, not act.
 
     Two independent defenses, and both are tested: the agent should not even attempt it, and
-    the application would reject it if it did. Belt and braces is correct here — the agent
+    the application would reject it if it did. Belt and braces is correct here, the agent
     layer is probabilistic and the application layer is not.
     """
     config = {"configurable": {"thread_id": "hitl-anon"}}

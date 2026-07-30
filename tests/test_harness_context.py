@@ -1,4 +1,4 @@
-"""Level 0 — assertions on the context the model actually receives. No LLM, no network.
+"""Level 0: assertions on the context the model actually receives. No LLM, no network.
 
 The prompt reaching your model is *assembled at runtime* from your system prompt, your tool
 schemas, harness-injected tools, middleware rewrites, and any dynamically loaded files,
@@ -6,7 +6,7 @@ skills, or memories. By the time it arrives it has been through five layers of c
 not write today.
 
 Almost nobody looks at it. People debug agent behavior by reading their own source and
-reasoning about what the model *probably* got — and then it turns out a middleware truncated
+reasoning about what the model *probably* got, and then it turns out a middleware truncated
 the system prompt, or a tool description never made it because `parse_docstring` was off, or
 the skill file silently failed to load.
 
@@ -37,9 +37,9 @@ ARIA_TOOLS = {
 }
 
 # Injected by `create_deep_agent`. Asserting on these is how you notice a harness upgrade
-# changed what your agent can do — which is a thing that happens, and which you would
+# changed what your agent can do, which is a thing that happens, and which you would
 # otherwise discover from behavior.
-# `write_todos` comes from TodoListMiddleware, which we add explicitly — `create_deep_agent`
+# `write_todos` comes from TodoListMiddleware, which we add explicitly, `create_deep_agent`
 # does not inject it in deepagents 0.7. The rest come from the harness itself. This exact
 # assertion is what caught the prompt referencing a tool the model never received.
 HARNESS_TOOLS = {"write_todos", "task", "write_file", "read_file", "edit_file", "ls", "grep", "glob"}
@@ -110,7 +110,7 @@ def test_load_bearing_prompt_instructions_are_present(context, requirement: str)
 # regression test (Module 4), and then it gets removed.
 #
 # These two tests pin that state. A known-bad state that is *asserted* is a very different
-# thing from a known-bad state that is merely remembered — without them, someone reading this
+# thing from a known-bad state that is merely remembered, without them, someone reading this
 # repo cold "helpfully" fixes the prompt and the Module 4 demo silently stops working.
 
 
@@ -154,7 +154,7 @@ def test_every_aria_tool_argument_has_a_description(context) -> None:
     """The `parse_docstring` gotcha, caught at the level that actually matters.
 
     `tests/test_tool_parity.py` checks the tool objects. This checks what arrived at the
-    model after assembly, which is the claim you actually care about — a tool can have a
+    model after assembly, which is the claim you actually care about, a tool can have a
     perfect schema and still reach the model stripped.
     """
     gaps = [
@@ -182,7 +182,7 @@ def test_read_only_mode_removes_the_write_tools(read_only_context) -> None:
 
 def test_destructive_tool_is_described_as_consequential(context) -> None:
     """The model's only warning that this tool matters is its description. Assert the warning
-    is actually in there — it is the cheapest guard on the most expensive action."""
+    is actually in there, it is the cheapest guard on the most expensive action."""
     description = context.tool_descriptions["request_equipment_shutdown"]
     assert "OUT OF SERVICE" in description
     assert "supervisor approval" in description.casefold()
@@ -231,7 +231,7 @@ def test_limits_are_actually_configured() -> None:
 def test_summarizer_uses_the_cheap_model() -> None:
     """Summarizing a transcript is a much easier task than the agent's real job, so it should
     not run on the expensive model. Easy to configure once and then silently lose in a
-    refactor — and it is pure cost when you do."""
+    refactor, and it is pure cost when you do."""
     import os
 
     from langchain.agents.middleware import SummarizationMiddleware
@@ -262,7 +262,7 @@ def test_assembled_context_is_within_budget(context) -> None:
 
 
 def test_no_credentials_leaked_into_the_prompt(context) -> None:
-    """Cheap, and it has caught real bugs in real codebases — usually via a tool description
+    """Cheap, and it has caught real bugs in real codebases, usually via a tool description
     built from a config object, or an error message that helpfully includes the request."""
     haystack = context.full_prompt
     for marker in ("sk-ant-", "lsv2_", "sk-proj-", "AKIA", "BEGIN PRIVATE KEY"):

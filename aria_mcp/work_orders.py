@@ -6,7 +6,7 @@ world*, which makes it a different kind of thing and worth keeping separate:
 * Reads can be retried freely. Writes cannot. A retried `create_work_order` is a duplicate
   work order that a planner has to go clean up.
 * Writes are what you gate with human-in-the-loop.
-* Writes are what makes Level 3 ("stateful") evaluation possible in Module 2 — you can
+* Writes are what makes Level 3 ("stateful") evaluation possible in Module 2, you can
   assert the world actually changed, not just that the agent said the right words.
 
 The store is deliberately in-memory and resettable. In production this is your maintenance
@@ -68,7 +68,7 @@ class WorkOrderStore:
 
         Validates against the equipment register and the procedure library before writing,
         so a work order can never reference an asset or a procedure that does not exist.
-        Validate at the write boundary — a bad row in the maintenance system outlives the
+        Validate at the write boundary: a bad row in the maintenance system outlives the
         conversation that created it.
 
         Raises:
@@ -139,7 +139,7 @@ class WorkOrderStore:
     ) -> dict[str, Any]:
         """Close out a work order as complete.
 
-        Added test-first in Module 2 — the spec (`evals/datasets.py:TDD_EXAMPLES`) was
+        Added test-first in Module 2: the spec (`evals/datasets.py:TDD_EXAMPLES`) was
         written before this method existed, run to watch it fail, and only then implemented.
         The edge cases below are here because writing the spec surfaced them, which is the
         argument for the order of operations: designing the test made us ask "what if they
@@ -171,7 +171,7 @@ class WorkOrderStore:
             raise ARIALookupError(
                 f"Completion notes must be at least {MIN_DESCRIPTION_CHARS} characters "
                 f"describing what was actually done; got {notes!r}. These notes are the "
-                f"asset's maintenance history — the next person to work on this equipment "
+                f"asset's maintenance history: the next person to work on this equipment "
                 f"reads them."
             )
 
@@ -213,7 +213,7 @@ class WorkOrderStore:
         THIS IS THE CONSEQUENTIAL ONE. Taking a crude charge pump out of service is a
         production decision with real money attached, and on a criticality-A asset with no
         running spare it can force a unit rate cut. The agent must never do this without a
-        human in the loop — see `interrupt_on` in `aria/agent_v2.py`.
+        human in the loop, see `interrupt_on` in `aria/agent_v2.py`.
 
         Two layers of protection, and it is worth being explicit that they are different:
 
@@ -247,7 +247,7 @@ class WorkOrderStore:
             raise ARIALookupError(
                 f"A shutdown request needs a substantive reason of at least "
                 f"{MIN_REASON_CHARS} characters; got {reason!r}. State the observed "
-                f"condition and why continued operation is unacceptable — this text goes "
+                f"condition and why continued operation is unacceptable, this text goes "
                 f"in front of the Unit Supervisor who approves or rejects it."
             )
 
@@ -272,7 +272,7 @@ class WorkOrderStore:
         impact: list[str] = []
         if equipment["criticality"] == "A":
             impact.append(
-                "Criticality A asset — loss of service has a direct production or safety "
+                "Criticality A asset, loss of service has a direct production or safety "
                 "consequence."
             )
         if not spare_running:

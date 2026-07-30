@@ -1,4 +1,4 @@
-"""Level 0 — harness tests. Deterministic, instant, no LLM.
+"""Level 0: harness tests. Deterministic, instant, no LLM.
 
 WHAT ARE WE ACTUALLY TESTING?
 -----------------------------
@@ -18,7 +18,7 @@ kinds, and most people write neither:
 
 1.  **Component units.** Call the middleware directly with a fabricated failed tool call and
     assert what it does. You do not need an agent for this, let alone a model. That is
-    `tests/test_middleware.py` — 25 tests, 0.1 seconds.
+    `tests/test_middleware.py`, 25 tests, 0.1 seconds.
 
 2.  **Context assembly assertions.** This module. Invoke the agent ONCE against a fake model
     that records what it received, then assert on the actual assembled request: was the
@@ -38,7 +38,7 @@ prompt, or a tool description never made it because `parse_docstring` was off, o
 file silently failed to load.
 
 Printing the assembled request once is often the entire debugging session. Asserting on it in
-CI means that class of bug never reaches you again — and it costs nothing, because a fake
+CI means that class of bug never reaches you again, and it costs nothing, because a fake
 model answers instantly.
 """
 
@@ -57,7 +57,7 @@ from langchain_core.messages import AIMessage
 class CapturedContext:
     """Everything the model actually received on its first call.
 
-    This is the ground truth. Not what your source says, not what you intended — what
+    This is the ground truth. Not what your source says, not what you intended, what
     arrived.
     """
 
@@ -85,7 +85,7 @@ class CapturedContext:
 
     @property
     def approx_tokens(self) -> int:
-        """Rough token count of the assembled context — chars/4.
+        """Rough token count of the assembled context, chars/4.
 
         Deliberately crude. The point is not precision, it is having a number you can put a
         CI threshold on so context bloat gets caught while it is 20% instead of 300%. Tool
@@ -119,7 +119,7 @@ class CapturedContext:
 class ContextCapture(AgentMiddleware):
     """Records the first model request, then lets it proceed.
 
-    `wrap_model_call` sits around the model call, so `request` is the fully assembled thing —
+    `wrap_model_call` sits around the model call, so `request` is the fully assembled thing,
     after every other middleware has had its turn. That is exactly the object you want to
     assert on, and it is otherwise invisible.
 
@@ -164,7 +164,7 @@ class ContextCapture(AgentMiddleware):
                     arg: spec.get("description", "")
                     for arg, spec in arg_schema(tool).items()
                 }
-            except Exception:  # noqa: BLE001 — a dict-shaped provider tool, etc.
+            except Exception:  # noqa: BLE001, a dict-shaped provider tool, etc.
                 sink.tool_arg_descriptions[name] = {}
 
         model = getattr(request, "model", None)
@@ -177,12 +177,12 @@ class ToolAwareFakeModel(GenericFakeChatModel):
     """A fake model that tolerates `bind_tools`.
 
     `GenericFakeChatModel` raises `NotImplementedError` on `bind_tools`, and the agent binds
-    tools on every model call — so the plain fake blows up right after our middleware has
+    tools on every model call, so the plain fake blows up right after our middleware has
     captured the request. Accepting the bind and ignoring it is all we need: we are asserting
     on what the tools *were*, not on the model choosing to call one.
 
     Returning `self` also means the fake never emits a tool call, so the agent takes exactly
-    one turn and stops. That is the behavior you want for a context assertion — no loop, no
+    one turn and stops. That is the behavior you want for a context assertion, no loop, no
     branching, one deterministic pass.
     """
 
@@ -193,7 +193,7 @@ class ToolAwareFakeModel(GenericFakeChatModel):
 def fake_model(reply: str = "Captured.") -> ToolAwareFakeModel:
     """A model that returns a canned reply without a network call.
 
-    This is what makes Level 0 free. We are not testing the model here — we are testing what
+    This is what makes Level 0 free. We are not testing the model here, we are testing what
     we hand it. Swapping in a fake makes the whole assertion instant and perfectly
     reproducible, which is the difference between a check that runs in CI and a check that
     runs when someone remembers to.
@@ -210,7 +210,7 @@ def capture_context(
     Args:
         question: The user turn. Matters only when you are asserting on dynamic context.
         **build_kwargs: Passed through to `aria.agent_v2.build_agent`. This is how you assert
-            that a configuration change had the effect you intended — e.g.
+            that a configuration change had the effect you intended, e.g.
             `capture_context(read_only=True)` and then check the write tools are gone. That
             assertion is worth having: "we thought that flag disabled the write tools" is a
             very believable production incident.
@@ -226,13 +226,13 @@ def capture_context(
     sink = CapturedContext()
 
     # Appended, so it is the INNERMOST middleware and sees the request after every other
-    # layer has had its turn. That is the whole point — an outer position would capture the
+    # layer has had its turn. That is the whole point, an outer position would capture the
     # request before the middleware you most want to verify has touched it.
     build_kwargs.setdefault("require_approval", False)
     build_kwargs["model"] = fake_model()
     build_kwargs.setdefault("checkpointer", InMemorySaver())
 
-    # Built through `build_agent`, not assembled by hand — so Level 0 asserts on the real
+    # Built through `build_agent`, not assembled by hand, so Level 0 asserts on the real
     # production assembly path rather than on a lookalike we wrote for the test.
     agent = build_agent(extra_middleware=[ContextCapture(sink)], **build_kwargs)
 

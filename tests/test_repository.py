@@ -86,7 +86,7 @@ def test_search_respects_limit(repo: Repository) -> None:
 
 
 def test_search_returns_empty_for_a_genuine_miss(repo: Repository) -> None:
-    """An honest empty result. Distinct from an error — and the tool docstring tells the
+    """An honest empty result. Distinct from an error, and the tool docstring tells the
     agent to say 'the library has nothing on this' rather than improvise."""
     assert repo.search_procedures("submarine periscope calibration") == []
 
@@ -223,7 +223,7 @@ def test_healthy_tank_has_no_warnings(repo: Repository) -> None:
 
 
 def test_suspect_gauge_and_active_receipt_both_warn(repo: Repository) -> None:
-    """T-043 has a suspect ATG *and* a receipt in progress. Both must be flagged — an
+    """T-043 has a suspect ATG *and* a receipt in progress. Both must be flagged, an
     agent that reports one and drops the other is a partial-truth failure, which is
     harder to catch in review than an outright wrong answer."""
     warnings = repo.get_tank_status("T-043")["data_quality_warnings"]

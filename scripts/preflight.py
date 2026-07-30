@@ -172,7 +172,7 @@ def check_notebooks() -> None:
     if proc.returncode == 0:
         record(PASS, "notebooks", "current")
     else:
-        record(WARN, "notebooks", "stale — run: python scripts/build_notebooks.py")
+        record(WARN, "notebooks", "stale, run: python scripts/build_notebooks.py")
 
 
 # ------------------------------------------------------------------------- 7. model
@@ -191,14 +191,14 @@ def check_model() -> None:
         )
         return
 
-    # Fall back to a sensible default rather than KeyError-ing if ARIA_MODEL is unset —
+    # Fall back to a sensible default rather than KeyError-ing if ARIA_MODEL is unset,
     # preflight exists to give clear diagnoses, not to fail obscurely itself.
     default = "anthropic:claude-sonnet-5" if provider == "anthropic" else "openai:gpt-5.5"
     model = os.environ.get("ARIA_MODEL") or default
     try:
         from langchain.chat_models import init_chat_model
 
-        # One tiny call. Cheapest possible proof that auth works and the model id is real —
+        # One tiny call. Cheapest possible proof that auth works and the model id is real,
         # a bad model name is otherwise a confusing failure 20 minutes into the session.
         reply = init_chat_model(model, max_tokens=8).invoke("Say OK")
         text = reply.content if isinstance(reply.content, str) else str(reply.content)
@@ -239,7 +239,7 @@ def check_langsmith() -> None:
         return
 
     if os.environ.get("LANGSMITH_TRACING", "").lower() not in {"true", "1"}:
-        record(WARN, "LANGSMITH_TRACING", "Not 'true' — nothing will be traced.")
+        record(WARN, "LANGSMITH_TRACING", "Not 'true', nothing will be traced.")
     else:
         record(PASS, "LANGSMITH_TRACING", "true")
 
@@ -249,7 +249,7 @@ def check_langsmith() -> None:
 
 def check_deploy_tooling() -> None:
     try:
-        # Invoke through the current interpreter, not PATH — in a venv the console
+        # Invoke through the current interpreter, not PATH, in a venv the console
         # script may not be on PATH even though the package is installed, and a false
         # "not found" here sends people installing something they already have.
         proc = subprocess.run(
@@ -310,7 +310,7 @@ def main() -> int:
 
     print("\n" + "=" * 74)
     if failed:
-        print(f"  {len(failed)} CHECK(S) FAILED — fix these before the session:")
+        print(f"  {len(failed)} CHECK(S) FAILED, fix these before the session:")
         for _, name, detail in failed:
             print(f"    - {name}: {detail.splitlines()[0] if detail else ''}")
     elif warned:

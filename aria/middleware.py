@@ -1,7 +1,7 @@
 """Custom middleware for ARIA.
 
 Middleware is the answer to a question that comes up constantly once you start
-productionizing: *"the model usually does the right thing here — how do I make it always
+productionizing: *"the model usually does the right thing here, how do I make it always
 do the right thing?"* The tempting answer is to add another sentence to the system prompt.
 The better answer, whenever the rule can be expressed in code, is a hook that runs whether
 the model cooperates or not.
@@ -19,12 +19,12 @@ Each class below targets a specific, observed production failure mode:
 A note on where these run: `before_model` / `after_model` are node-style hooks that run
 once per model call. `wrap_tool_call` wraps every tool invocation, so it can inspect and
 correct arguments before the tool ever sees them, or short-circuit the call entirely.
-Middleware composes — the list order in `create_deep_agent(middleware=[...])` is the
+Middleware composes: the list order in `create_deep_agent(middleware=[...])` is the
 nesting order, outermost first.
 
 RULE: observability and guard code must never be the reason your agent falls over. Every
 LangSmith interaction below is wrapped in a bare `except Exception`. That is deliberate,
-not sloppy — an agent that 500s because a metadata write failed is strictly worse than one
+not sloppy, an agent that 500s because a metadata write failed is strictly worse than one
 that loses a tag.
 """
 
@@ -43,16 +43,16 @@ from langgraph.runtime import Runtime
 
 EQUIPMENT_TAG: Final[re.Pattern[str]] = re.compile(r"^[A-Z]{1,2}-\d{3}[A-Z]?$")
 TANK_TAG: Final[re.Pattern[str]] = re.compile(r"^T-\d{3}$")
-# A revision-qualified citation. The `[^\n]{0,140}?` is not laziness — it is the fix for a
+# A revision-qualified citation. The `[^\n]{0,140}?` is not laziness, it is the fix for a
 # real false negative found by running the agent and reading what it actually produced.
 #
 # ARIA formats citations with the procedure TITLE between the id and the revision:
 #
 #     **SOP-LOTO-014** "Lockout/Tagout for Centrifugal Pumps" Rev 7 (effective 2025-03-11)
-#     **SOP-MECH-108 (Mechanical Seal Replacement — API 682), Rev 3 (effective 2025-01-27)**
+#     **SOP-MECH-108 (Mechanical Seal Replacement, API 682), Rev 3 (effective 2025-01-27)**
 #
 # The original `SOP-\w+-\d+\s+Rev\s+\d+` required them adjacent, so it reported "procedure id
-# but NO revision" on three of five real formats — with the revision sitting right there in the
+# but NO revision" on three of five real formats, with the revision sitting right there in the
 # text. An evaluator that says the agent isn't citing when it is will send you off to fix a
 # prompt that was fine, and it makes the metric it feeds worthless.
 #
@@ -71,7 +71,7 @@ def _annotate_run(**fields: Any) -> None:
 
     This is how a middleware makes itself visible to Module 3. Anything written here
     becomes a filterable field on the trace, which means you can build a monitoring chart
-    or an alert on it — `metadata.reasoning_leak_detected = true`, for instance.
+    or an alert on it, `metadata.reasoning_leak_detected = true`, for instance.
 
     Silently does nothing when tracing is off, which is what you want for local runs and
     for unit tests.
@@ -89,7 +89,7 @@ def _annotate_run(**fields: Any) -> None:
                 metadata[key] = metadata.get(key, 0) + value
             else:
                 metadata[key] = value
-    except Exception:  # noqa: BLE001 — never let telemetry break the agent
+    except Exception:  # noqa: BLE001, never let telemetry break the agent
         pass
 
 
@@ -114,7 +114,7 @@ def _replace_text(message: AIMessage, new_text: str) -> AIMessage:
     with an existing id as a replacement rather than an append. Drop the id and you get
     two assistant messages instead of one corrected one.
 
-    Reasoning content blocks are dropped rather than rewritten — they are the thing we are
+    Reasoning content blocks are dropped rather than rewritten, they are the thing we are
     removing from the visible answer.
     """
     if isinstance(message.content, str):
@@ -133,20 +133,20 @@ class ReasoningLeakMiddleware(AgentMiddleware):
 
     The failure looks like this in production: instead of an answer, the user gets
     "Okay, so the user is asking about lockout/tagout for P-101A. Let me search the
-    procedure library. I should probably also check the equipment record..." — a wall of
+    procedure library. I should probably also check the equipment record...", a wall of
     first-person deliberation. It is inconspicuous in your own testing because you *can*
     read it and it *is* roughly correct, so it survives review. Your users hate it.
 
     It happens for a few reasons: a model whose reasoning tokens are not being separated
     into the right channel, a prompt that asked the model to "think step by step" without
     saying where, or a provider/version change that altered how reasoning is returned.
-    That last one is why this belongs in code — it can start happening on a Tuesday
+    That last one is why this belongs in code, it can start happening on a Tuesday
     without you shipping anything.
 
     Two mechanisms, with deliberately different confidence levels:
 
     * Explicitly delimited blocks (`<thinking>...</thinking>`, `<scratchpad>`, and
-      friends) are **removed**. Zero false positives — these markers never legitimately
+      friends) are **removed**. Zero false positives, these markers never legitimately
       appear in an answer about pump seals.
     * Reasoning-sounding *prose* is only **flagged**, never removed. A regex confident
       enough to delete prose is a regex confident enough to delete a real answer. We
@@ -164,7 +164,7 @@ class ReasoningLeakMiddleware(AgentMiddleware):
         r"<\s*/\s*\1\s*>",
         re.IGNORECASE | re.DOTALL,
     )
-    #: An unclosed opening tag — the model started a block and never terminated it, so the
+    #: An unclosed opening tag: the model started a block and never terminated it, so the
     #: remainder of the message is reasoning. Applied only after the paired form.
     _DANGLING: Final[re.Pattern[str]] = re.compile(
         r"<\s*(thinking|thought|scratchpad|reasoning|internal)\s*>.*\Z",
@@ -233,7 +233,7 @@ class ToolArgumentGuardMiddleware(AgentMiddleware):
     You have three options for each of these. Ranked:
 
     1.  **Fix it in code** where the correct behavior is unambiguous. Case normalization is
-        not a judgment call — the model should not have to spend a turn learning that.
+        not a judgment call, the model should not have to spend a turn learning that.
     2.  **Return a corrective message** where a fix would be a guess. Redirecting a tank
         tag to the tank tool is arguably a fix, but silently changing which tool ran makes
         the trace lie about what happened, so we tell the model instead and let the next
@@ -319,7 +319,7 @@ class ToolArgumentGuardMiddleware(AgentMiddleware):
 
         `ToolCallRequest.override` is the supported API in current LangChain; the in-place
         fallback keeps this working on older point releases. Version-defensive code in a
-        workshop repo earns its keep — half the room will be on a different minor.
+        workshop repo earns its keep, half the room will be on a different minor.
         """
         override = getattr(request, "override", None)
         if callable(override):
@@ -344,14 +344,14 @@ class AnswerContractMiddleware(AgentMiddleware):
     We deliberately **do not** rewrite the answer. Two reasons:
 
     * We cannot invent a citation. If the model gave advice with no source, appending a
-      plausible-looking source is the worst possible outcome — we would be manufacturing
+      plausible-looking source is the worst possible outcome, we would be manufacturing
       exactly the false confidence the contract exists to prevent.
     * A visible, measured violation is more valuable than a hidden, patched one. This is
       the middleware that makes "our agent gave unsourced safety advice" a number on a
       dashboard with an alert on it, rather than something a user discovers.
 
     So: annotate, and let Modules 3 and 4 do their jobs. This is the seam between building
-    an agent and operating one, and it is worth pausing on during the workshop — the
+    an agent and operating one, and it is worth pausing on during the workshop, the
     decision *not* to auto-fix is the engineering judgment being taught here.
     """
 
@@ -392,7 +392,7 @@ class AnswerContractMiddleware(AgentMiddleware):
                 citation_available=consulted,
             )
 
-        # Cited a procedure it never actually read. Rarer and much worse — this is
+        # Cited a procedure it never actually read. Rarer and much worse, this is
         # fabricated provenance, which is more dangerous than no provenance because it
         # survives review.
         if mentions_procedure and not consulted:

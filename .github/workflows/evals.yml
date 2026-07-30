@@ -1,7 +1,7 @@
 name: evals
 
 # Three tiers, priced deliberately. The whole design question for agent CI is "what do I run
-# on every commit without going broke?" — and the answer is: a lot more than people assume,
+# on every commit without going broke?", and the answer is: a lot more than people assume,
 # because Level 0 and code-only evals need no model at all.
 
 on:
@@ -12,7 +12,7 @@ on:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # TIER 1 — every commit. No API key, no model, no LangSmith. Seconds, free.
+  # TIER 1: every commit. No API key, no model, no LangSmith. Seconds, free.
   #
   # This is the tier people skip, and it catches the most per dollar: middleware
   # behavior, tool schemas, the assembled prompt, middleware order, and the
@@ -29,7 +29,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
-      - name: Unit tests — application, middleware, harness context, evaluators
+      - name: Unit tests: application, middleware, harness context, evaluators
         run: pytest tests/ -q
 
       # A stale notebook is a real failure: participants get a build artifact that
@@ -38,7 +38,7 @@ jobs:
         run: python scripts/build_notebooks.py --check
 
   # ---------------------------------------------------------------------------
-  # TIER 2 — every PR that touches the agent. Model calls, but NO judge calls,
+  # TIER 2: every PR that touches the agent. Model calls, but NO judge calls,
   # so it costs cents rather than dollars.
   #
   # `paths` is the lever. An agent's eval suite is expensive enough that gating it
@@ -62,7 +62,7 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
-            echo "No agent changes — skipping model-backed evals."
+            echo "No agent changes: skipping model-backed evals."
           fi
 
       - uses: actions/setup-python@v5
@@ -88,7 +88,7 @@ jobs:
           python -m evals.runner --level scripted-cheap --reps 1
 
   # ---------------------------------------------------------------------------
-  # TIER 3 — the real gate. Judges, repetitions, and the regression dataset grown
+  # TIER 3: the real gate. Judges, repetitions, and the regression dataset grown
   # from production. Costs real money, so it runs when you ask for it.
   #
   # Opt in by labelling the PR `run-evals`, or dispatching manually. Teams also
@@ -125,7 +125,7 @@ jobs:
           python -m evals.runner --level scripted --reps 3
 
       # Production failures, promoted from human review. This is the gate that
-      # matters most — it can only fail on something that already hurt someone.
+      # matters most, it can only fail on something that already hurt someone.
       - name: Regression gate
         continue-on-error: true    # the dataset may not exist yet on a fresh clone
         env:
@@ -144,7 +144,7 @@ jobs:
         run: pytest evals/test_stateful.py -q --langsmith-output
 
   # ---------------------------------------------------------------------------
-  # NIGHTLY — the expensive tier nobody wants in the critical path.
+  # NIGHTLY: the expensive tier nobody wants in the critical path.
   # Simulated users are N model calls for the agent plus N for the user, so they
   # are an order of magnitude more expensive than anything above.
   # Move to a schedule: trigger and add `schedule: - cron: "0 7 * * *"`.

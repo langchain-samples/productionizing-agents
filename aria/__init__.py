@@ -1,4 +1,4 @@
-"""ARIA — the agent.
+"""ARIA: the agent.
 
 This package contains the agent and nothing else: prompt, middleware, tool wiring, model
 selection. All plant data access lives in `aria_mcp`, behind a tested API.

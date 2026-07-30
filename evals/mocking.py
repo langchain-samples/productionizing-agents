@@ -2,7 +2,7 @@
 
 THE IDEA
 --------
-Module 1 established that the tools are correct — 110 tests, no LLM. So evaluating the
+Module 1 established that the tools are correct, 110 tests, no LLM. So evaluating the
 agent does not mean evaluating retrieval again. It means asking:
 
     "Given a specific tool response, does the agent behave correctly?"
@@ -15,7 +15,7 @@ adding a case is adding a row, not writing code.
 WHERE THE SCRIPT LIVES
 ----------------------
 Both halves of a dataset example accept arbitrary JSON. LangSmith does not care what you put
-there — only your target and your evaluators do. The mock world goes in `inputs`, because the
+there, only your target and your evaluators do. The mock world goes in `inputs`, because the
 *target* is what needs it, and because the world a case runs in is an input by definition:
 
     {
@@ -71,7 +71,7 @@ class CallRecorder:
 
     This is the trajectory, and it's what lets you assert on *process* rather than only on
     the final answer. "Did it call get_tank_status before answering about a tank level" is
-    often a sharper test than anything you can check in the prose — and it's a code
+    often a sharper test than anything you can check in the prose, and it's a code
     assertion, so it costs nothing and never flakes.
     """
 
@@ -107,10 +107,10 @@ def make_mock_tool(name: str, script: Any, recorder: CallRecorder) -> Structured
     Args:
         name: A real ARIA tool name.
         script: What the tool should return. Three forms:
-            * a dict/str — returned every time it is called.
-            * a list — returned in sequence, one per call. The last entry repeats once
+            * a dict/str: returned every time it is called.
+            * a list: returned in sequence, one per call. The last entry repeats once
               exhausted. Use this for "fails, then succeeds on retry" cases.
-            * `{"raise": "message"}` — the tool *throws* instead of returning. Distinct from
+            * `{"raise": "message"}`: the tool *throws* instead of returning. Distinct from
               returning `{"error": ...}`, and worth testing separately: a raised exception
               takes the `ToolRetryMiddleware` path, a returned error does not.
     """
@@ -152,10 +152,10 @@ def mocked_toolset(
     Args:
         mock_spec: `{tool_name: script}` from the dataset example's `inputs.mock_tools`.
             `None` or `{}` gives you Level 1: every tool is a stub. That is the right setup
-            for "does the agent work at all" and "did it pick the right tool" — you are
+            for "does the agent work at all" and "did it pick the right tool", you are
             testing routing, and a stub answers that as well as real data would, for free.
         recorder: Collects the trajectory.
-        stub_unscripted: Stub out tools the dataset didn't mention. Keep True — the whole
+        stub_unscripted: Stub out tools the dataset didn't mention. Keep True, the whole
             point is a hermetic test, and a single un-mocked tool reaching real data is how
             a test suite becomes quietly non-deterministic.
     """
@@ -171,7 +171,7 @@ def assert_contract_parity() -> None:
     """Mocks must present an identical surface to the real tools.
 
     Called in Module 2's notebook, and in `evals/test_stateful.py`. If this ever fails, your
-    evals are measuring an agent that does not exist in production — the most expensive kind
+    evals are measuring an agent that does not exist in production, the most expensive kind
     of green test suite.
     """
     recorder = CallRecorder()

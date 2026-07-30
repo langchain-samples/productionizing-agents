@@ -1,4 +1,4 @@
-"""Run ARIA's evals — target function, experiment runner, and the model comparison.
+"""Run ARIA's evals: target function, experiment runner, and the model comparison.
 
     python -m evals.runner --seed                       # create the datasets
     python -m evals.runner --level smoke                # run one split
@@ -10,7 +10,7 @@ WHY `aevaluate` AND NOT `evaluate`
 `aevaluate` runs examples concurrently with real async concurrency, and an agent eval is
 almost entirely IO wait on model calls. On a 12-example dataset with `max_concurrency=8` the
 difference is roughly a minute versus roughly ten seconds. When your test suite is fast
-enough to run on every prompt tweak, you run it on every prompt tweak — and that behavioral
+enough to run on every prompt tweak, you run it on every prompt tweak, and that behavioral
 change is worth more than the wall-clock saving.
 
 WHY REPETITIONS
@@ -123,22 +123,22 @@ LEVELS: dict[str, dict[str, Any]] = {
         # `complete_work_order` to see red, then with it to see green.
         "dataset": TDD_DATASET,
         "evaluators": ALL_EVALUATORS,
-        "description": "The hand-crafted spec — workflows agreed before any code was written",
+        "description": "The hand-crafted spec, workflows agreed before any code was written",
     },
     "smoke": {
         "dataset": SMOKE_DATASET,
         "evaluators": SMOKE_EVALUATORS,
-        "description": "Level 1 — does it work at all, and does it route correctly",
+        "description": "Level 1, does it work at all, and does it route correctly",
     },
     "scripted": {
         "dataset": SCRIPTED_DATASET,
         "evaluators": ALL_EVALUATORS,
-        "description": "Level 2 — behavior under scripted tool responses, failures included",
+        "description": "Level 2, behavior under scripted tool responses, failures included",
     },
     "regressions": {
         # Populated from the annotation queue, not by hand. Every row is a failure that
         # actually happened in production, carrying assertions a human wrote while looking at
-        # it. This becomes the most valuable dataset you own — the others are guesses about
+        # it. This becomes the most valuable dataset you own, the others are guesses about
         # what users do; this one is evidence.
         "dataset": REGRESSIONS_DATASET,
         "evaluators": ALL_EVALUATORS,
@@ -150,7 +150,7 @@ LEVELS: dict[str, dict[str, Any]] = {
         # `scripted` split is the pre-release gate.
         "dataset": SCRIPTED_DATASET,
         "evaluators": CODE_EVALUATORS,
-        "description": "Level 2, code assertions only — cheap enough for every commit",
+        "description": "Level 2, code assertions only, cheap enough for every commit",
     },
 }
 
@@ -190,7 +190,7 @@ async def run_level(
         num_repetitions=reps,
         max_concurrency=max_concurrency,
         # Metadata is what makes an experiment findable six weeks later. Record every
-        # variable you changed — future you will want to filter on exactly these.
+        # variable you changed, future you will want to filter on exactly these.
         metadata={
             "level": level,
             "model": model,
@@ -207,7 +207,7 @@ def experiment_stats(experiment_name: str) -> dict[str, Any]:
 
     This is the part people skip, and it is half the value of running evals at all. Pass/fail
     tells you whether the agent works. Cost and latency tell you whether you can afford to
-    ship it — and they are what turn "should we use the cheaper model?" from an argument into
+    ship it, and they are what turn "should we use the cheaper model?" from an argument into
     a measurement.
     """
     from langsmith import Client
@@ -257,10 +257,10 @@ def print_comparison(stats: list[dict[str, Any]]) -> None:
     print("-" * 96)
     row("total cost (USD)", [f"${s['total_cost']:.4f}" for s in stats])
     row("cost per run (USD)", [f"${s['cost_per_run']:.4f}" for s in stats])
-    row("latency p50 (s)", [f"{s['latency_p50']:.2f}" if s["latency_p50"] else "—" for s in stats])
-    row("latency p99 (s)", [f"{s['latency_p99']:.2f}" if s["latency_p99"] else "—" for s in stats])
+    row("latency p50 (s)", [f"{s['latency_p50']:.2f}" if s["latency_p50"] else ", " for s in stats])
+    row("latency p99 (s)", [f"{s['latency_p99']:.2f}" if s["latency_p99"] else ", " for s in stats])
     row("total tokens", [f"{s['total_tokens']:,}" for s in stats])
-    row("error rate", [f"{s['error_rate']:.1%}" if s["error_rate"] is not None else "—" for s in stats])
+    row("error rate", [f"{s['error_rate']:.1%}" if s["error_rate"] is not None else ", " for s in stats])
 
     print("-" * 96)
     for s in stats[1:]:
@@ -274,7 +274,7 @@ def print_comparison(stats: list[dict[str, Any]]) -> None:
         if score_delta >= -0.02:
             print("    → Quality held. This is a straightforward win; ship the cheaper model.")
         elif score_delta >= -0.10:
-            print("    → Small regression. Look at WHICH evaluator dropped before deciding —")
+            print("    → Small regression. Look at WHICH evaluator dropped before deciding, ")
             print("      a 0.05 drop in `within_tool_budget` is very different from a 0.05")
             print("      drop in `grounded_in_tool_output`. Not all points are equal.")
         else:
@@ -294,7 +294,7 @@ async def compare_models(
     stops being a matter of taste. You run it and read the table.
 
     Note what is held fixed: the dataset, the evaluators, and the judge model. Change any of
-    those between runs and the comparison is worthless — you can no longer attribute a score
+    those between runs and the comparison is worthless, you can no longer attribute a score
     difference to the agent rather than the grader.
     """
     from aria.agent_v2 import DEFAULT_COMPARISON, MODEL_CANDIDATES

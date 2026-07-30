@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ARIA — a deliberately minimal front end.
+  ARIA: a deliberately minimal front end.
 
   Open this file directly in a browser. No build step, no npm, no server for the page itself.
 
@@ -9,15 +9,15 @@
     1. A local server:   langgraph dev        ->  http://127.0.0.1:2024   (no API key)
     2. A deployment:     langgraph deploy     ->  https://<your>.us.langgraph.app  (+ API key)
 
-  That is the point of having it. If `langgraph deploy` doesn't work for someone in the room —
-  no Plus plan, Docker not running, corporate network — they paste the localhost URL and carry
+  That is the point of having it. If `langgraph deploy` doesn't work for someone in the room,
+  no Plus plan, Docker not running, corporate network, they paste the localhost URL and carry
   on. Nobody is blocked, and the rest of the workshop is identical either way, because both
   targets speak the same API and both write traces to the same LangSmith project.
 
   WHY A UI AT ALL, IN AN OBSERVABILITY WORKSHOP?
   Because Modules 3 and 4 need production traffic that a *human* generated. Script-generated
   traces are fine for looking at monitoring charts, but the interesting failures come from
-  people asking things you didn't anticipate — which is exactly the lesson. Ten minutes of a
+  people asking things you didn't anticipate, which is exactly the lesson. Ten minutes of a
   room full of engineers trying to break ARIA produces better material for the annotation
   queue than any traffic generator.
 
@@ -29,7 +29,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ARIA — Asset Reliability Information Assistant</title>
+<title>ARIA: Asset Reliability Information Assistant</title>
 <style>
   :root {
     --bg: #0f1115; --panel: #171a21; --line: #262b36; --text: #e6e8ec;
@@ -128,7 +128,7 @@
 
     "OSHA benzene PEL" is the important one: it sounds in-domain, it is safety-critical, and
     it is NOT in the procedure library. ARIA as shipped will very likely answer it from the
-    model's own knowledge — confidently, with no source. That is the production failure the
+    model's own knowledge, confidently, with no source. That is the production failure the
     online evaluator catches, the annotation queue confirms, and Module 4 turns into a
     regression test.
   -->
@@ -136,7 +136,7 @@
     <button data-q="What's the lockout procedure for P-101A?">lockout P-101A</button>
     <button data-q="What's the level in tank 43?">tank 43 level</button>
     <button data-q="Is nitrogen purge required before entering V-205?">entry V-205</button>
-    <button data-q="Raise an urgent work order on P-101A — the inboard seal is leaking. I'm T. Alvarez, badge 8823.">raise a work order</button>
+    <button data-q="Raise an urgent work order on P-101A, the inboard seal is leaking. I'm T. Alvarez, badge 8823.">raise a work order</button>
     <button data-q="Take P-101A out of service, the seal is leaking badly. Requested by T. Alvarez, badge 8823." class="probe">shutdown (triggers approval)</button>
     <button data-q="What's the OSHA permissible exposure limit for benzene?" class="probe">OSHA benzene PEL ← probe</button>
   </div>
@@ -219,7 +219,7 @@ function render(state) {
 function renderInterrupt(parent, intr) {
   const box = document.createElement("div");
   box.className = "interrupt";
-  box.innerHTML = `<h3>APPROVAL REQUIRED — the agent has paused before acting</h3>
+  box.innerHTML = `<h3>APPROVAL REQUIRED, the agent has paused before acting</h3>
                    <pre>${JSON.stringify(intr.value ?? intr, null, 2)}</pre>`;
 
   const mk = (label, resume) => {
@@ -236,7 +236,7 @@ function renderInterrupt(parent, intr) {
 
   box.append(
     mk("Approve", { type: "accept" }),
-    mk("Reject", { type: "reject", args: "Unit Supervisor declined — hold until turnaround." }),
+    mk("Reject", { type: "reject", args: "Unit Supervisor declined, hold until turnaround." }),
   );
   parent.querySelector(".body").appendChild(box);
 }
@@ -284,7 +284,7 @@ document.querySelectorAll(".hints button").forEach((b) => {
 });
 
 bubble("sys", "session",
-`Connected to ${base()} — nothing sent yet.
+`Connected to ${base()}, nothing sent yet.
 
 Every message here becomes a trace in your LangSmith project. Modules 3 and 4 read those
 traces, so try to break it: ask something out of scope, ask about equipment that doesn't

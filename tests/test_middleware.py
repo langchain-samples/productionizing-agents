@@ -2,7 +2,7 @@
 
 Note what makes these tests cheap: middleware hooks are plain functions over state. You can
 call `after_model({"messages": [...]}, runtime)` directly with a hand-built message and
-assert on exactly what comes back — no model, no API key, no network, no flake.
+assert on exactly what comes back, no model, no API key, no network, no flake.
 
 That is the strongest practical argument for moving a rule out of the prompt and into a
 hook. "Always cite the procedure revision" in a prompt can only be verified statistically,
@@ -211,7 +211,7 @@ def tool_result(name: str) -> ToolMessage:
 
 def test_contract_middleware_never_rewrites_the_answer(contract: AnswerContractMiddleware) -> None:
     """The whole design decision, asserted. We cannot invent a citation, so we must not
-    try — a fabricated source is worse than a missing one."""
+    try, a fabricated source is worse than a missing one."""
     message = AIMessage(content="Do the thing.", id="m")
     update = contract.after_model(state(tool_result("search_procedures"), message), RUNTIME)
     assert update is None
@@ -223,8 +223,8 @@ def test_cited_answer_is_recognized(contract: AnswerContractMiddleware) -> None:
 
 
 def test_procedure_id_without_a_revision_is_not_a_citation(contract: AnswerContractMiddleware) -> None:
-    """'See SOP-LOTO-014' is not good enough. Revisions change what the procedure says —
-    SOP-CSE-003 Rev 12 tightened blinding requirements over Rev 11 — so an unversioned
+    """'See SOP-LOTO-014' is not good enough. Revisions change what the procedure says,
+    SOP-CSE-003 Rev 12 tightened blinding requirements over Rev 11, so an unversioned
     reference can send someone to instructions that are no longer correct."""
     from aria.middleware import CITATION, PROCEDURE_ID
 

@@ -3,7 +3,7 @@
 The same five capabilities are exposed to the agent two ways:
 
     local_tools()      thin in-process adapters over aria_mcp.repository
-    mcp_tools()         the real thing — a subprocess speaking MCP
+    mcp_tools()         the real thing, a subprocess speaking MCP
 
 Both are backed by identical `aria_mcp.repository` calls, and that is the point worth
 noticing. Once your application logic lives behind a narrow, tested API, *how* the agent
@@ -15,7 +15,7 @@ Which to use:
 
     mcp_tools()    What you ship. Real process boundary, real protocol, and the same
                    server can serve other agents, an IDE, or a human with an MCP client.
-                   Async — MCP is an async protocol and there is no honest way around it.
+                   Async: MCP is an async protocol and there is no honest way around it.
 
     local_tools()  What you use in notebooks, unit tests, and eval loops. Synchronous, no
                    subprocess to manage, ~1ms per call. When you are running an eval over
@@ -66,7 +66,7 @@ def search_procedures(query: str, limit: int = 5) -> dict[str, Any]:
 
     Returns:
         `{"results": [...], "count": n}` where each result has `id`, `title`, `revision`,
-        `effective_date`, `applies_to`, `body` (possibly truncated), and `citation` — a
+        `effective_date`, `applies_to`, `body` (possibly truncated), and `citation`, a
         preformatted string you should quote verbatim rather than assembling yourself.
         `{"results": [], "count": 0}` means the library genuinely has nothing on that
         topic; say so plainly rather than answering from general knowledge.
@@ -84,7 +84,7 @@ def get_procedure(procedure_id: str) -> dict[str, Any]:
     """Retrieve the complete, untruncated text of one procedure by its id.
 
     Use this after `search_procedures` when you need every step, or when the user names a
-    procedure directly. Never guess an id — if you are not certain, search instead.
+    procedure directly. Never guess an id, if you are not certain, search instead.
 
     Args:
         procedure_id: An id like "SOP-CSE-003". Case-insensitive.
@@ -92,7 +92,7 @@ def get_procedure(procedure_id: str) -> dict[str, Any]:
     Returns:
         The full procedure record including `body`, `revision`, `effective_date`, and
         `citation`. Some procedures carry a `notes` field describing what changed in the
-        current revision — read it, because it usually exists precisely because an earlier
+        current revision, read it, because it usually exists precisely because an earlier
         revision said something that is now wrong.
     """
     try:
@@ -108,14 +108,14 @@ def get_equipment(tag: str) -> dict[str, Any]:
 
     Tells you what the asset is, what it is in service on, its hazards, its area electrical
     classification, its current status, its PM and inspection dates, its open work orders,
-    and — importantly — `applicable_procedures`, the list of procedure ids that govern work
+    and, importantly, `applicable_procedures`, the list of procedure ids that govern work
     on it. Reach for those ids rather than searching blind.
 
     Tanks are NOT here. Use `get_tank_status` for anything starting with "T-".
 
     Args:
         tag: An equipment tag like "P-101A", "V-205", "C-401", "K-501". Case-insensitive.
-            Note that many pumps are installed in A/B pairs — "P-101" alone is not a tag
+            Note that many pumps are installed in A/B pairs. "P-101" alone is not a tag
             and the error will tell you which suffixes exist.
 
     Returns:
@@ -134,7 +134,7 @@ def list_equipment(unit: str | None = None) -> dict[str, Any]:
 
     Use this to orient yourself when the user refers to equipment vaguely ("the crude
     charge pumps", "the amine drum") and you need to resolve it to a tag. It returns
-    summaries only — follow up with `get_equipment` for details.
+    summaries only, follow up with `get_equipment` for details.
 
     Args:
         unit: Optional unit name, e.g. "Crude Unit 1", "Naphtha Hydrotreater", "Reformer",
@@ -158,7 +158,7 @@ def get_tank_status(tag: str) -> dict[str, Any]:
     dates, and any data-quality problems.
 
     Pay attention to `data_quality_warnings`. It is a precomputed list of conditions that
-    make the level reading unreliable or the situation hazardous — a suspect automatic
+    make the level reading unreliable or the situation hazardous, a suspect automatic
     gauge, a receipt in progress, or a level close to the high-high alarm. If that list is
     non-empty you must surface every warning in it to the user. Reporting a level from a
     suspect gauge as though it were fact is exactly the failure this tool exists to
@@ -189,7 +189,7 @@ def create_work_order(
 
     Use this when the user asks you to raise, schedule, or write up work. Always look up
     the equipment first and include the governing procedure ids from its
-    `applicable_procedures` — a work order that does not reference its procedures makes the
+    `applicable_procedures`, a work order that does not reference its procedures makes the
     planner go find them again.
 
     Args:
@@ -206,7 +206,7 @@ def create_work_order(
     Returns:
         The created work order including its assigned `id`, plus `created: true`. If an
         identical request was already made this session you get the original back with
-        `created: false` and `duplicate_of` set — that is idempotency working, not an
+        `created: false` and `duplicate_of` set, that is idempotency working, not an
         error, and you should tell the user the work order already exists rather than
         trying again.
     """
@@ -235,7 +235,7 @@ def request_equipment_shutdown(
 
     This is a consequential action. Taking a crude charge pump out of service is a
     production decision, and on a criticality-A asset with no running spare it can force a
-    unit rate cut. It files a request for supervisor approval — it does not shut anything
+    unit rate cut. It files a request for supervisor approval, it does not shut anything
     down.
 
     Requirements, all enforced:
@@ -254,7 +254,7 @@ def request_equipment_shutdown(
 
     Returns:
         The filed request with `status: "pending_supervisor_approval"` and an
-        `impact_assessment` list. Surface every item in that list to the user — it names
+        `impact_assessment` list. Surface every item in that list to the user, it names
         the production consequence, which is the thing the approver most needs to know.
     """
     from aria_mcp.work_orders import get_store
@@ -279,7 +279,7 @@ def complete_work_order(
     """Close out an existing work order as complete.
 
     Use this when the user reports that work has been finished. You must know the work order
-    id — call `list_work_orders` if the user refers to the work without giving an id, and ask
+    id, call `list_work_orders` if the user refers to the work without giving an id, and ask
     them to confirm which one rather than guessing.
 
     A work order can only be closed once. If it is already complete, say so; do not close it
@@ -289,7 +289,7 @@ def complete_work_order(
         work_order_id: The id to close, e.g. "WO-90001". Case-insensitive. Must exist.
         completion_notes: What was actually done, at least 15 characters. These notes become
             the asset's maintenance history and the next person to work on this equipment
-            reads them — record findings, parts used, and anything left outstanding.
+            reads them, record findings, parts used, and anything left outstanding.
         completed_by: Name or badge number of the human who did or verified the work.
             Required; you cannot sign off work yourself. Ask if the user has not said.
 
@@ -339,7 +339,7 @@ READ_TOOLS = [
 
 #: The write surface. Not safe to retry blindly; `request_equipment_shutdown` is gated by
 #: human-in-the-loop in `aria/agent_v2.py`. Keeping these in a separate list is not
-#: cosmetic — it is what lets you configure interrupts, retries, and permissions by
+#: cosmetic, it is what lets you configure interrupts, retries, and permissions by
 #: category instead of enumerating tool names in four different places.
 WRITE_TOOLS = [
     create_work_order,
@@ -361,7 +361,7 @@ def local_tools(*, include_writes: bool = True) -> list[Any]:
     """In-process tools. Synchronous, fast, no subprocess. Use in notebooks and evals.
 
     Args:
-        include_writes: Set False for a read-only agent — useful for the Level 1 and 2
+        include_writes: Set False for a read-only agent, useful for the Level 1 and 2
             evals in Module 2, where you want to measure retrieval behavior without any
             chance of a test run filing work orders.
     """
@@ -375,7 +375,7 @@ async def mcp_tools(*, transport: str = "stdio", url: str | None = None) -> list
     """The same capabilities, reached over MCP. This is the production path.
 
     Args:
-        transport: "stdio" launches `python -m aria_mcp.server` as a subprocess — the right
+        transport: "stdio" launches `python -m aria_mcp.server` as a subprocess, the right
             choice when the server is a local sidecar. "http" connects to an already-running
             server, which is what you use once the application is deployed independently
             and shared between consumers.
@@ -383,7 +383,7 @@ async def mcp_tools(*, transport: str = "stdio", url: str | None = None) -> list
 
     Returns:
         LangChain tools, one per `@mcp.tool()` on the server. Note that the descriptions
-        the model sees come from the *server's* docstrings, not from this file — the
+        the model sees come from the *server's* docstrings, not from this file, the
         application owns its own contract, which is exactly what you want. Update a tool
         description on the server and every consumer picks it up on reconnect.
     """
@@ -410,7 +410,7 @@ async def mcp_tools(*, transport: str = "stdio", url: str | None = None) -> list
 
 
 def arg_schema(t: Any) -> dict[str, dict[str, Any]]:
-    """The `properties` block of a tool's argument schema — literally what the model sees."""
+    """The `properties` block of a tool's argument schema, literally what the model sees."""
     schema = getattr(t, "args_schema", None)
     if schema is None:
         return {}

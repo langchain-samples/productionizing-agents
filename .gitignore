@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 .env
 .ipynb_checkpoints/
-# Notebooks are build artifacts of notebook_src/ — but they ARE committed so
+# Notebooks are build artifacts of notebook_src/, but they ARE committed so
 # participants don't need to build. Outputs are stripped by the builder.
 slides/screenshots/
 slides/*.pdf
