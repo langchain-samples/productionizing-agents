@@ -168,8 +168,7 @@ guessing which half moved.</p>
 </ol>
 <p>If you can't cheaply rule out (2), <strong>every debugging session investigates both.</strong> And these
 aren't independent: bad tool output <em>causes</em> bad reasoning, so you get to watch the model make
-a perfectly reasonable inference from garbage while you argue with yourself about whether the
-model is dumb.</p>
+a reasonable inference from garbage and you spend the session blaming the model.</p>
 <p>The fix is a boundary:</p>
 <pre><code>app/               THE APPLICATION: no LLM import anywhere in it
   repository.py      data access, validation, business rules
@@ -179,7 +178,7 @@ agent/             THE AGENT: prompt, middleware, model, tool wiring
 </code></pre>
 <p>Now <code>pytest tests/</code> runs the application in milliseconds with no API key. When the agent
 misbehaves you can say <em>"the tools are correct"</em> and mean it, with a green run behind you. The
-only remaining variable is the model. <strong>That's the prize</strong>, not the test count.</p>
+only remaining variable is the model, which is the point of the boundary, not the test count.</p>
 <p>Putting the boundary at a protocol (MCP, or an HTTP service) rather than a module adds: the
 separation becomes impossible to violate, the surface is independently deployable and
 load-testable, one application can serve several consumers, and authorization lands somewhere
@@ -235,7 +234,7 @@ programmer. Six that matter:</p>
 human involved. Write your error messages for the model that will read them.</p>
 <p>On that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
 <code>suspect</code>, which means its level must not be quoted as fact. The tempting design hands the model
-raw JSON and hopes it notices the field. Often it does! That's exactly the problem: <strong>"often" is
+raw JSON and hopes it notices the field. It often does, which is the problem: <strong>"often" is
 not a safety property</strong>, and it degrades silently when you upgrade the model. Compute a
 <code>data_quality_warnings</code> list in tested code instead.</p>
 <hr />
@@ -276,7 +275,7 @@ not a safety property</strong>, and it degrades silently when you upgrade the mo
 <pre><code>code evaluator   assert &quot;SOP-014 Rev 7&quot; in answer     exact, free, instant
 LLM-as-judge     assert grounded_in(answer, sources)  fuzzy, costs a model call
 </code></pre>
-<p>That's it. A judge is an assertion you can't write as a regex.</p>
+<p>A judge is an assertion you can't write as a regex.</p>
 <h3 id="both-reasons-you-want-a-suite">Both reasons you want a suite</h3>
 <p>People build eval suites to catch bugs before shipping. That's the obvious reason and the smaller
 one. The bigger one is the same reason you want unit tests before a refactor: <strong>tests are what make
@@ -392,7 +391,7 @@ costs nothing and never flakes; at Level 4 the same property costs a dollar and 
 probability.</p>
 <hr />
 <h2 id="level-0-the-level-nobody-writes">Level 0, the level nobody writes</h2>
-<p>This is the highest value per second in the entire suite, and almost nobody does it. Two kinds.</p>
+<p>This is the highest value per second in the entire suite. Two kinds.</p>
 <h3 id="test-your-middleware-directly">Test your middleware directly</h3>
 <p>Middleware hooks are plain functions over state. You don't need an agent to test them, let
 alone a model.</p>
@@ -400,7 +399,7 @@ alone a model.</p>
 <code>get_equipment</code>. When the model reaches for the wrong one, we'd rather stop the call and say so
 than let the tool fail and hope the model recovers.</p>
 <p>The hook takes two things: the tool call, and a <code>handler</code> that means <em>"go ahead and run the real
-tool."</em> That second argument is the whole trick. Pass in a fake one that records whether it was
+tool."</em> That second argument is what makes the hook testable. Pass in a fake one that records whether it was
 reached, and you can assert the guard stopped the call without ever running a tool:</p>
 <pre><code class="language-python"><span class="k">def</span><span class="w"> </span><span class="nf">test_tank_tag_sent_to_equipment_tool_is_redirected</span><span class="p">():</span>
     <span class="n">guard</span> <span class="o">=</span> <span class="n">ToolArgumentGuardMiddleware</span><span class="p">()</span>
@@ -431,9 +430,9 @@ middleware:  check the answer, flag it if absent           ← a guarantee, 100%
 <p>The prompt reaching your model is assembled at runtime from your system prompt, tool schemas,
 harness-injected tools, middleware rewrites, and dynamically loaded skills or memories: five
 layers of code you didn't write today.</p>
-<p><strong>Almost nobody looks at it.</strong> People debug agent behavior by reading their own source and
+<p>People usually debug agent behavior by reading their own source and
 reasoning about what the model <em>probably</em> received.</p>
-<p>So look at it. Invoke once against a fake model that records what it got:</p>
+<p>Invoke once against a fake model that records what it got:</p>
 <pre><code class="language-python"><span class="k">class</span><span class="w"> </span><span class="nc">ContextCapture</span><span class="p">(</span><span class="n">AgentMiddleware</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Records the first fully-assembled model request, then lets it proceed.&quot;&quot;&quot;</span>
 
@@ -527,7 +526,7 @@ which your clever groundedness judge will notice, because it never receives an a
 a tank-level question without calling the tank tool got it right from memory, which is a bug even
 when the answer is correct.</p>
 <h3 id="level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</h3>
-<p>Now the useful part. Instead of <em>waiting</em> for production to hand you a suspect sensor reading so
+<p>Instead of <em>waiting</em> for production to hand you a suspect sensor reading so
 you can see what the agent does, you <strong>script</strong> it.</p>
 <p>Put the mock world in the dataset. Both halves of a row take arbitrary JSON that the platform
 never interprets, so one row can carry the world <em>and</em> the expectations:</p>
@@ -592,7 +591,7 @@ green suite tells you nothing about production. Assert the parity:</p>
 and you've thrown away the most testable part of an agent's behavior. <em>"Did it call
 <code>get_tank_status</code> before answering about a tank level"</em> is a sharper test than anything you can
 check in the prose, and it's a code assertion.</p>
-<h4 id="the-failure-mode-that-hides-best">★ The failure mode that hides best</h4>
+<h4 id="when-a-tool-fails-does-the-agent-say-so">When a tool fails, does the agent say so?</h4>
 <p><strong>A tool failed. Did the agent claim it worked anyway?</strong></p>
 <p>Among the most damaging agent failures in production, and the least likely to be caught in
 casual testing, because the answer <em>reads fine</em>. The user is told their work order was
@@ -741,9 +740,9 @@ actually ships:</p>
 </code></pre>
 <p>Nobody can answer that, so the numbers aren't comparable between reviewers, between runs, or
 between models. <strong>Never a bare 1–10.</strong> If you can't write the anchor for each point you don't
-have a scale; you have a vibe with a number attached, and it will be treated as data.</p>
+have a scale, and reviewers will disagree while the number gets treated as data anyway.</p>
 <h3 id="your-evaluators-can-make-mistakes-align-them">Your evaluators can make mistakes. Align them.</h3>
-<p>The step almost everyone skips. You will make decisions with these numbers: <em>"the cheap model
+<p>You will make decisions with these numbers: <em>"the cheap model
 scored 0.94, ship it."</em> If an evaluator has an inverted condition, that number is noise and
 you'll act on it anyway, because a green dashboard is persuasive.</p>
 <blockquote>
@@ -763,7 +762,7 @@ it would produce. Then pin the real formats as test cases.</p>
 <li><strong>Align it against human labels.</strong> Until you've done that, treat its absolute numbers with
    suspicion and its <em>relative</em> numbers (A vs B, same judge) as useful.</li>
 </ol>
-<p>Aligning is straightforward and nobody does it: label ~20 examples yourself, balanced between
+<p>Aligning is straightforward: label ~20 examples yourself, balanced between
 pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
 read the misaligned cases and <strong>group them</strong>, failure modes cluster, and two or three explain
 most of the gap. Then put those failure modes in the prompt. And add more labels
@@ -816,14 +815,48 @@ something did:</p>
 <p>The person who best knows the answer is wrong is almost never the person who wants to write an
 evaluator. <strong>That's the difference between a loop that runs and one that stalls waiting on an
 engineer.</strong></p>
+<p>The other reason they work is <em>when</em> you can write them. A hand-written dataset can only contain
+the failures you thought of in advance, and plenty of agent failures aren't like that: you could
+not have specified them up front, but you know one instantly when you see it in a real trace.
+Assertions are how you capture that recognition. <strong>Which is why they pay off most when pointed at
+flagged production runs rather than at a blank page</strong>: read the trace, write down in English what
+the answer should have done, and the thing you noticed is now a test that can never regress
+silently.</p>
 <p>Note the third assertion in that example: it captures nuance a boolean can't, and it's what
 stops the eventual fix becoming an over-correction where the agent refuses to say the word
 "OSHA" at all.</p>
 <h3 id="write-the-dataset-first">Write the dataset <em>first</em></h3>
-<p>Assertions are also how you do TDD with an agent. Before writing any agent code:</p>
-<blockquote>
-<p><em>"When the user says X, the response should do Y, and the world should look like Z."</em></p>
-</blockquote>
+<p>Assertions are also how you do TDD with an agent. Before writing any agent code, write the rows.
+One per workflow, in three columns:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">When the user says</th>
+<th style="text-align: left;">The response should</th>
+<th style="text-align: left;">And the world should</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><em>"Close out WO-90001, seal replaced, bump tested, no leaks. T. Alvarez, badge 8823."</em></td>
+<td style="text-align: left;">Confirm the closure and name the work order</td>
+<td style="text-align: left;"><code>WO-90001</code> is complete, with the notes and the technician recorded</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>"Close out WO-90001."</em></td>
+<td style="text-align: left;">Ask <strong>who</strong> did the work before closing anything</td>
+<td style="text-align: left;">Unchanged</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>"Take P-101A out of service, the seal is shot."</em></td>
+<td style="text-align: left;">Ask who is requesting the shutdown</td>
+<td style="text-align: left;">Unchanged</td>
+</tr>
+</tbody>
+</table>
+<p>The second row is the one that earns this practice. A planner reading the first row asks <em>"what
+if they don't say who did it?"</em>, and you have discovered you need a <code>completed_by</code> requirement
+before you have written the tool, rather than after a technician closed someone else's work order.</p>
 <p>That table is readable by a domain expert who will never review your prompt. It changes who's in
 the room, and it inverts the usual failure:</p>
 <table>
@@ -898,9 +931,9 @@ flaky usually means an underspecified prompt; broken usually means a missing cap
 </table>
 <p>Two techniques worth knowing: tag your tests so you can run subsets, and make CI conditional on
 what changed: the prompt file, the model config, or an explicit <code>run-evals</code> label.</p>
-<p><strong>But the honest headline:</strong> when you're getting started, the most valuable thing about the suite
-isn't the CI gate. It's that it lets you <em>try things</em>. Swap a model. Rewrite the prompt. Get an
-answer in thirty seconds instead of an argument.</p>
+<p>When you're getting started, the most valuable thing about the suite isn't the CI gate: it's that
+swapping a model or rewriting the prompt gets you an answer in thirty seconds instead of an
+argument.</p>
 <h3 id="use-async">Use async</h3>
 <p>Agent evals are almost entirely IO wait on model calls. On a 12-example dataset with
 <code>max_concurrency=8</code>, async is roughly ten seconds against roughly a minute. When the suite is
@@ -908,7 +941,7 @@ fast enough to run on every prompt tweak, you run it on every prompt tweak, and 
 change is worth more than the wall-clock saving.</p>
 <hr />
 <h2 id="reading-the-results">Reading the results</h2>
-<p>Here's the payoff. <em>"Should we use the expensive model or the cheap one?"</em> is normally settled by
+<p><em>"Should we use the expensive model or the cheap one?"</em> is normally settled by
 vibes, seniority, or whoever last read a benchmark. With a suite it's a measurement:</p>
 <pre><code>metric                       expensive      cheap
 mean score                        0.94       0.93
@@ -995,12 +1028,11 @@ tool calls per request is normal, and that's a product decision to make consciou
 partial output, show the plan, show which tool is running) rather than discover from a complaint.</p>
 <hr />
 <h2 id="the-limit-and-the-loop">The limit, and the loop</h2>
-<p>Here's the thing you have to say out loud about everything above:</p>
 <blockquote>
 <p><strong>Every case in your suite is one you thought of.</strong></p>
 </blockquote>
-<p>Offline evals can only cover failure modes you imagined. Your users will find the others. The
-question is whether you find out from a dashboard or from a phone call.</p>
+<p>Offline evals can only cover failure modes you imagined. Your users will find the others, so you
+need a production loop that surfaces them before a customer does.</p>
 <p>We shipped our agent with a plausible, well-intentioned bullet in the system prompt, something
 a stakeholder had asked for after a pilot review: <em>"answer directly and confidently from your own
 knowledge; people are busy."</em> Every level of the suite passed. Then in production:</p>
@@ -1013,10 +1045,9 @@ tools called: []
 dangerous, not less, because being right builds the trust a later wrong answer will spend. The
 failure is the missing source, not the wrong number.</p>
 <p>It even said <em>"this is a general industrial hygiene fact, not something from the procedure
-library"</em>, and gave the number anyway. It knew. It flagged it. It proceeded.</p>
+library"</em>, and gave the number anyway. It flagged the gap, then ignored it.</p>
 <p>Ask that same agent <em>"what should I cook for dinner?"</em> and it declines cleanly. <strong>The dangerous
-out-of-scope questions are the ones that sound in-domain.</strong> Nobody gets hurt when an agent
-refuses to plan dinner.</p>
+out-of-scope questions are the ones that sound in-domain.</strong></p>
 <h3 id="closing-the-loop">Closing the loop</h3>
 <figure>
 <svg class="ring" viewBox="0 0 820 330" role="img" aria-label="Production traces flow through online evaluators to a human review queue, where assertions are written, run red, then fixed and shipped back to production.">
@@ -1039,8 +1070,9 @@ becomes something the suite can never miss again.</figcaption>
 
 <p><strong>Online evaluators</strong> run against live traffic, where there's no reference output and no idea
 what's coming, so they must be reference-free: input, output, trajectory only. The useful ones
-are out-of-scope, hallucination, task-completed, perceived-error (did the user's next message
-signal they thought the answer was wrong), and a <em>code</em> one for anything mechanically checkable.</p>
+Some useful ones: out-of-scope, hallucination, task-completed, perceived-error (did the user's
+next message signal they thought the answer was wrong), and a <em>code</em> one for anything
+mechanically checkable.</p>
 <p>Sample them. <strong>Start at 10–20%, not 100%.</strong> Every online evaluator is a model call on every
 matching trace; three judges at full sampling can cost more than the agent. You're estimating a
 rate, not auditing every transaction, and a systemic problem shows up just as fast.</p>
@@ -1071,22 +1103,13 @@ interesting one:</p>
 <p><strong>If you only review what your filters catch, your filters define the ceiling on what you can
 learn.</strong></p>
 </blockquote>
-<p>Then a human writes assertions on the bad trace, those become a dataset row, and (this
-part is not optional) <strong>you run it and watch it fail before you fix anything.</strong></p>
+<p>Then a human writes assertions on the bad trace, those become a dataset row, and <strong>you run it and watch it fail before you fix anything.</strong></p>
 <blockquote>
 <p><strong>A regression test you haven't seen fail is not a test. It's a hope.</strong></p>
 </blockquote>
 <p>Skip red and you never learn whether the assertion discriminates. A surprising fraction of
 hand-written assertions pass trivially against the broken agent, because they describe something
 it already did.</p>
-<p>Don't automate the <em>whole</em> loop yet. Tooling now exists that will detect a recurring issue,
-diagnose it, write the fix and open a pull request: most of the work. Keep a human on the merge
-for anything safety-adjacent. Two reasons: your evals are an
-incomplete proxy for "good," and an optimizer will find the gap between your metric and your
-intent, because that's what optimizers do. <em>This whole section exists because our suite had
-exactly such a gap.</em> And the failure is silent: a prompt that games your evaluators looks like
-progress on every chart you have.</p>
-<p>Automate detection, triage and the diff. Read the diff before merging. That's not your bottleneck.</p>
 <hr />
 <h2 id="starter-kit">Starter kit</h2>
 <h3 id="if-youre-starting-out">If you're starting out</h3>
@@ -1179,14 +1202,14 @@ your number and it's wrong in a knowable direction. Note it matters for <em>abso
 Relative comparison under one fixed judge, which is what the model bake-off above does, is
 the case that's already trustworthy.</p>
 <p>Where the two overlap (code checks before judges, one judge per failure mode, binary rather
-than Likert, domain experts in the loop) they agree, which is some evidence both are right.</p>
+than Likert, domain experts in the loop) they agree.</p>
 <hr />
 <h2 id="the-short-version">The short version</h2>
 <ol>
 <li><strong>Test the tools first.</strong> Otherwise you're debugging two coupled non-deterministic systems.</li>
 <li><strong>Errors carry the fix.</strong> <code>{}</code> reads as "doesn't exist" and produces confident lies.</li>
 <li><strong>Five levels, by how much of the world is real.</strong> Push every property as far down as it goes.</li>
-<li><strong>Level 0 is free and nobody writes it.</strong> If your prompt names a tool, assert the tool arrives.</li>
+<li><strong>Level 0 is free.</strong> If your prompt names a tool, assert the tool arrives.</li>
 <li><strong>Code evaluators before judges.</strong> Judges only where a regex genuinely can't reach.</li>
 <li><strong>One judge, one question, answered yes or no.</strong> Decompose "quality" into binaries and average
    them. If you must have a scale, anchor every point. Never a bare 1–10.</li>
