@@ -1047,7 +1047,8 @@ than Likert, domain experts in the loop) they agree.
 4. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
    average them. If you must have a scale, anchor every point.
 5. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
-6. **Pin the judge. Align the judge.**
+6. **Align the judge.** You will make a lot of decisions off the back of it, so check that it is
+   leading you the right way.
 7. **Assertions let domain experts write tests.** That's what keeps the loop moving.
 8. **Always watch the test fail first.**
 9. **Every case is one you thought of.** Build the production loop that finds the rest.
