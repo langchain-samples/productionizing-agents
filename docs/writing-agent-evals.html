@@ -1208,20 +1208,15 @@ traffic. Three places it goes deeper:</p>
 <ol>
 <li><strong>Test as much deterministic code as you can</strong>, to isolate the one non-deterministic part.</li>
 <li><strong>Design your tool results to be readable by an agent.</strong></li>
-<li><strong>Code evaluators before judges.</strong> Judges only where a regex genuinely can't reach.</li>
-<li><strong>Ten pass/fail judges beat one judge scoring 1–10.</strong> Decompose "quality" into binaries and
-   average them. If you must have a scale, anchor every point.</li>
+<li><strong>Code evaluators before judges.</strong></li>
+<li><strong>Ten pass/fail judges beat one judge scoring 1–10.</strong></li>
 <li><strong>Test what happens when tools fail.</strong> "Claimed success anyway" is trust-breaking.</li>
 <li><strong>Align the judge.</strong> You will make a lot of decisions off the back of it, so check that it is
    leading you the right way.</li>
-<li><strong>Assertions let domain experts write tests.</strong> That's what keeps the loop moving.</li>
+<li><strong>Assertions let domain experts write tests.</strong> Use them.</li>
 <li><strong>Always watch the test fail first.</strong></li>
+<li><strong>Make a test for every failure you catch.</strong></li>
 <li><strong>Every case is one you thought of.</strong> Build the production loop that finds the rest.</li>
-</ol>
-<p>And if you keep five things:</p>
-<ol>
-<li><strong>Isolate and test deterministic code</strong> as much as possible.</li>
-<li><strong>Make tests for any failure case you catch.</strong></li>
 <li><strong>Keep your agent thin.</strong></li>
 <li><strong>Engineer for change.</strong></li>
 <li><strong>Build on the shoulders of giants, and ride the wave.</strong></li>

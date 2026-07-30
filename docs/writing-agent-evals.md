@@ -1001,20 +1001,15 @@ traffic. Three places it goes deeper:
 
 1. **Test as much deterministic code as you can**, to isolate the one non-deterministic part.
 2. **Design your tool results to be readable by an agent.**
-3. **Code evaluators before judges.** Judges only where a regex genuinely can't reach.
-4. **Ten pass/fail judges beat one judge scoring 1–10.** Decompose "quality" into binaries and
-   average them. If you must have a scale, anchor every point.
+3. **Code evaluators before judges.**
+4. **Ten pass/fail judges beat one judge scoring 1–10.**
 5. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
 6. **Align the judge.** You will make a lot of decisions off the back of it, so check that it is
    leading you the right way.
-7. **Assertions let domain experts write tests.** That's what keeps the loop moving.
+7. **Assertions let domain experts write tests.** Use them.
 8. **Always watch the test fail first.**
-9. **Every case is one you thought of.** Build the production loop that finds the rest.
-
-And if you keep five things:
-
-1. **Isolate and test deterministic code** as much as possible.
-2. **Make tests for any failure case you catch.**
-3. **Keep your agent thin.**
-4. **Engineer for change.**
-5. **Build on the shoulders of giants, and ride the wave.**
+9. **Make a test for every failure you catch.**
+10. **Every case is one you thought of.** Build the production loop that finds the rest.
+11. **Keep your agent thin.**
+12. **Engineer for change.**
+13. **Build on the shoulders of giants, and ride the wave.**
