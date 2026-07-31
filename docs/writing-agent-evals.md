@@ -1014,6 +1014,10 @@ tests/
 
 ## Going further
 
+If you'd rather hand this to a coding agent than read it, everything above is also packaged as a
+skill: [`skills/writing-agent-evals/SKILL.md`](https://github.com/langchain-samples/productionizing-agents/blob/main/skills/writing-agent-evals/SKILL.md),
+which is this post with the prose stripped out and the rules left in.
+
 Everything above is about getting a suite to exist and be trustworthy. Once you have one, and
 once you have real traces flowing through it, there's a further body of practice worth reading:
 Hamel Husain's [evals-skills](https://github.com/hamelsmu/evals-skills), a set of skills aimed at

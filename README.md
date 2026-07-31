@@ -127,6 +127,9 @@ Full setup detail, including air-gapped / no-LangSmith fallbacks: **[SETUP.md](S
 │   └── 04_self_improving.ipynb
 ├── notebook_src/           Source for the above, jupytext percent format
 │
+├── skills/
+│   └── writing-agent-evals/SKILL.md   The blog as instructions for a coding agent
+│
 ├── frontend/index.html     Local chat UI + approval gate. No build step.
 ├── langgraph.json          `langgraph dev` / `langgraph deploy`
 │
