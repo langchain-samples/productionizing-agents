@@ -433,20 +433,42 @@ def _judge():
 
 
 def _grade(key: str, instructions: str, payload: str) -> dict[str, Any]:
-    grade: Grade = _judge().invoke(
-        [
-            {
-                "role": "system",
-                "content": (
-                    "You are grading the output of a refinery maintenance assistant. Be "
-                    "strict and specific. When the criterion is not met, say exactly what "
-                    "is missing or wrong.\n\n" + instructions
-                ),
-            },
-            {"role": "user", "content": payload},
-        ]
-    )
-    return {"key": key, "score": grade.passed, "comment": grade.reasoning}
+    """Ask the judge one question. Never raises.
+
+    Structured output is not guaranteed: a judge occasionally emits prose, or a half-formed
+    tool call, and `with_structured_output` raises a validation error. Letting that propagate
+    turns one bad grade into a failed evaluator, so retry once and then record the failure as
+    an unscored verdict.
+
+    Unscored, deliberately, rather than a pass or a fail. We do not know the answer, and a
+    default in either direction is a lie: defaulting to pass hides real regressions, and
+    defaulting to fail invents them. It drops out of the averages and the comment says why.
+    """
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are grading the output of a refinery maintenance assistant. Be "
+                "strict and specific. When the criterion is not met, say exactly what "
+                "is missing or wrong.\n\n" + instructions
+            ),
+        },
+        {"role": "user", "content": payload},
+    ]
+
+    last: Exception | None = None
+    for _ in range(2):
+        try:
+            grade: Grade = _judge().invoke(messages)
+            return {"key": key, "score": grade.passed, "comment": grade.reasoning}
+        except Exception as exc:  # noqa: BLE001, any provider or validation error
+            last = exc
+
+    return {
+        "key": key,
+        "score": None,
+        "comment": f"judge did not return a usable verdict: {type(last).__name__}: {last}",
+    }
 
 
 def task_accomplished(inputs: dict, outputs: dict, reference_outputs: dict) -> dict:
