@@ -166,6 +166,30 @@ completely different economics:
 **Most teams only build the right-hand column**, then wonder why their suite is slow, flaky and
 expensive. A large share of what you want to verify lives on the left and needs no model at all.
 
+### One turn, or the whole conversation?
+
+There's a second axis, and it's worth settling before you write anything: **what is one row of
+your dataset?**
+
+A **trace** is one user prompt and the agent's reply. Inside it the agent may loop a dozen times
+and call six tools, but from the outside it's request in, response out. That shape is familiar,
+and it's why almost everything else in this post is written at the trace level.
+
+A **thread** (session, trajectory) is a sequence of those back-and-forths: the user asks, the
+agent answers, the user pushes back, and the thing you actually care about only emerges across
+four turns.
+
+**Start at the trace level.** Not because threads don't matter, but because a failing trace hands
+you a bounded thing to fix. When a thread eval fails you know the conversation went wrong
+somewhere; when a trace eval fails you know which turn, with the tool calls attached. Reach for
+thread-level evals when the property genuinely needs the extra context: did the agent repeat
+itself, did it lose a constraint the user set three turns ago, did the user have to ask twice.
+
+One practical wrinkle: a thread has no natural end. Nothing tells you the user is finished, so
+you pick a cutoff, usually a gap of inactivity, and then live with the fact that it's arbitrary.
+Ten minutes is a fine starting point. Long enough that a coffee break doesn't split one
+conversation into two, short enough that tomorrow's questions aren't stapled onto today's.
+
 ---
 
 ## The five levels
@@ -569,7 +593,25 @@ Either way, **write them against output your agent actually produced**, not outp
 would produce. A regex built from a format you guessed at will quietly disagree with the real
 thing.
 
-### One judge, one question, and the answer is yes or no
+### Five that apply to almost any agent
+
+Most of your evaluators will be specific to your domain. These five are not, and they're a
+reasonable day-one set for anything with a user on the other end. All binary.
+
+| | | |
+| :-- | :-- | :-- |
+| `accomplished` | judge | Did the agent do what was asked? The one irreducibly semantic question, and the one worth spending a model call on. Works at either level. |
+| `perceived_error` | judge | Could this plausibly have looked like a failure to the user, or did the user show frustration? Catches the gap between *technically fine* and *felt broken*. |
+| `user_delighted` | judge | Did the user express actual happiness? Rare, and the only signal here with an upper end worth chasing. |
+| `tool_error` | code | Did a tool error, including the model calling it with bad arguments? Free, and it separates *your* bug from the model's. |
+| `ai_slop` | code | Em dashes and the giveaway vocabulary. Split it per-marker once it starts firing. |
+
+Two of those, `perceived_error` and `user_delighted`, need the *next* user message to be
+evaluable, because frustration and delight are things the user expresses after the fact. That
+makes them thread-level by nature even though the rest of the set works fine on a single trace.
+
+`tool_error` is the one to wire up first: it's free, it fires on real bugs, and a spike in it is
+usually a deploy rather than a model.
 
 The instinct when you reach for a judge is to ask for a quality score out of ten. Resist it: a
 single holistic number is the least useful thing a judge can produce.
