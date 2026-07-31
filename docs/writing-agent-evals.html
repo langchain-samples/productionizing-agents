@@ -477,7 +477,7 @@ afternoon tuning a prompt that referenced a tool that didn't exist.</p>
 </tr>
 <tr>
 <td style="text-align: left;">Every <strong>argument</strong> has a description</td>
-<td style="text-align: left;">The gotcha below</td>
+<td style="text-align: left;">Arguments reaching the model undocumented despite your docstring</td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>read_only=True</code> really removes write tools</td>
@@ -497,18 +497,6 @@ afternoon tuning a prompt that referenced a tool that didn't exist.</p>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p><strong>The <code>parse_docstring</code> gotcha.</strong> Your docstring becomes the <em>tool-level</em> description
-automatically. Per-<strong>argument</strong> descriptions do not come along, and the fix differs by
-ecosystem:</p>
-<p><code>python
-@tool(parse_docstring=True)              # LangChain
-Annotated[str, Field(description=...)]   # FastMCP: parse_docstring doesn't exist here</code></p>
-<p>Get it wrong and the model sees <code>{"title": "Tag", "type": "string"}</code> for an argument you wrote
-a paragraph about. It presents as <em>"the model keeps passing the wrong format"</em>, which sends
-you looking at the model instead of the schema. Check, don't assume:
-<code>print(tool.args_schema.model_json_schema()["properties"])</code></p>
-</blockquote>
 <h2 id="level-1-smoke-your-health-endpoint">Level 1 (Smoke): your <code>/health</code> endpoint</h2>
 <p>No real tools; every tool is a stub that returns an explicit "not scripted" marker. You're
 testing that the agent <strong>works</strong> and <strong>routes</strong>, not that it retrieves well.</p>
@@ -1207,7 +1195,6 @@ traffic. Three places it goes deeper:</p>
 <h2 id="the-short-version">The short version</h2>
 <ol>
 <li><strong>Test as much deterministic code as you can</strong>, to isolate the one non-deterministic part.</li>
-<li><strong>Design your tool results to be readable by an agent.</strong></li>
 <li><strong>Code evaluators before judges.</strong></li>
 <li><strong>Ten pass/fail judges beat one judge scoring 1–10.</strong></li>
 <li><strong>Test what happens when tools fail.</strong> "Claimed success anyway" is trust-breaking.</li>

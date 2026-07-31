@@ -289,25 +289,11 @@ What else is worth asserting here, all free:
 | :-- | :-- |
 | Load-bearing prompt sentences are present | A token-trimming edit deleting your safety boundary |
 | Every tool has a description | A tool that silently lost its docstring |
-| Every **argument** has a description | The gotcha below |
+| Every **argument** has a description | Arguments reaching the model undocumented despite your docstring |
 | `read_only=True` really removes write tools | *"We thought that flag disabled writes"* |
 | Middleware **order** is what you configured | A guard grading output another guard hasn't cleaned yet |
 | Assembled context is under N tokens | Context bloat, which shows up on your bill and nowhere else |
 | No credentials in the prompt | A tool description built from a config object |
-
-> **The `parse_docstring` gotcha.** Your docstring becomes the *tool-level* description
-> automatically. Per-**argument** descriptions do not come along, and the fix differs by
-> ecosystem:
->
-> ```python
-> @tool(parse_docstring=True)              # LangChain
-> Annotated[str, Field(description=...)]   # FastMCP: parse_docstring doesn't exist here
-> ```
->
-> Get it wrong and the model sees `{"title": "Tag", "type": "string"}` for an argument you wrote
-> a paragraph about. It presents as *"the model keeps passing the wrong format"*, which sends
-> you looking at the model instead of the schema. Check, don't assume:
-> `print(tool.args_schema.model_json_schema()["properties"])`
 
 ---
 
@@ -999,16 +985,15 @@ traffic. Three places it goes deeper:
 ## The short version
 
 1. **Test as much deterministic code as you can**, to isolate the one non-deterministic part.
-2. **Design your tool results to be readable by an agent.**
-3. **Code evaluators before judges.**
-4. **Ten pass/fail judges beat one judge scoring 1–10.**
-5. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
-6. **Align the judge.** You will make a lot of decisions off the back of it, so check that it is
+2. **Code evaluators before judges.**
+3. **Ten pass/fail judges beat one judge scoring 1–10.**
+4. **Test what happens when tools fail.** "Claimed success anyway" is trust-breaking.
+5. **Align the judge.** You will make a lot of decisions off the back of it, so check that it is
    leading you the right way.
-7. **Assertions let domain experts write tests.** Use them.
-8. **Always watch the test fail first.**
-9. **Make a test for every failure you catch.**
-10. **Every case is one you thought of.** Build the production loop that finds the rest.
-11. **Keep your agent thin.**
-12. **Engineer for change.**
-13. **Build on the shoulders of giants, and ride the wave.**
+6. **Assertions let domain experts write tests.** Use them.
+7. **Always watch the test fail first.**
+8. **Make a test for every failure you catch.**
+9. **Every case is one you thought of.** Build the production loop that finds the rest.
+10. **Keep your agent thin.**
+11. **Engineer for change.**
+12. **Build on the shoulders of giants, and ride the wave.**
