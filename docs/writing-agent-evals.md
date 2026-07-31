@@ -815,32 +815,6 @@ Hold **three things** fixed: the dataset, the evaluators, and the judge model. C
 those between runs and you can no longer attribute a difference to the agent rather than the
 grader.
 
-### Don't read the mean and stop
-
-Read **which** evaluator moved:
-
-```
-tool budget       0.92 → 0.83     probably fine. It thrashes a bit more.
-groundedness      0.98 → 0.89     STOP. That's hallucination.
-```
-
-Same delta. Completely different decision. **Not all points are equal**, and an average
-deliberately hides that.
-
-So tier your metrics *before* you run the comparison. It's easier to be honest about what matters
-before you're staring at a number you want to be acceptable:
-
-| Tier | A regression here means |
-| :-- | :-- |
-| **Non-negotiable** | Do not ship. Safety and truthfulness properties. |
-| **Important** | Investigate before shipping. |
-| **Efficiency** | Trade freely against cost. |
-
-And use **p99, not p50**, for latency. A p50 of 3s with a p99 of 40s is a bad experience that a
-mean will hide from you. Agent latency also isn't API latency: several model calls and several
-tool calls per request is normal, and that's a product decision to make consciously (stream
-partial output, show the plan, show which tool is running) rather than discover from a complaint.
-
 ---
 
 ## The limit, and the loop
