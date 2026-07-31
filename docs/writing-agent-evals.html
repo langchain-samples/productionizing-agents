@@ -781,11 +781,17 @@ have a scale, and reviewers will disagree while the number gets treated as data 
 <li><strong>Align it against human labels.</strong> Until you've done that, treat its absolute numbers with
    suspicion and its <em>relative</em> numbers (A vs B, same judge) as useful.</li>
 </ol>
-<p>Aligning is straightforward: label ~20 examples yourself, balanced between
-pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
-read the misaligned cases and <strong>group them</strong>, failure modes cluster, and two or three explain
-most of the gap. Then put those failure modes in the prompt. And add more labels
-before celebrating: 100% agreement on 20 examples is overfitting, not success.</p>
+<p><strong>Grading samples by hand is the part that matters</strong>, more than writing the evaluator around it.
+Take real outputs, rate each one pass/fail on the one property you care about, and write down
+<em>why</em>. Those labels are the ground truth. Without them you can tell whether a judge is confident,
+but not whether it's right.</p>
+<p>Then hill-climb the prompt against them: hand a model the current judge prompt, your labels, and
+the cases where it disagreed with you, and let it revise until it matches. Your written reasons
+are what make this work, because they say <em>why</em> it was wrong rather than only that it was.</p>
+<p><strong>Label at least twice as many as you tune on, and hold the second half back.</strong> This is the step
+people skip, and skipping it is why aligned judges disappoint later: a prompt tuned until it
+agrees on the examples it was tuned on tells you nothing. Score it on the held-out half and quote
+that number. 100% agreement on the training half is overfitting, not success.</p>
 <h2 id="assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</h2>
 <p>Instead of writing a correct answer by hand, describe <strong>what a correct answer looks like</strong> in
 free-form English, one claim per row:</p>
@@ -1153,7 +1159,7 @@ traffic. Three places it goes deeper:</p>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Judge alignment, properly</strong></td>
-<td style="text-align: left;">"Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and <strong>scoring the judge separately on the answers that should pass and the ones that should fail</strong>, rather than on raw agreement, because with class imbalance a judge that always says Pass scores 90% and catches nothing.</td>
+<td style="text-align: left;">Holding back half, as above, is the minimum. The fuller version is a train/dev/test split, plus <strong>scoring the judge separately on the answers that should pass and the ones that should fail</strong> rather than on raw agreement, because with class imbalance a judge that always says Pass scores 90% and catches nothing.</td>
 </tr>
 </tbody>
 </table>

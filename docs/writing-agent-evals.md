@@ -623,11 +623,19 @@ have a scale, and reviewers will disagree while the number gets treated as data 
 3. **Align it against human labels.** Until you've done that, treat its absolute numbers with
    suspicion and its *relative* numbers (A vs B, same judge) as useful.
 
-Aligning is straightforward: label ~20 examples yourself, balanced between
-pass and fail, then iterate the judge prompt until it agrees with you. What moves the number:
-read the misaligned cases and **group them**, failure modes cluster, and two or three explain
-most of the gap. Then put those failure modes in the prompt. And add more labels
-before celebrating: 100% agreement on 20 examples is overfitting, not success.
+**Grading samples by hand is the part that matters**, more than writing the evaluator around it.
+Take real outputs, rate each one pass/fail on the one property you care about, and write down
+*why*. Those labels are the ground truth. Without them you can tell whether a judge is confident,
+but not whether it's right.
+
+Then hill-climb the prompt against them: hand a model the current judge prompt, your labels, and
+the cases where it disagreed with you, and let it revise until it matches. Your written reasons
+are what make this work, because they say *why* it was wrong rather than only that it was.
+
+**Label at least twice as many as you tune on, and hold the second half back.** This is the step
+people skip, and skipping it is why aligned judges disappoint later: a prompt tuned until it
+agrees on the examples it was tuned on tells you nothing. Score it on the held-out half and quote
+that number. 100% agreement on the training half is overfitting, not success.
 
 ---
 
@@ -952,7 +960,7 @@ traffic. Three places it goes deeper:
 | :-- | :-- |
 | **Synthetic data, structured** | Hand-writing a dataset is fine for a dozen cases and doesn't scale to a hundred. Pick three dimensions where you expect failures, generate tuples, then use a *separate* prompt to turn each tuple into a query; one-step generation produces repetitive phrasing. |
 | **Error analysis** | The systematic version of *The limit, and the loop*. Read ~100 traces, note the *first* thing that went wrong in each, let categories **emerge** rather than starting from a list, group into 5–10, label everything, rank by frequency and impact. Also a triage step worth adopting: before building an evaluator, ask whether you can just *fix* it: a missing instruction, a missing tool, a plain bug. Only evaluate what survives the fix. |
-| **Judge alignment, properly** | "Label 20 and iterate" leaks if you iterate against the same examples you drew few-shots from. Proper version: train/dev/test split, and **scoring the judge separately on the answers that should pass and the ones that should fail**, rather than on raw agreement, because with class imbalance a judge that always says Pass scores 90% and catches nothing. |
+| **Judge alignment, properly** | Holding back half, as above, is the minimum. The fuller version is a train/dev/test split, plus **scoring the judge separately on the answers that should pass and the ones that should fail** rather than on raw agreement, because with class imbalance a judge that always says Pass scores 90% and catches nothing. |
 
 ---
 

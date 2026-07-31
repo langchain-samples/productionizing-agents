@@ -54,41 +54,55 @@ scale is truly unavoidable, anchor every point.
 **6. Use code evals for as much as possible.** Reach for an LLM only when code genuinely cannot
 catch it.
 
-**7. Write your evaluators yourself.** Everything else is an implementation detail; evals are how
+**7. Grade samples by hand before you write a judge.** This matters more than writing the
+evaluators. Take real outputs, rate each one Y/N on the single property you care about, and
+write down *why*. Those labels are the ground truth every judge is measured against, and there
+is no substitute for producing them yourself: without them you have no way to know whether a
+judge is right, only whether it is confident.
+
+**8. Label at least twice what you tune on, and hold the second half back.** Then align the
+judge by hill-climbing its prompt: give a model the current prompt, your labels, and the cases
+where it disagreed with you, and let it revise until it matches. Your written reasons are what
+make this work, because they tell it *why* it was wrong rather than just that it was.
+
+The split is the part people skip. A prompt tuned until it agrees on the examples it was tuned
+on tells you nothing, so score it on the held-out half and report that number. 100% agreement on
+the training half is overfitting, not success.
+
+**9. Write your evaluators yourself.** Everything else is an implementation detail; evals are how
 you make every decision from here on. A coding agent may take the first stab, but a human reviews
 every one.
 
-**8. Validate the judge before you trust it.** Pin the judge model in config and leave it alone,
-including while swapping the agent's model. Require a `reasoning` field. Align it against ~20
-human labels, balanced pass and fail, and group the misaligned cases before editing the prompt.
-Until aligned, treat its absolute numbers with suspicion and its relative numbers as useful.
+**10. Pin the judge model** in config and leave it alone, including while swapping the agent's
+model. Require a `reasoning` field on its output. Until it is aligned, treat its absolute numbers
+with suspicion and its relative numbers as useful.
 
 ## Run
 
-**9. Run with `repetitions=3` while developing.** Two things to read from it. A case scoring 0.67
+**11. Run with `repetitions=3` while developing.** Two things to read from it. A case scoring 0.67
 is flaky, not broken, and those need different fixes. And if the *evaluator* doesn't return the
 same result each time, tighten the eval prompt.
 
-**10. Hold three things fixed across any comparison:** the dataset, the evaluators, and the judge
+**12. Hold three things fixed across any comparison:** the dataset, the evaluators, and the judge
 model. Change one and you can no longer attribute a difference to the agent.
 
-**11. Don't read the mean and stop.** Read which evaluator moved. `tool_budget 0.92 -> 0.83` is
+**13. Don't read the mean and stop.** Read which evaluator moved. `tool_budget 0.92 -> 0.83` is
 probably fine; `groundedness 0.98 -> 0.89` is hallucination. Same delta, opposite decisions. Tier
 your metrics into non-negotiable / important / efficiency *before* the run, while it's still easy
 to be honest. Use p99, not p50, for latency.
 
 ## LangSmith wiring
 
-**12.** Store prompts in PromptHub and have evaluators reference them, so the grader's prompt is
+**14.** Store prompts in PromptHub and have evaluators reference them, so the grader's prompt is
 versioned rather than buried in code. Link a rule/automation from the eval to the **dataset** for
 offline, and another to the **project** for online.
 
 ## Production
 
-**13. You won't know all the failure modes before you ship.** Release internally or to beta
+**15. You won't know all the failure modes before you ship.** Release internally or to beta
 first. Pipe **5%** of live traces to an annotation queue and have domain experts leave
 `assertions` in plain English. Run an assertions judge against them.
 
-**14. Sample online evals by cost.** Code evals on **100%** of production traffic, they're free.
+**16. Sample online evals by cost.** Code evals on **100%** of production traffic, they're free.
 LLM evals on **~10%** (100% while you're still testing). Set up automation to route every errored
 trace, whether a code error or a judge-flagged failure, to the annotation queue for review.
