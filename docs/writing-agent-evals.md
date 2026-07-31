@@ -38,7 +38,7 @@ you're starting fresh, or you already have something in production.
 
 <h1 class="chapter" id="ch-1"><span class="cn">Chapter 1</span>Groundwork<span class="cb">What has to be true before a number means anything.</span></h1>
 
-## Two things to do before you write a single eval
+## Before you write a single eval
 
 Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.
@@ -76,43 +76,6 @@ Putting the boundary at a protocol (MCP, or an HTTP service) rather than a modul
 separation becomes impossible to violate, the surface is independently deployable and
 load-testable, one application can serve several consumers, and authorization lands somewhere
 auditable.
-
-### Make your tools *total*
-
-*Total* in the mathematical sense: every input gets a defined, informative response, and no input
-produces a silent empty. Design rules change when your caller is a model rather than a
-programmer. Six that matter:
-
-| Rule | Why, when a model is calling |
-| :-- | :-- |
-| Unknown identifier → **error**, not `[]` | An empty result reads as "doesn't exist." Silent wrong answers. |
-| Errors **carry the fix** | Turns a dead end into a self-correcting retry. |
-| Output is **bounded** | Unbounded tool output is a context-window incident waiting for your largest customer. |
-| Output is **deterministic** | Stable sort order, or your evals flake for reasons unrelated to the model. |
-| **Provenance** travels with data | You cannot evaluate groundedness if there's nothing to be grounded in. |
-| Business rules in **code** | See below. |
-
-The second one is the highest-leverage change you can make to an agent's reliability:
-
-```python
-# Before
-return {}
-
-# After
-raise LookupError(
-    f"No equipment with tag {tag!r}. "
-    f"Tags starting with 'P-101': P-101A, P-101B."
-)
-```
-
-The model reads "P-101A, P-101B", picks one, and recovers **inside the same turn** with no
-human involved. Write your error messages for the model that will read them.
-
-On that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
-`suspect`, which means its level must not be quoted as fact. The tempting design hands the model
-raw JSON and hopes it notices the field. It often does, which is the problem: **"often" is
-not a safety property**, and it degrades silently when you upgrade the model. Compute a
-`data_quality_warnings` list in tested code instead.
 
 ---
 
@@ -965,8 +928,7 @@ dollars.
 1. **Write the dataset before the agent.** Ten rows: *when the user says X, the response should
    do Y, and the world should look like Z.* Show it to a domain expert and let them argue with
    it. That conversation is worth more than the rows.
-2. **Move your application logic behind a tested boundary.** Unit test it with no LLM. Make every
-   error message name the fix.
+2. **Move your application logic behind a tested boundary.** Unit test it with no LLM.
 3. **Write Level 0.** Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.

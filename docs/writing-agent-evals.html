@@ -163,7 +163,7 @@ pre .copy:hover{color:var(--acc);border-color:var(--acc)}
 pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media (hover:none){pre .copy{opacity:1}}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
-</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li><li><a href="#make-your-tools-total">Make your tools total</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#what-are-you-actually-testing">What are you actually testing?</a></div><ol class="sub"><li><a href="#one-turn-or-the-whole-conversation">One turn, or the whole conversation?</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-harness-tests">Level 0, harness tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#five-that-apply-to-almost-any-agent">Five that apply to almost any agent</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
+</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#before-you-write-a-single-eval">Before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#what-are-you-actually-testing">What are you actually testing?</a></div><ol class="sub"><li><a href="#one-turn-or-the-whole-conversation">One turn, or the whole conversation?</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-five-levels">The five levels</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#level-0-harness-tests">Level 0, harness tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-1-smoke-your-health-endpoint">Level 1 (Smoke): your /health endpoint</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-2-scripted-build-the-world-the-test-needs">Level 2 (Scripted): build the world the test needs</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-3-stateful-did-the-world-actually-change">Level 3 (Stateful): did the world actually change?</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#level-4-simulated-a-second-llm-plays-the-user">Level 4 (Simulated): a second LLM plays the user</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#five-that-apply-to-almost-any-agent">Five that apply to almost any agent</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#reading-the-results">Reading the results</a></div><ol class="sub"><li><a href="#dont-read-the-mean-and-stop">Don&#x27;t read the mean and stop</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
 <h3 id="how-to-save-and-produce-incredible-agents">How to save $$$ and produce incredible agents</h3>
 <div class="bio">
 <p><strong>Hi, I'm Josiah.</strong> I've been building LLM applications in production, with
@@ -191,7 +191,7 @@ one of these tests caught on its first run, which nobody had planted for it.</p>
 you're starting fresh, or you already have something in production.</p>
 <h1 class="chapter" id="ch-1"><span class="cn">Chapter 1</span>Groundwork<span class="cb">What has to be true before a number means anything.</span></h1>
 
-<h2 id="two-things-to-do-before-you-write-a-single-eval">Two things to do before you write a single eval</h2>
+<h2 id="before-you-write-a-single-eval">Before you write a single eval</h2>
 <p>Evals measure the agent. If the layer underneath is shaky, you're measuring a coupled system and
 guessing which half moved.</p>
 <h3 id="get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</h3>
@@ -221,60 +221,6 @@ only remaining variable is the model, which is the point of the boundary, not th
 separation becomes impossible to violate, the surface is independently deployable and
 load-testable, one application can serve several consumers, and authorization lands somewhere
 auditable.</p>
-<h3 id="make-your-tools-total">Make your tools <em>total</em></h3>
-<p><em>Total</em> in the mathematical sense: every input gets a defined, informative response, and no input
-produces a silent empty. Design rules change when your caller is a model rather than a
-programmer. Six that matter:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Rule</th>
-<th style="text-align: left;">Why, when a model is calling</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">Unknown identifier → <strong>error</strong>, not <code>[]</code></td>
-<td style="text-align: left;">An empty result reads as "doesn't exist." Silent wrong answers.</td>
-</tr>
-<tr>
-<td style="text-align: left;">Errors <strong>carry the fix</strong></td>
-<td style="text-align: left;">Turns a dead end into a self-correcting retry.</td>
-</tr>
-<tr>
-<td style="text-align: left;">Output is <strong>bounded</strong></td>
-<td style="text-align: left;">Unbounded tool output is a context-window incident waiting for your largest customer.</td>
-</tr>
-<tr>
-<td style="text-align: left;">Output is <strong>deterministic</strong></td>
-<td style="text-align: left;">Stable sort order, or your evals flake for reasons unrelated to the model.</td>
-</tr>
-<tr>
-<td style="text-align: left;"><strong>Provenance</strong> travels with data</td>
-<td style="text-align: left;">You cannot evaluate groundedness if there's nothing to be grounded in.</td>
-</tr>
-<tr>
-<td style="text-align: left;">Business rules in <strong>code</strong></td>
-<td style="text-align: left;">See below.</td>
-</tr>
-</tbody>
-</table>
-<p>The second one is the highest-leverage change you can make to an agent's reliability:</p>
-<pre><code class="language-python"><span class="c1"># Before</span>
-<span class="k">return</span> <span class="p">{}</span>
-
-<span class="c1"># After</span>
-<span class="k">raise</span> <span class="ne">LookupError</span><span class="p">(</span>
-    <span class="sa">f</span><span class="s2">&quot;No equipment with tag </span><span class="si">{</span><span class="n">tag</span><span class="si">!r}</span><span class="s2">. &quot;</span>
-    <span class="sa">f</span><span class="s2">&quot;Tags starting with &#39;P-101&#39;: P-101A, P-101B.&quot;</span>
-<span class="p">)</span></code></pre>
-<p>The model reads "P-101A, P-101B", picks one, and recovers <strong>inside the same turn</strong> with no
-human involved. Write your error messages for the model that will read them.</p>
-<p>On that last rule: anything you can compute, compute. One of our tanks has a gauge flagged
-<code>suspect</code>, which means its level must not be quoted as fact. The tempting design hands the model
-raw JSON and hopes it notices the field. It often does, which is the problem: <strong>"often" is
-not a safety property</strong>, and it degrades silently when you upgrade the model. Compute a
-<code>data_quality_warnings</code> list in tested code instead.</p>
 <h2 id="the-eval-mental-model">The eval mental model</h2>
 <p>Everything here maps onto something you already do:</p>
 <table>
@@ -1188,8 +1134,7 @@ dollars.</p>
 <li><strong>Write the dataset before the agent.</strong> Ten rows: <em>when the user says X, the response should
    do Y, and the world should look like Z.</em> Show it to a domain expert and let them argue with
    it. That conversation is worth more than the rows.</li>
-<li><strong>Move your application logic behind a tested boundary.</strong> Unit test it with no LLM. Make every
-   error message name the fix.</li>
+<li><strong>Move your application logic behind a tested boundary.</strong> Unit test it with no LLM.</li>
 <li><strong>Write Level 0.</strong> Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.</li>
