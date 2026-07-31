@@ -1121,7 +1121,7 @@ it already did.</p>
 
 <h2 id="starter-kit">Starter kit</h2>
 <h3 id="if-youre-starting-out">If you're starting out</h3>
-<p>Do these four things this week, in this order. Total cost: one afternoon and roughly zero
+<p>Do these three things this week, in this order. Total cost: one afternoon and roughly zero
 dollars.</p>
 <ol>
 <li><strong>Write the dataset before the agent.</strong> Ten rows: <em>when the user says X, the response should
@@ -1129,8 +1129,6 @@ dollars.</p>
    it. That conversation is worth more than the rows.</li>
 <li><strong>Move your application logic behind a tested boundary.</strong> Unit test it with no LLM. Make every
    error message name the fix.</li>
-<li><strong>Add call limits.</strong> <code>model_call_limit</code> and <code>tool_call_limit</code>, generously: 3× your p99. The
-   goal isn't to constrain normal behavior, it's to make the pathological case <em>terminate</em>.</li>
 <li><strong>Write Level 0.</strong> Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.</li>

@@ -917,7 +917,7 @@ it already did.
 
 ### If you're starting out
 
-Do these four things this week, in this order. Total cost: one afternoon and roughly zero
+Do these three things this week, in this order. Total cost: one afternoon and roughly zero
 dollars.
 
 1. **Write the dataset before the agent.** Ten rows: *when the user says X, the response should
@@ -925,9 +925,7 @@ dollars.
    it. That conversation is worth more than the rows.
 2. **Move your application logic behind a tested boundary.** Unit test it with no LLM. Make every
    error message name the fix.
-3. **Add call limits.** `model_call_limit` and `tool_call_limit`, generously: 3× your p99. The
-   goal isn't to constrain normal behavior, it's to make the pathological case *terminate*.
-4. **Write Level 0.** Capture the assembled prompt and assert on it: every tool present, every
+3. **Write Level 0.** Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.
 
