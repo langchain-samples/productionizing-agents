@@ -29,7 +29,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
 
-      - name: Unit tests: application, middleware, harness context, evaluators
+      - name: "Unit tests: application, middleware, harness context, evaluators"
         run: pytest tests/ -q
 
       # A stale notebook is a real failure: participants get a build artifact that
