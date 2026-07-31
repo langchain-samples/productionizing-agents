@@ -186,7 +186,32 @@ print(src[src.index('    assertions = '):][:1400])
 # %%
 from evals.runner import run_level
 
-if HAS_LLM and HAS_LANGSMITH:
+
+def regressions_are_ready() -> bool:
+    """`aria-regressions` is filled by a human in the annotation queue, not by this notebook.
+
+    Without that step the dataset is empty and `aevaluate` raises a bare "No examples found",
+    which reads like a broken notebook rather than a missing prerequisite.
+    """
+    from langsmith import Client
+
+    client = Client()
+    try:
+        dataset = client.read_dataset(dataset_name="aria-regressions")
+    except Exception:
+        print("Dataset aria-regressions doesn't exist yet. Run the automations cell above.")
+        return False
+    if not next(iter(client.list_examples(dataset_id=dataset.id)), None):
+        print(
+            "Dataset aria-regressions is empty, which means the review step hasn't happened "
+            "yet.\nGo to the aria-triage queue, write the assertions above on the flagged "
+            "trace, and hit\nAdd to Dataset & Next. Then re-run this cell."
+        )
+        return False
+    return True
+
+
+if HAS_LLM and HAS_LANGSMITH and regressions_are_ready():
     red = await run_level("regressions", reps=1)
 else:
     print("Skipped. Run: python -m evals.runner --level regressions")
@@ -225,7 +250,7 @@ show(SCOPE_BOUNDARY)
 # side by side in one session:
 
 # %%
-if HAS_LLM and HAS_LANGSMITH:
+if HAS_LLM and HAS_LANGSMITH and regressions_are_ready():
     green = await run_level("regressions", reps=1, prefix="aria-regressions-FIXED")
 else:
     print("Skipped.")

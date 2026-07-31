@@ -149,9 +149,11 @@ PERSONAS: dict[str, Persona] = {
 
 def _user_model():
     """The simulated user. Warmer than the judge, a deterministic user is not a user."""
+    from evals.evaluators import _sampling_kwargs
+
     return init_chat_model(
         os.environ.get("SIMULATOR_MODEL", os.environ.get("JUDGE_MODEL", "anthropic:claude-sonnet-5")),
-        temperature=0.7,
+        **_sampling_kwargs(default_temperature=0.7),
     )
 
 

@@ -181,6 +181,15 @@ print(spec_table())
 # watch the spec fail, then pass.
 
 # %%
+# The spec has to exist in LangSmith before anything can run against it. `seed_datasets` is
+# idempotent, so the later call in the Level 1/2 section is a no-op that reports what's
+# already there.
+if HAS_LANGSMITH:
+    from evals.datasets import seed_datasets
+
+    seed_datasets()
+
+# %%
 if HAS_LLM and HAS_LANGSMITH:
     # RED: the agent has no way to close a work order.
     red = await run_level("tdd", reps=1, exclude_tools=("complete_work_order",))

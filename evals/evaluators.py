@@ -408,10 +408,27 @@ class Grade(BaseModel):
     passed: bool = Field(description="True if the criterion is met.")
 
 
+def _sampling_kwargs(*, default_temperature: float) -> dict[str, Any]:
+    """Sampling settings for a judge or simulator, minus anything the model will reject.
+
+    The Claude 5 family dropped `temperature`: passing it returns a 400,
+    "`temperature` is deprecated for this model", at *invoke* time rather than at
+    construction, so there is nothing to catch when you build the model. Newer models are
+    low-variance by default, which is what a judge wanted the setting for anyway.
+
+    Set `EVAL_TEMPERATURE` to send it anyway, for a provider or an older model that honors it.
+    """
+    override = os.environ.get("EVAL_TEMPERATURE")
+    if override is None:
+        return {}
+    value = default_temperature if override == "" else float(override)
+    return {"temperature": value}
+
+
 def _judge():
     return init_chat_model(
         os.environ.get("JUDGE_MODEL", "anthropic:claude-sonnet-5"),
-        temperature=0,
+        **_sampling_kwargs(default_temperature=0),
     ).with_structured_output(Grade)
 
 
@@ -557,7 +574,10 @@ def grade_against_assertions(outputs: dict, reference_outputs: dict) -> list[dic
     """
     assertions = reference_outputs.get("assertions") or []
     if not assertions:
-        return []
+        # An evaluator is not allowed to return nothing. LangSmith raises on *any* falsy
+        # result, so a bare `[]` here lands a `ValueError(...)` on every row of every dataset
+        # that doesn't use assertions, which is most of them. Say "not applicable" instead.
+        return [{"key": "grade_against_assertions", "comment": "no assertions on this example"}]
 
     answer = _answer(outputs)
     trajectory = _trajectory(outputs)

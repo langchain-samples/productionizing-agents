@@ -202,6 +202,13 @@ async def run_level(
     )
 
 
+def _seconds(value: Any) -> float | None:
+    """LangSmith reports latency as a `timedelta`, and the table formats floats."""
+    if value is None:
+        return None
+    return value.total_seconds() if hasattr(value, "total_seconds") else float(value)
+
+
 def experiment_stats(experiment_name: str) -> dict[str, Any]:
     """Pull cost, latency, and score aggregates for a finished experiment.
 
@@ -212,8 +219,15 @@ def experiment_stats(experiment_name: str) -> dict[str, Any]:
     """
     from langsmith import Client
 
-    project = Client().read_project(project_name=experiment_name, include_stats=True)
+    client = Client()
+    project = client.read_project(project_name=experiment_name, include_stats=True)
     feedback = project.feedback_stats or {}
+
+    # `.get("avg", 0)` is not enough: LangSmith sends `"avg": null` for a key whose runs
+    # haven't been scored yet, and the default only fires when the key is missing entirely.
+    scores = {key: round((value or {}).get("avg") or 0, 3) for key, value in feedback.items()}
+    if not scores:
+        scores = _scores_from_feedback(client, experiment_name)
 
     return {
         "experiment": experiment_name,
@@ -221,11 +235,30 @@ def experiment_stats(experiment_name: str) -> dict[str, Any]:
         "error_rate": project.error_rate,
         "total_cost": float(project.total_cost or 0),
         "cost_per_run": float(project.total_cost or 0) / max(project.run_count or 1, 1),
-        "latency_p50": project.latency_p50,
-        "latency_p99": project.latency_p99,
-        "total_tokens": project.total_tokens,
-        "scores": {key: round(value.get("avg", 0), 3) for key, value in feedback.items()},
+        "latency_p50": _seconds(project.latency_p50),
+        "latency_p99": _seconds(project.latency_p99),
+        "total_tokens": project.total_tokens or 0,
+        "scores": scores,
     }
+
+
+def _scores_from_feedback(client: Any, experiment_name: str) -> dict[str, float]:
+    """Average the feedback rows ourselves.
+
+    `read_project(include_stats=True).feedback_stats` comes back `None` for an experiment that
+    has only just finished, even when every score is already recorded against the runs. Read
+    the rows directly rather than reporting a table of 0.000 for a run that graded fine.
+    """
+    runs = list(client.list_runs(project_name=experiment_name, is_root=True))
+    if not runs:
+        return {}
+
+    collected: dict[str, list[float]] = {}
+    for item in client.list_feedback(run_ids=[run.id for run in runs]):
+        if item.score is None:      # a judge that errored, or a not-applicable verdict
+            continue
+        collected.setdefault(item.key, []).append(float(item.score))
+    return {key: round(sum(v) / len(v), 3) for key, v in sorted(collected.items())}
 
 
 def _mean(scores: dict[str, float]) -> float:
@@ -257,10 +290,10 @@ def print_comparison(stats: list[dict[str, Any]]) -> None:
     print("-" * 96)
     row("total cost (USD)", [f"${s['total_cost']:.4f}" for s in stats])
     row("cost per run (USD)", [f"${s['cost_per_run']:.4f}" for s in stats])
-    row("latency p50 (s)", [f"{s['latency_p50']:.2f}" if s["latency_p50"] else ", " for s in stats])
-    row("latency p99 (s)", [f"{s['latency_p99']:.2f}" if s["latency_p99"] else ", " for s in stats])
+    row("latency p50 (s)", [f"{s['latency_p50']:.2f}" if s["latency_p50"] else "-" for s in stats])
+    row("latency p99 (s)", [f"{s['latency_p99']:.2f}" if s["latency_p99"] else "-" for s in stats])
     row("total tokens", [f"{s['total_tokens']:,}" for s in stats])
-    row("error rate", [f"{s['error_rate']:.1%}" if s["error_rate"] is not None else ", " for s in stats])
+    row("error rate", [f"{s['error_rate']:.1%}" if s["error_rate"] is not None else "-" for s in stats])
 
     print("-" * 96)
     for s in stats[1:]:
@@ -304,7 +337,11 @@ async def compare_models(
 
     for model in models:
         results = await run_level(level, model=model, reps=reps)
-        # The experiment has to finish before its aggregates exist.
+        # The experiment has to finish before its aggregates exist. `aevaluate` returns as soon
+        # as the runs are queued, so without this the table reads back zeros and nulls: every
+        # score 0.000, no cost, no latency. Nothing errors, it just quietly compares nothing.
+        if hasattr(results, "wait"):
+            await results.wait()
         name = getattr(results, "experiment_name", None)
         if name:
             stats.append(experiment_stats(name))

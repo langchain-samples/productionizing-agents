@@ -186,8 +186,24 @@ class ToolAwareFakeModel(GenericFakeChatModel):
     branching, one deterministic pass.
     """
 
+    reply: str = "Captured."
+
     def bind_tools(self, tools: Any, **kwargs: Any) -> Any:  # noqa: ANN401
         return self
+
+    def _generate(self, messages: Any, stop: Any = None, run_manager: Any = None, **kwargs: Any) -> Any:  # noqa: ANN401
+        """Answer from a plain string instead of `GenericFakeChatModel`'s message iterator.
+
+        The base class does `next(self.messages)`, which makes the fake stateful and therefore
+        sensitive to anyone *else* reading it. With `LANGSMITH_TRACING=true` the tracer does
+        read it, to serialize the model, and drains it: a finite iterator is then exhausted
+        before the agent's real call and `StopIteration` surfaces as a bare `RuntimeError`
+        from inside LangGraph, while an infinite one hangs the tracer instead. Deriving the
+        answer from a string sidesteps the whole question.
+        """
+        from langchain_core.outputs import ChatGeneration, ChatResult
+
+        return ChatResult(generations=[ChatGeneration(message=AIMessage(content=self.reply))])
 
 
 def fake_model(reply: str = "Captured.") -> ToolAwareFakeModel:
@@ -197,8 +213,10 @@ def fake_model(reply: str = "Captured.") -> ToolAwareFakeModel:
     we hand it. Swapping in a fake makes the whole assertion instant and perfectly
     reproducible, which is the difference between a check that runs in CI and a check that
     runs when someone remembers to.
+
+    `messages` is required by the base class but never read, see `_generate`.
     """
-    return ToolAwareFakeModel(messages=iter([AIMessage(content=reply)] * 50))
+    return ToolAwareFakeModel(reply=reply, messages=iter(()))
 
 
 def capture_context(
