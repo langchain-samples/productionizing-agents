@@ -527,8 +527,12 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
     <span class="p">},</span>
   <span class="p">},</span>
   <span class="s2">&quot;reference_outputs&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="c1"># Machine-checkable, graded by code.</span>
+    <span class="c1"># Machine-checkable, graded by code. Free, instant.</span>
+    <span class="c1"># Must call, at least once, in any order:</span>
     <span class="s2">&quot;expect_tool_calls&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;get_tank_status&quot;</span><span class="p">],</span>
+    <span class="c1"># Must NOT call. Restraint, and the half people leave out:</span>
+    <span class="s2">&quot;forbid_tool_calls&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;create_work_order&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;max_tool_calls&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
     <span class="s2">&quot;expect_warnings_surfaced&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;suspect&quot;</span><span class="p">,</span> <span class="s2">&quot;receipt&quot;</span><span class="p">],</span>
     <span class="s2">&quot;must_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;12.1&quot;</span><span class="p">],</span>
     <span class="c1"># Semantic, graded by a judge. Anyone can write these, in English.</span>
@@ -538,9 +542,47 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
       <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;explains_the_consequence&quot;</span><span class="p">,</span>
        <span class="s2">&quot;comment&quot;</span><span class="p">:</span> <span class="s2">&quot;Says the number should not be used for a custody transfer.&quot;</span><span class="p">},</span>
     <span class="p">],</span>
-  <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="c1"># Not graded. What you filter and slice by when reading results.</span>
+  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;scripted&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;suspect_gauge_not_stated_as_fact&quot;</span><span class="p">},</span>
 <span class="p">}</span></code></pre>
 <p><strong>A new test case is a new dict, not new code.</strong> That's what makes this scale to 200 cases.</p>
+<p>Three things about that row are worth calling out. The <strong>code-checkable and semantic halves are
+separate on purpose</strong>, because one is free and one costs a model call. <code>forbid_tool_calls</code> is the
+one people leave out, and it's how you assert <em>restraint</em> on a tool that does something
+irreversible. And a mock value can be more than a payload:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Mock value</th>
+<th style="text-align: left;">What the agent gets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">any JSON</td>
+<td style="text-align: left;">returned as the tool result</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>{"error": "..."}</code></td>
+<td style="text-align: left;">a value it reads, and can recover from</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>{"raise": "..."}</code></td>
+<td style="text-align: left;">an exception, so it never sees a result</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>[first, second, ...]</code></td>
+<td style="text-align: left;">successive calls get successive responses</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Make the mock and the assertion agree.</strong> A mock that returns a confident, specific answer can't
+be paired with <em>"the agent shouldn't have answered"</em>: an agent that uses the result is following
+its tool output, and the judge gets a brief that argues with the fixture. Decide which case you're
+building, a tool that returned <strong>nothing</strong> or one that returned something <strong>irrelevant</strong>, and
+write the mock to match. The second is the harder failure, because agents will confidently
+repurpose an off-topic result.</p>
 <p>That split is forced by one API detail worth knowing. The target function passed to <code>evaluate</code> /
 <code>aevaluate</code> receives <code>inputs</code> <strong>only</strong>:</p>
 <pre><code class="language-python"><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">target</span><span class="p">(</span><span class="n">inputs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>   <span class="c1"># the whole signature</span></code></pre>

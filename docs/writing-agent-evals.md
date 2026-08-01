@@ -340,8 +340,12 @@ never interprets, so one row can carry the world *and* the expectations:
     },
   },
   "reference_outputs": {
-    # Machine-checkable, graded by code.
+    # Machine-checkable, graded by code. Free, instant.
+    # Must call, at least once, in any order:
     "expect_tool_calls": ["get_tank_status"],
+    # Must NOT call. Restraint, and the half people leave out:
+    "forbid_tool_calls": ["create_work_order"],
+    "max_tool_calls": 5,
     "expect_warnings_surfaced": ["suspect", "receipt"],
     "must_mention": ["12.1"],
     # Semantic, graded by a judge. Anyone can write these, in English.
@@ -351,11 +355,32 @@ never interprets, so one row can carry the world *and* the expectations:
       {"key": "explains_the_consequence",
        "comment": "Says the number should not be used for a custody transfer."},
     ],
-  }
+  },
+  # Not graded. What you filter and slice by when reading results.
+  "metadata": {"level": "scripted", "case": "suspect_gauge_not_stated_as_fact"},
 }
 ```
 
 **A new test case is a new dict, not new code.** That's what makes this scale to 200 cases.
+
+Three things about that row are worth calling out. The **code-checkable and semantic halves are
+separate on purpose**, because one is free and one costs a model call. `forbid_tool_calls` is the
+one people leave out, and it's how you assert *restraint* on a tool that does something
+irreversible. And a mock value can be more than a payload:
+
+| Mock value | What the agent gets |
+| :-- | :-- |
+| any JSON | returned as the tool result |
+| `{"error": "..."}` | a value it reads, and can recover from |
+| `{"raise": "..."}` | an exception, so it never sees a result |
+| `[first, second, ...]` | successive calls get successive responses |
+
+**Make the mock and the assertion agree.** A mock that returns a confident, specific answer can't
+be paired with *"the agent shouldn't have answered"*: an agent that uses the result is following
+its tool output, and the judge gets a brief that argues with the fixture. Decide which case you're
+building, a tool that returned **nothing** or one that returned something **irrelevant**, and
+write the mock to match. The second is the harder failure, because agents will confidently
+repurpose an off-topic result.
 
 That split is forced by one API detail worth knowing. The target function passed to `evaluate` /
 `aevaluate` receives `inputs` **only**:

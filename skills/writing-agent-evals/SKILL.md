@@ -46,6 +46,64 @@ context under a token ceiling. This is the highest value per second in the whole
 failure that matters is the agent claiming success anyway, which is invisible in error logs,
 invisible on dashboards, and the one that breaks trust.
 
+### What one row looks like
+
+```json
+{
+  "inputs": {
+    "prompt": "why can't i see both pages when I try to connect to Marky",
+    "mock_tools": {
+      "web_search": {"results": []},
+      "raise_support": "we raised a support message for you"
+    }
+  },
+  "reference_outputs": {
+    "tool_calls": {
+      "must_call": ["web_search", "raise_support"],
+      "must_not_call": []
+    },
+    "assertions": [
+      {"key": "must_not_hallucinate",
+       "comment": "The search returned no results, so the response must not state how to fix it."},
+      {"key": "must_say_it_escalated",
+       "comment": "The response tells the user a support request was raised."}
+    ]
+  },
+  "metadata": {"case": "search_empty_escalates", "tier": "non-negotiable"}
+}
+```
+
+The mechanically checkable half and the semantic half are separate on purpose: `tool_calls` is a
+code evaluator, `assertions` costs a model call. That is rule 6 expressed in the data.
+
+- `must_call` means "appeared at least once, any order". Add `order: [...]` only when the
+  sequence is the property being tested.
+- `must_not_call` is the highest-value one and the one people forget. It is how you assert
+  restraint on a destructive tool.
+- `assertions` is a **list** of `{key, comment}`, not an object. The annotation queue emits that
+  shape, and rule 15 depends on domain experts adding rows through it.
+- `metadata.tier` gives rule 13 somewhere to read the tier from. Without it you cannot tell a
+  safety regression from an efficiency one while looking at the table.
+
+**Make the mock and the assertion agree.** A mock that returns a confident, specific answer
+cannot be paired with "the agent should not have answered": an agent that uses the result is
+following its tool output, and the judge gets a brief that argues with the fixture. Decide which
+you are testing, a tool that returned *nothing* or a tool that returned something *irrelevant*,
+and write the mock to match. The second is the harder failure mode, because agents will
+confidently repurpose an off-topic result.
+
+**A mock value can be more than a string**, and needs to be for rule 4:
+
+| Form | Behavior |
+| :-- | :-- |
+| any value | returned as the tool result |
+| `{"error": "..."}` | a value the model reads and can recover from |
+| `{"raise": "..."}` | throws, so the model never sees a result |
+| `[a, b, ...]` | successive calls get successive responses |
+
+Names only is not enough. A tool called correctly with the wrong arguments is a large bug class
+and invisible in a trajectory check, so assert on arguments where they matter.
+
 ## Evaluators
 
 **5. Evals return boolean pass/fail.** Ten binary judges beat one judge scoring 1 to 10. If a
