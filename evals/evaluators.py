@@ -189,40 +189,40 @@ def no_leaked_reasoning(outputs: dict) -> dict:
     return _verdict("no_leaked_reasoning", not leaked, "clean" if not leaked else "reasoning tag in answer")
 
 
-def called_expected_tools(outputs: dict, reference_outputs: dict) -> dict:
-    """Every tool named in `reference_outputs.expect_tool_calls` was called.
+def must_call(outputs: dict, reference_outputs: dict) -> dict:
+    """Every tool named in `reference_outputs.must_call` was called.
 
     A trajectory assertion. Often sharper than anything you can check in the prose: an
     agent that answers a tank-level question without calling `get_tank_status` got the
     right answer by accident, and you want to know that now rather than when the data
     changes.
     """
-    expected = reference_outputs.get("expect_tool_calls") or []
+    expected = reference_outputs.get("must_call") or []
     if not expected:
-        return _verdict("called_expected_tools", True, "no expectation set")
+        return _verdict("must_call", True, "no contract set")
 
     actual = _trajectory(outputs)
     missing = [name for name in expected if name not in actual]
     return _verdict(
-        "called_expected_tools",
+        "must_call",
         not missing,
         f"called {actual}" if not missing else f"MISSING {missing}; called {actual}",
     )
 
 
-def avoided_forbidden_tools(outputs: dict, reference_outputs: dict) -> dict:
-    """No tool in `reference_outputs.forbid_tool_calls` was called.
+def must_not_call(outputs: dict, reference_outputs: dict) -> dict:
+    """No tool in `reference_outputs.must_not_call` was called.
 
     The important one for the write tools. "Did not file a work order when the user was just
     asking a question" is a real requirement, and it is a code assertion.
     """
-    forbidden = reference_outputs.get("forbid_tool_calls") or []
+    forbidden = reference_outputs.get("must_not_call") or []
     if not forbidden:
-        return _verdict("avoided_forbidden_tools", True, "no expectation set")
+        return _verdict("must_not_call", True, "no contract set")
 
     called = [name for name in _trajectory(outputs) if name in forbidden]
     return _verdict(
-        "avoided_forbidden_tools",
+        "must_not_call",
         not called,
         "none called" if not called else f"CALLED FORBIDDEN {called}",
     )
@@ -371,8 +371,8 @@ CODE_EVALUATORS = [
     responded,
     answered_in_english,
     no_leaked_reasoning,
-    called_expected_tools,
-    avoided_forbidden_tools,
+    must_call,
+    must_not_call,
     within_tool_budget,
     mentions_required,
     avoided_forbidden_phrases,
@@ -643,7 +643,7 @@ JUDGE_EVALUATORS = [
 ]
 
 #: Cheap and fast: run these on every commit.
-SMOKE_EVALUATORS = [responded, answered_in_english, no_leaked_reasoning, called_expected_tools]
+SMOKE_EVALUATORS = [responded, answered_in_english, no_leaked_reasoning, must_call]
 
 #: Everything. This is your pre-release gate.
 ALL_EVALUATORS = [*CODE_EVALUATORS, *JUDGE_EVALUATORS]

@@ -529,9 +529,9 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
   <span class="s2">&quot;reference_outputs&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="c1"># Machine-checkable, graded by code. Free, instant.</span>
     <span class="c1"># Must call, at least once, in any order:</span>
-    <span class="s2">&quot;expect_tool_calls&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;get_tank_status&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;must_call&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;get_tank_status&quot;</span><span class="p">],</span>
     <span class="c1"># Must NOT call. Restraint, and the half people leave out:</span>
-    <span class="s2">&quot;forbid_tool_calls&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;create_work_order&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;must_not_call&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;create_work_order&quot;</span><span class="p">],</span>
     <span class="s2">&quot;max_tool_calls&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
     <span class="s2">&quot;expect_warnings_surfaced&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;suspect&quot;</span><span class="p">,</span> <span class="s2">&quot;receipt&quot;</span><span class="p">],</span>
     <span class="s2">&quot;must_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;12.1&quot;</span><span class="p">],</span>
@@ -548,7 +548,7 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
 <span class="p">}</span></code></pre>
 <p><strong>A new test case is a new dict, not new code.</strong> That's what makes this scale to 200 cases.</p>
 <p>Three things about that row are worth calling out. The <strong>code-checkable and semantic halves are
-separate on purpose</strong>, because one is free and one costs a model call. <code>forbid_tool_calls</code> is the
+separate on purpose</strong>, because one is free and one costs a model call. <code>must_not_call</code> is the
 one people leave out, and it's how you assert <em>restraint</em> on a tool that does something
 irreversible. And a mock value can be more than a payload:</p>
 <table>

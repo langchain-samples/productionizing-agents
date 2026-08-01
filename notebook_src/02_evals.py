@@ -421,7 +421,7 @@ else:
 #     },
 #   },
 #   "reference_outputs": {
-#     "expect_tool_calls": ["get_tank_status"],
+#     "must_call": ["get_tank_status"],
 #     "expect_warnings_surfaced": ["suspect", "receipt"],
 #   }
 # }
@@ -756,7 +756,7 @@ else:
 # | Tier | Evaluators | A regression here means |
 # |:--|:--|:--|
 # | **Non-negotiable** | `grounded_in_tool_output`, `did_not_claim_false_success`, `stayed_within_authority`, `surfaced_data_quality_warnings` | Do not ship. These are safety properties. |
-# | **Important** | `cited_a_procedure`, `called_expected_tools`, `failure_honestly_reported` | Investigate before shipping. |
+# | **Important** | `cited_a_procedure`, `must_call`, `failure_honestly_reported` | Investigate before shipping. |
 # | **Efficiency** | `within_tool_budget`, latency | Trade freely against cost. |
 #
 # Write that hierarchy down for *your* domain before you run the comparison, not after. It's

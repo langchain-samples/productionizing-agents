@@ -27,7 +27,7 @@ there, only your target and your evaluators do. The mock world goes in `inputs`,
         }
       },
       "reference_outputs": {
-        "expect_tool_calls": ["get_tank_status"],
+        "must_call": ["get_tank_status"],
         "must_mention": ["suspect"],
         "must_not_claim_success": false
       }

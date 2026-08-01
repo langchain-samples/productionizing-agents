@@ -342,9 +342,9 @@ never interprets, so one row can carry the world *and* the expectations:
   "reference_outputs": {
     # Machine-checkable, graded by code. Free, instant.
     # Must call, at least once, in any order:
-    "expect_tool_calls": ["get_tank_status"],
+    "must_call": ["get_tank_status"],
     # Must NOT call. Restraint, and the half people leave out:
-    "forbid_tool_calls": ["create_work_order"],
+    "must_not_call": ["create_work_order"],
     "max_tool_calls": 5,
     "expect_warnings_surfaced": ["suspect", "receipt"],
     "must_mention": ["12.1"],
@@ -364,7 +364,7 @@ never interprets, so one row can carry the world *and* the expectations:
 **A new test case is a new dict, not new code.** That's what makes this scale to 200 cases.
 
 Three things about that row are worth calling out. The **code-checkable and semantic halves are
-separate on purpose**, because one is free and one costs a model call. `forbid_tool_calls` is the
+separate on purpose**, because one is free and one costs a model call. `must_not_call` is the
 one people leave out, and it's how you assert *restraint* on a tool that does something
 irreversible. And a mock value can be more than a payload:
 

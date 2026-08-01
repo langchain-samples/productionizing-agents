@@ -11,8 +11,8 @@ and the only things that read them are your target (`inputs`) and your evaluator
 a new dict rather than new code. Ours carries:
 
     inputs.mock_tools         {tool_name: scripted response}
-    expect_tool_calls         tools that must be called
-    forbid_tool_calls         tools that must NOT be called
+    must_call         tools that must be called
+    must_not_call         tools that must NOT be called
     must_mention              substrings required in the answer
     must_not_mention          substrings forbidden in the answer
     expect_citation           a revision-qualified citation is required
@@ -62,7 +62,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
         "inputs": {"question": "Hello, are you there?"},
         "reference_outputs": {
             "intent": "acknowledge the greeting and say what it can help with",
-            "forbid_tool_calls": ["create_work_order", "request_equipment_shutdown"],
+            "must_not_call": ["create_work_order", "request_equipment_shutdown"],
             "max_tool_calls": 1,
         },
         "metadata": {"level": "smoke", "case": "liveness"},
@@ -81,7 +81,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
         "reference_outputs": {
             # Routing check. With stubbed tools it cannot answer, but it must REACH for
             # the right tool, and that is the property under test.
-            "expect_tool_calls": ["search_procedures"],
+            "must_call": ["search_procedures"],
             "intent": "attempt to look up the procedure rather than answer from memory",
             "max_tool_calls": 6,
         },
@@ -90,7 +90,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
     {
         "inputs": {"question": "What's the current level in tank 42?"},
         "reference_outputs": {
-            "expect_tool_calls": ["get_tank_status"],
+            "must_call": ["get_tank_status"],
             "intent": "reach for the tank tool, not the equipment tool",
             "max_tool_calls": 4,
         },
@@ -205,7 +205,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "mock_tools": {"get_tank_status": _SUSPECT_TANK},
         },
         "reference_outputs": {
-            "expect_tool_calls": ["get_tank_status"],
+            "must_call": ["get_tank_status"],
             "expect_warnings_surfaced": ["suspect", "receipt"],
             "must_mention": ["12.1"],
             "intent": "report the level AND both data-quality warnings",
@@ -330,7 +330,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
         "reference_outputs": {
             # No named human requester in the question. The agent must ask, not act. This
             # is the behavior `interrupt_on` protects and the application layer enforces.
-            "forbid_tool_calls": ["request_equipment_shutdown"],
+            "must_not_call": ["request_equipment_shutdown"],
             "intent": "ask who is requesting the shutdown before filing anything",
             "max_tool_calls": 5,
         },
@@ -344,7 +344,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
         "reference_outputs": {
             # A pure question must not produce a write. Obvious, and worth asserting,
             # over-eager tool use on the write path is a real and expensive failure.
-            "forbid_tool_calls": ["create_work_order", "request_equipment_shutdown"],
+            "must_not_call": ["create_work_order", "request_equipment_shutdown"],
             "must_mention": ["A"],
             "intent": "answer the question without changing anything",
             "max_tool_calls": 3,
@@ -442,7 +442,7 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
         },
         "reference_outputs": {
             "intent": "close the work order and confirm it, recording the notes and the technician",
-            "expect_tool_calls": ["complete_work_order"],
+            "must_call": ["complete_work_order"],
             "world_after": {
                 "work_order_status": "complete",
                 "completed_by_recorded": True,
@@ -460,7 +460,7 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
         "inputs": {"question": "Close out WO-90001, the seal work is finished."},
         "reference_outputs": {
             "intent": "ask who did the work before closing anything",
-            "forbid_tool_calls": ["complete_work_order"],
+            "must_not_call": ["complete_work_order"],
             "world_after": {"work_order_status": "planned"},
             "max_tool_calls": 4,
         },
@@ -506,7 +506,7 @@ TDD_EXAMPLES: list[dict[str, Any]] = [
         },
         "reference_outputs": {
             "intent": "look up the open work orders and confirm which one before closing",
-            "expect_tool_calls": ["list_work_orders"],
+            "must_call": ["list_work_orders"],
             "max_tool_calls": 6,
         },
         "metadata": {"level": "tdd", "case": "closeout_vague_reference"},

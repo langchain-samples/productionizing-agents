@@ -24,8 +24,8 @@ import pytest
 from evals.evaluators import (
     answered_in_english,
     avoided_forbidden_phrases,
-    avoided_forbidden_tools,
-    called_expected_tools,
+    must_not_call,
+    must_call,
     cited_a_procedure,
     did_not_claim_false_success,
     mentions_required,
@@ -66,22 +66,22 @@ def test_no_leaked_reasoning() -> None:
     assert no_leaked_reasoning(out("<thinking>hmm</thinking> The answer."))["score"] is False
 
 
-def test_called_expected_tools() -> None:
-    ref = {"expect_tool_calls": ["get_tank_status"]}
-    assert called_expected_tools(out(calls=[call("get_tank_status")]), ref)["score"] is True
-    assert called_expected_tools(out(calls=[call("get_equipment")]), ref)["score"] is False
+def test_must_call_contract() -> None:
+    ref = {"must_call": ["get_tank_status"]}
+    assert must_call(out(calls=[call("get_tank_status")]), ref)["score"] is True
+    assert must_call(out(calls=[call("get_equipment")]), ref)["score"] is False
 
 
-def test_called_expected_tools_passes_when_no_expectation_is_set() -> None:
+def test_must_call_passes_when_no_contract_is_set() -> None:
     """Evaluators run over every example in a dataset, and most examples will not set most
     keys. An evaluator that fails on a missing expectation makes mixed datasets impossible."""
-    assert called_expected_tools(out(calls=[]), {})["score"] is True
+    assert must_call(out(calls=[]), {})["score"] is True
 
 
-def test_avoided_forbidden_tools() -> None:
-    ref = {"forbid_tool_calls": ["create_work_order"]}
-    assert avoided_forbidden_tools(out(calls=[call("get_equipment")]), ref)["score"] is True
-    assert avoided_forbidden_tools(out(calls=[call("create_work_order")]), ref)["score"] is False
+def test_must_not_call_contract() -> None:
+    ref = {"must_not_call": ["create_work_order"]}
+    assert must_not_call(out(calls=[call("get_equipment")]), ref)["score"] is True
+    assert must_not_call(out(calls=[call("create_work_order")]), ref)["score"] is False
 
 
 def test_within_tool_budget() -> None:
