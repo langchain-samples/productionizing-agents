@@ -7,6 +7,20 @@ description: Build or extend an evaluation suite for an LLM agent. Verifiable ru
 
 Rules, in order. Each one is checkable: you can look at a repo and say whether it holds.
 
+## The one line for your CLAUDE.md
+
+A skill only loads once something has already triggered it. This has to fire *before* the agent
+starts writing code, so it belongs in always-on context:
+
+> Treat agents like software and always do TDD. Before adding any capability or fixing any bug,
+> add a sample to the eval dataset first, prove it red, then make it green. A sample looks like
+> `{inputs: {prompt, mock_tools}, reference_outputs: {must_call, must_not_call, assertions:
+> [{key, comment}]}, metadata: {case}}`. Evaluators are the one thing a human must review, so
+> say clearly which ones you wrote and why.
+
+That last clause is not optional. Rule 9 says a human reviews every evaluator, and a standing
+instruction to write them is exactly the thing that quietly erodes it.
+
 ## Build
 
 **1. Do TDD for agents.** Start every new feature by adding samples to the dataset: the request,
