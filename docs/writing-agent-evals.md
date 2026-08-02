@@ -577,14 +577,14 @@ reasonable day-one set for anything with a user on the other end. All binary.
 | | | |
 | :-- | :-- | :-- |
 | `accomplished` | judge | Did the agent do what was asked? The one irreducibly semantic question, and the one worth spending a model call on. Works at either level. |
+| `hallucination` | judge | Did the response assert anything no tool result supports? The failure that costs trust fastest, because the user has no way to catch it themselves. |
 | `perceived_error` | judge | Could this plausibly have looked like a failure to the user, or did the user show frustration? Catches the gap between *technically fine* and *felt broken*. |
-| `user_delighted` | judge | Did the user express actual happiness? Rare, and the only signal here with an upper end worth chasing. |
 | `tool_error` | code | Did a tool error, including the model calling it with bad arguments? Free, and it separates *your* bug from the model's. |
 | `ai_slop` | code | Em dashes and the giveaway vocabulary. Split it per-marker once it starts firing. |
 
-Two of those, `perceived_error` and `user_delighted`, need the *next* user message to be
-evaluable, because frustration and delight are things the user expresses after the fact. That
-makes them thread-level by nature even though the rest of the set works fine on a single trace.
+One of those, `perceived_error`, needs the *next* user message to be evaluable, because
+frustration is something the user expresses after the fact. That makes it thread-level by nature
+even though the rest of the set works fine on a single trace.
 
 `tool_error` is the one to wire up first: it's free, it fires on real bugs, and a spike in it is
 usually a deploy rather than a model.
