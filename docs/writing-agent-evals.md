@@ -371,9 +371,12 @@ irreversible. And a mock value can be more than a payload:
 | Mock value | What the agent gets |
 | :-- | :-- |
 | any JSON | returned as the tool result |
-| `{"error": "..."}` | a value it reads, and can recover from |
 | `{"raise": "..."}` | an exception, so it never sees a result |
 | `[first, second, ...]` | successive calls get successive responses |
+
+`raise` is the only reserved word. An error payload like `{"error": "503"}` needs no special
+form, because it *is* data: the tool returned it, the model reads it, and it can recover. A bare
+list means sequence, so a tool that really returns a list needs nesting, `[[a, b]]`.
 
 **Make the mock and the assertion agree.** A mock that returns a confident, specific answer can't
 be paired with *"the agent shouldn't have answered"*: an agent that uses the result is following
@@ -456,8 +459,8 @@ the next one fails, and the expectations say what the agent owes you when it doe
     "mock_tools": {
       # This one succeeds.
       "get_equipment": {"tag": "P-101A", "criticality": "A"},
-      # This one fails, as a value the model reads. Use {"raise": "..."}
-      # instead to throw, so it never sees a result at all.
+      # This one fails. Still just a returned value, which the model reads and
+      # can recover from. Use {"raise": "..."} to throw instead.
       "create_work_order": {"error": "503 Service Unavailable.",
                             "recoverable": True},
     },
@@ -476,9 +479,9 @@ Script four flavors, because they fail differently:
 
 | Flavor | Mock value | Why it's separate |
 | :-- | :-- | :-- |
-| Returns an error | `{"error": ...}` | The common case. The model reads it and can recover. |
+| Returns an error | an error payload | The common case. The model reads it and can recover. |
 | **Raises** | `{"raise": ...}` | Different code path, goes through retry middleware, and the model never sees a result |
-| Permission denied | `{"error": ...}` | Unrecoverable; must not be retried into the ground |
+| Permission denied | an error payload | Unrecoverable; must not be retried into the ground |
 | A **read** fails | either | Sneakiest: no action to falsely claim, so the agent just answers from nothing |
 
 When a *write* fails there's an obvious success to falsely claim. When a *read* fails, the agent

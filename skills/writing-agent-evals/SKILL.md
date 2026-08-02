@@ -106,14 +106,19 @@ you are testing, a tool that returned *nothing* or a tool that returned somethin
 and write the mock to match. The second is the harder failure mode, because agents will
 confidently repurpose an off-topic result.
 
-**A mock value can be more than a string**, and needs to be for rule 4:
+**`raise` is the only reserved word.** Everything else is returned to the model as-is, which
+includes an error payload: a tool that hands back `{"error": "503"}` is returning data, and the
+model reads it and can recover. Throwing is the case that needs its own form, because it takes a
+different code path and the model never sees a result at all.
 
-| Form | Behavior |
+| Mock value | Behavior |
 | :-- | :-- |
-| any value | returned as the tool result |
-| `{"error": "..."}` | a value the model reads and can recover from |
-| `{"raise": "..."}` | throws, so the model never sees a result |
+| any value | returned as the tool result, error payloads included |
+| `{"raise": "..."}` | throws instead of returning |
 | `[a, b, ...]` | successive calls get successive responses |
+
+One sharp edge falls out of that last row: a bare list means *sequence*, so a tool whose real
+return value is a list needs nesting, `[[a, b]]`, to mean "return this list every time".
 
 So a failing tool is not a different row shape, just a different mock value. One tool succeeds,
 the next fails, and the expectations say what the agent owes you when it does:

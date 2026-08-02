@@ -564,10 +564,6 @@ irreversible. And a mock value can be more than a payload:</p>
 <td style="text-align: left;">returned as the tool result</td>
 </tr>
 <tr>
-<td style="text-align: left;"><code>{"error": "..."}</code></td>
-<td style="text-align: left;">a value it reads, and can recover from</td>
-</tr>
-<tr>
 <td style="text-align: left;"><code>{"raise": "..."}</code></td>
 <td style="text-align: left;">an exception, so it never sees a result</td>
 </tr>
@@ -577,6 +573,9 @@ irreversible. And a mock value can be more than a payload:</p>
 </tr>
 </tbody>
 </table>
+<p><code>raise</code> is the only reserved word. An error payload like <code>{"error": "503"}</code> needs no special
+form, because it <em>is</em> data: the tool returned it, the model reads it, and it can recover. A bare
+list means sequence, so a tool that really returns a list needs nesting, <code>[[a, b]]</code>.</p>
 <p><strong>Make the mock and the assertion agree.</strong> A mock that returns a confident, specific answer can't
 be paired with <em>"the agent shouldn't have answered"</em>: an agent that uses the result is following
 its tool output, and the judge gets a brief that argues with the fixture. Decide which case you're
@@ -633,8 +632,8 @@ the next one fails, and the expectations say what the agent owes you when it doe
     <span class="s2">&quot;mock_tools&quot;</span><span class="p">:</span> <span class="p">{</span>
       <span class="c1"># This one succeeds.</span>
       <span class="s2">&quot;get_equipment&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;P-101A&quot;</span><span class="p">,</span> <span class="s2">&quot;criticality&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
-      <span class="c1"># This one fails, as a value the model reads. Use {&quot;raise&quot;: &quot;...&quot;}</span>
-      <span class="c1"># instead to throw, so it never sees a result at all.</span>
+      <span class="c1"># This one fails. Still just a returned value, which the model reads and</span>
+      <span class="c1"># can recover from. Use {&quot;raise&quot;: &quot;...&quot;} to throw instead.</span>
       <span class="s2">&quot;create_work_order&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;503 Service Unavailable.&quot;</span><span class="p">,</span>
                             <span class="s2">&quot;recoverable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
     <span class="p">},</span>
@@ -659,7 +658,7 @@ the next one fails, and the expectations say what the agent owes you when it doe
 <tbody>
 <tr>
 <td style="text-align: left;">Returns an error</td>
-<td style="text-align: left;"><code>{"error": ...}</code></td>
+<td style="text-align: left;">an error payload</td>
 <td style="text-align: left;">The common case. The model reads it and can recover.</td>
 </tr>
 <tr>
@@ -669,7 +668,7 @@ the next one fails, and the expectations say what the agent owes you when it doe
 </tr>
 <tr>
 <td style="text-align: left;">Permission denied</td>
-<td style="text-align: left;"><code>{"error": ...}</code></td>
+<td style="text-align: left;">an error payload</td>
 <td style="text-align: left;">Unrecoverable; must not be retried into the ground</td>
 </tr>
 <tr>
