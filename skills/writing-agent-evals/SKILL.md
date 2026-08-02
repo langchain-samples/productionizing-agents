@@ -126,7 +126,7 @@ the next fails, and the expectations say what the agent owes you when it does:
 ```json
 "mock_tools": {
   "get_equipment":     {"tag": "P-101A"},
-  "create_work_order": {"error": "503 Service Unavailable", "recoverable": true}
+  "create_work_order": {"raise": "503 Service Unavailable"}
 },
 "reference_outputs": {
   "must_not_mention": ["work order has been created"],

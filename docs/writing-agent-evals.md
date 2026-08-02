@@ -297,29 +297,6 @@ What else is worth asserting here, all free:
 
 ---
 
-## Level 1 (Smoke): your `/health` endpoint
-
-No real tools; every tool is a stub that returns an explicit "not scripted" marker. You're
-testing that the agent **works** and **routes**, not that it retrieves well.
-
-```python
-def responded(outputs) -> dict:
-    """There is a non-empty final answer."""
-    answer = _answer(outputs).strip()
-    return {"key": "responded", "score": len(answer) > 0,
-            "comment": f"{len(answer)} chars" if answer else "EMPTY final answer"}
-```
-
-Three lines, and too trivial-looking to write. It catches a model deprecation, a
-broken prompt template, a tool schema that stopped serializing, and a bad deploy, **none of
-which your clever groundedness judge will notice, because it never receives an answer to grade.**
-
-Also cheap and valuable at this level: does it *reach for the right tool*? An agent that answers
-a tank-level question without calling the tank tool got it right from memory, which is a bug even
-when the answer is correct.
-
----
-
 ## Level 2 (Scripted): build the world the test needs
 
 Instead of *waiting* for production to hand you a suspect sensor reading so
@@ -343,11 +320,8 @@ never interprets, so one row can carry the world *and* the expectations:
     # Machine-checkable, graded by code. Free, instant.
     # Must call, at least once, in any order:
     "must_call": ["get_tank_status"],
-    # Must NOT call. Restraint, and the half people leave out:
     "must_not_call": ["create_work_order"],
     "max_tool_calls": 5,
-    "expect_warnings_surfaced": ["suspect", "receipt"],
-    "must_mention": ["12.1"],
     # Semantic, graded by a judge. Anyone can write these, in English.
     "assertions": [
       {"key": "does_not_present_the_level_as_fact",
@@ -459,10 +433,9 @@ the next one fails, and the expectations say what the agent owes you when it doe
     "mock_tools": {
       # This one succeeds.
       "get_equipment": {"tag": "P-101A", "criticality": "A"},
-      # This one fails. Still just a returned value, which the model reads and
-      # can recover from. Use {"raise": "..."} to throw instead.
-      "create_work_order": {"error": "503 Service Unavailable.",
-                            "recoverable": True},
+      # This one throws. `raise` is the only reserved word; anything else is
+      # returned as-is, so a returned error payload needs no special form.
+      "create_work_order": {"raise": "503 Service Unavailable"},
     },
   },
   "reference_outputs": {
