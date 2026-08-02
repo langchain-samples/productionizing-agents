@@ -115,6 +115,21 @@ confidently repurpose an off-topic result.
 | `{"raise": "..."}` | throws, so the model never sees a result |
 | `[a, b, ...]` | successive calls get successive responses |
 
+So a failing tool is not a different row shape, just a different mock value. One tool succeeds,
+the next fails, and the expectations say what the agent owes you when it does:
+
+```json
+"mock_tools": {
+  "get_equipment":     {"tag": "P-101A"},
+  "create_work_order": {"error": "503 Service Unavailable", "recoverable": true}
+},
+"reference_outputs": {
+  "must_not_mention": ["work order has been created"],
+  "assertions": [{"key": "must_say_it_failed",
+                  "comment": "States the work order was not created, and what to do next."}]
+}
+```
+
 Names only is not enough. A tool called correctly with the wrong arguments is a large bug class
 and invisible in a trajectory check, so assert on arguments where they matter.
 

@@ -625,29 +625,56 @@ check in the prose, and it's a code assertion.</p>
 casual testing, because the answer <em>reads fine</em>. The user is told their work order was
 filed. It wasn't. They find out days later when the work doesn't happen. Nothing in your error
 logs. Dashboards green.</p>
+<p><strong>The failure goes in the mock value.</strong> Nothing about the row changes shape: one tool succeeds,
+the next one fails, and the expectations say what the agent owes you when it does.</p>
+<pre><code class="language-python"><span class="p">{</span>
+  <span class="s2">&quot;inputs&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;question&quot;</span><span class="p">:</span> <span class="s2">&quot;Raise an urgent work order on P-101A, the seal is leaking.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mock_tools&quot;</span><span class="p">:</span> <span class="p">{</span>
+      <span class="c1"># This one succeeds.</span>
+      <span class="s2">&quot;get_equipment&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tag&quot;</span><span class="p">:</span> <span class="s2">&quot;P-101A&quot;</span><span class="p">,</span> <span class="s2">&quot;criticality&quot;</span><span class="p">:</span> <span class="s2">&quot;A&quot;</span><span class="p">},</span>
+      <span class="c1"># This one fails, as a value the model reads. Use {&quot;raise&quot;: &quot;...&quot;}</span>
+      <span class="c1"># instead to throw, so it never sees a result at all.</span>
+      <span class="s2">&quot;create_work_order&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;503 Service Unavailable.&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;recoverable&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+    <span class="p">},</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;reference_outputs&quot;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">&quot;expect_tool_failure&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;must_not_mention&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;work order has been created&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;i&#39;ve created work order&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;intent&quot;</span><span class="p">:</span> <span class="s2">&quot;say the work order could NOT be created, and what to do next&quot;</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;scripted&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;write_fails_503&quot;</span><span class="p">},</span>
+<span class="p">}</span></code></pre>
 <p>Script four flavors, because they fail differently:</p>
 <table>
 <thead>
 <tr>
 <th style="text-align: left;">Flavor</th>
+<th style="text-align: left;">Mock value</th>
 <th style="text-align: left;">Why it's separate</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align: left;">Returns <code>{"error": ...}</code></td>
-<td style="text-align: left;">The common case</td>
+<td style="text-align: left;">Returns an error</td>
+<td style="text-align: left;"><code>{"error": ...}</code></td>
+<td style="text-align: left;">The common case. The model reads it and can recover.</td>
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Raises</strong></td>
-<td style="text-align: left;">Different code path, goes through retry middleware</td>
+<td style="text-align: left;"><code>{"raise": ...}</code></td>
+<td style="text-align: left;">Different code path, goes through retry middleware, and the model never sees a result</td>
 </tr>
 <tr>
 <td style="text-align: left;">Permission denied</td>
+<td style="text-align: left;"><code>{"error": ...}</code></td>
 <td style="text-align: left;">Unrecoverable; must not be retried into the ground</td>
 </tr>
 <tr>
 <td style="text-align: left;">A <strong>read</strong> fails</td>
+<td style="text-align: left;">either</td>
 <td style="text-align: left;">Sneakiest: no action to falsely claim, so the agent just answers from nothing</td>
 </tr>
 </tbody>

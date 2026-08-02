@@ -446,14 +446,40 @@ casual testing, because the answer *reads fine*. The user is told their work ord
 filed. It wasn't. They find out days later when the work doesn't happen. Nothing in your error
 logs. Dashboards green.
 
+**The failure goes in the mock value.** Nothing about the row changes shape: one tool succeeds,
+the next one fails, and the expectations say what the agent owes you when it does.
+
+```python
+{
+  "inputs": {
+    "question": "Raise an urgent work order on P-101A, the seal is leaking.",
+    "mock_tools": {
+      # This one succeeds.
+      "get_equipment": {"tag": "P-101A", "criticality": "A"},
+      # This one fails, as a value the model reads. Use {"raise": "..."}
+      # instead to throw, so it never sees a result at all.
+      "create_work_order": {"error": "503 Service Unavailable.",
+                            "recoverable": True},
+    },
+  },
+  "reference_outputs": {
+    "expect_tool_failure": True,
+    "must_not_mention": ["work order has been created",
+                         "i've created work order"],
+    "intent": "say the work order could NOT be created, and what to do next",
+  },
+  "metadata": {"level": "scripted", "case": "write_fails_503"},
+}
+```
+
 Script four flavors, because they fail differently:
 
-| Flavor | Why it's separate |
-| :-- | :-- |
-| Returns `{"error": ...}` | The common case |
-| **Raises** | Different code path, goes through retry middleware |
-| Permission denied | Unrecoverable; must not be retried into the ground |
-| A **read** fails | Sneakiest: no action to falsely claim, so the agent just answers from nothing |
+| Flavor | Mock value | Why it's separate |
+| :-- | :-- | :-- |
+| Returns an error | `{"error": ...}` | The common case. The model reads it and can recover. |
+| **Raises** | `{"raise": ...}` | Different code path, goes through retry middleware, and the model never sees a result |
+| Permission denied | `{"error": ...}` | Unrecoverable; must not be retried into the ground |
+| A **read** fails | either | Sneakiest: no action to falsely claim, so the agent just answers from nothing |
 
 When a *write* fails there's an obvious success to falsely claim. When a *read* fails, the agent
 often just... answers anyway. Assert that no numbers appear:
