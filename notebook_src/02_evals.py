@@ -117,10 +117,10 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to recor
 #
 # Almost everything you need is two kinds, and they are the whole of this module:
 #
-# | Kind | Levels | What's real | You can assert | Cost |
-# |:--|:--|:--|:--|:--|
-# | **Code tests** | 0 | Nothing. Tools and harness are ordinary software. | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free** |
-# | **Agent tests** | 1, 2 | The model. Tools stubbed, or their responses mocked per case. | Behavior given a specific world, *including failures* | cheap |
+# | | What it covers | How you run it |
+# |:--|:--|:--|
+# | **1. Harness and tools** | Middleware, the assembled prompt, tool schemas, middleware order, limits. Ordinary software: deterministic, no cost, no wall clock. | `pytest` |
+# | **2. LLM tests** | Behavior with **mocked tools**: given this world, what does the agent do, *including when a tool fails*. | LangSmith datasets and experiments. Watch score, cost, latency. |
 #
 # **That covers about 80% of what you will write.** Two more levels exist and are worth
 # knowing about, but they cost real money and flake in ways these do not:
@@ -339,36 +339,11 @@ print("Nothing tells you that except a test.")
 # static rows, which is exactly why they're separate levels.
 
 # %% [markdown]
-# ---
-# ## Level 1. Smoke: the `/health` endpoint of your agent
-#
-# No real tools. Every tool is a stub returning `{"error": "not mocked for this test"}`.
-# We're testing that the agent **works** and that it **routes** correctly.
-#
-# These look too simple to bother writing. They are the split that catches a model
-# deprecation, a broken prompt template, a tool schema that stopped serializing, and a bad
-# deploy, **none of which your clever groundedness judge will notice, because it never
-# receives an answer to grade.**
+# Seed the datasets. `seed_datasets` is idempotent, so re-running it just reports what is
+# already there.
 
 # %%
-from evals.datasets import SMOKE_EXAMPLES
-
-for example in SMOKE_EXAMPLES[:4]:
-    ref = example["reference_outputs"]
-    print(f"  {example['metadata']['case']:<32} {example['inputs']['question'][:44]}")
-    checks = [k for k in ref if k != "intent"]
-    print(f"  {'':<32} asserts: {checks}\n")
-
-# %% [markdown]
-# Note `routing_procedure`: with stubbed tools ARIA *cannot* answer the question. But it must
-# **reach for `search_procedures`**, and that's the property under test. An agent that
-# answers a procedure question without consulting the library got it right from memory,
-# which in a safety domain is a bug even when the answer is correct.
-#
-# Seed the datasets:
-
-# %%
-from evals.datasets import MOCKED_DATASET, SMOKE_DATASET, seed_datasets
+from evals.datasets import MOCKED_DATASET, seed_datasets
 
 if HAS_LANGSMITH:
     seed_datasets()
@@ -376,39 +351,8 @@ else:
     print("Skipped: no LangSmith key.")
 
 # %% [markdown]
-# ### The evaluators
-#
-# Code-only for smoke. Look at how boring they are, that's the point.
-
-# %%
-import inspect
-
-from evals.evaluators import SMOKE_EVALUATORS
-
-for ev in SMOKE_EVALUATORS:
-    first_line = (ev.__doc__ or "").strip().split("\n")[0]
-    print(f"  {ev.__name__:<26} {first_line}")
-
-print("\n--- responded(), in full ---")
-print(inspect.getsource(inspect.unwrap(__import__("evals.evaluators", fromlist=["responded"]).responded)))
-
-# %% [markdown]
-# Three lines. Free. Instant. Never flakes. And it is the single most valuable test in the
-# suite, because "the agent returned nothing" is the failure that breaks everything
-# downstream and shows up nowhere in a quality score.
-#
-# ### Run it
-
-# %%
-if HAS_LLM and HAS_LANGSMITH:
-    smoke_results = await run_level("smoke", reps=1)
-    print("\nOpen the experiment in LangSmith, the link is printed above.")
-else:
-    print("Skipped: needs both a model key and LangSmith.")
-
-# %% [markdown]
 # ---
-# ## Level 2. Mocked Tools: build the world the test needs
+# ## LLM tests: build the world the test needs
 #
 # Now the useful part. Instead of *waiting* for production to hand you a suspect tank gauge
 # so you can see what the agent does, you **script** the suspect gauge.
@@ -599,7 +543,7 @@ else:
 
 # %% [markdown]
 # ---
-# ## Level 3. Stateful: did the world actually change?
+# ## Advanced: Stateful, did the world actually change?
 #
 # Levels 1 and 2 script a tool's *response*. That works while the response is a pure function
 # of the call. It breaks the moment there's state behind the tool:
@@ -632,7 +576,7 @@ print(Path("evals/test_stateful.py").read_text().split("@pytest.mark.langsmith")
 # *"a work order exists"* are different claims, and the gap between them is the failure mode
 # worth hunting. That test checks both, separately, on purpose.
 #
-# ### Human-in-the-loop is a Level 3 test
+# ### Human-in-the-loop is a stateful test
 #
 # `request_equipment_shutdown` is gated by `interrupt_on`. Three things need asserting, and
 # only the first is obvious:
@@ -660,7 +604,7 @@ else:
 
 # %% [markdown]
 # ---
-# ## Level 4. Simulated: a second LLM plays the user
+# ## Advanced: Simulated, a second LLM plays the user
 #
 # The only level that catches anything multi-turn:
 #
@@ -821,8 +765,8 @@ print("""
 #
 # | Situation | What to run | Trigger |
 # |:--|:--|:--|
-# | **Rapid iteration**: swapping models, rewriting the prompt | `smoke` + `mocked-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
-# | **Every commit / PR** | `smoke` + `mocked-cheap` | CI. No judge calls, so cost is negligible. |
+# | **Rapid iteration**: swapping models, rewriting the prompt | `mocked-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
+# | **Every commit / PR** | `pytest tests/` + `mocked-cheap` | CI. No judge calls, so cost is negligible. |
 # | **Before merging a prompt or model change** | full `mocked` with judges, `reps=3` | CI, conditional: see below |
 # | **Nightly** | everything including `simulate` | Scheduled |
 # | **Pre-release** | everything, `reps=5` | Manual gate |
@@ -861,8 +805,8 @@ print("""
 # | Evaluator | An assertion: exact (code) or fuzzy (judge) |
 # | Experiment | One recorded run of the suite |
 #
-# **Two kinds, by how real the world is:** code tests (Harness, Smoke) and agent tests
-# (Mocked Tools), plus Stateful and Simulated when you need them. **Push every property as far
+# **Two kinds:** code tests for the harness and tools, and LLM tests with mocked tools,
+# plus stateful and simulated when you need them. **Push every property as far
 # down that ladder as it will go.**
 #
 # **Six things worth taking away:**

@@ -1,7 +1,6 @@
 """Run ARIA's evals: target function, experiment runner, and the model comparison.
 
     python -m evals.runner --seed                       # create the datasets
-    python -m evals.runner --level smoke                # run one split
     python -m evals.runner --compare                    # the money shot: model bake-off
     python -m evals.runner --level mocked --reps 3      # repeat for stochasticity
 
@@ -35,11 +34,10 @@ from langgraph.checkpoint.memory import InMemorySaver
 from evals.datasets import (
     REGRESSIONS_DATASET,
     MOCKED_DATASET,
-    SMOKE_DATASET,
     TDD_DATASET,
     seed_datasets,
 )
-from evals.evaluators import ALL_EVALUATORS, CODE_EVALUATORS, SMOKE_EVALUATORS
+from evals.evaluators import ALL_EVALUATORS, CODE_EVALUATORS
 from evals.mocking import CallRecorder, mocked_toolset
 
 DEFAULT_MAX_CONCURRENCY = 8
@@ -124,11 +122,6 @@ LEVELS: dict[str, dict[str, Any]] = {
         "dataset": TDD_DATASET,
         "evaluators": ALL_EVALUATORS,
         "description": "The hand-crafted spec, workflows agreed before any code was written",
-    },
-    "smoke": {
-        "dataset": SMOKE_DATASET,
-        "evaluators": SMOKE_EVALUATORS,
-        "description": "Level 1, does it work at all, and does it route correctly",
     },
     "mocked": {
         "dataset": MOCKED_DATASET,

@@ -299,7 +299,7 @@ AFTER (scope_guard=True)
 # %%
 print("""
     python -m evals.runner --level regressions     # the new gate
-    python -m evals.runner --level smoke           # did the fix break basic behavior?
+    python -m evals.runner --level mocked-cheap   # did the fix break basic behavior?
     python -m evals.runner --level mocked        # did it break retrieval or citations?
     pytest tests/ -q                               # 179 deterministic tests
 """)

@@ -626,41 +626,36 @@
         <div class="content figure">
           <div class="ladder">
             <div class="rung dear" style="opacity:.85"><p class="lvl"><i class="fa-solid fa-satellite-dish"></i></p><p class="nm">Production</p><p class="cost desc">testing in production &#128517;</p></div>
-            <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated <span class="paren">advanced</span></p><p class="cost desc">another LLM plays the user</p></div>
-            <div class="rung cheap"><p class="lvl">3</p><p class="nm">Stateful <span class="paren">advanced</span></p><p class="cost desc">let tool calls alter state</p></div>
-            <div class="rung cheap"><p class="lvl">2</p><p class="nm">Mocked Tools <span class="paren">agent test</span></p><p class="cost desc">mock out the tool responses</p></div>
-            <div class="pair">
-              <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke <span class="paren">agent test</span></p><p class="cost desc">no tool calls</p></div>
-              <div class="rung free"><p class="lvl">0</p><p class="nm">Harness <span class="paren">code test</span></p><p class="cost desc">deterministic code</p></div>
-            </div>
+            <div class="rung dear"><p class="lvl"><i class="fa-solid fa-comments"></i></p><p class="nm">Simulated <span class="paren">advanced</span></p><p class="cost desc">another LLM plays the user</p></div>
+            <div class="rung cheap"><p class="lvl"><i class="fa-solid fa-database"></i></p><p class="nm">Stateful <span class="paren">advanced</span></p><p class="cost desc">let tool calls alter state</p></div>
+            <div class="rung cheap"><p class="lvl">2</p><p class="nm">LLM tests <span class="paren">mocked tools</span></p><p class="cost desc">LangSmith &middot; score, cost, latency</p></div>
+            <div class="rung free"><p class="lvl">1</p><p class="nm">Harness &amp; tools <span class="paren">code tests</span></p><p class="cost desc">pytest &middot; deterministic, free</p></div>
           </div>
         </div>
         <aside class="notes">
           NOT unit / integration / e2e. That analogy breaks: every agent test involves the
           whole agent, so "how many components" isn't the interesting axis. The useful axis
-          is how much of the world is real.
+          is what is deterministic and what is not.
 
-          THE HEADLINE: it collapses to TWO kinds, and they cover about 80% of what you
-          will write. CODE TESTS, levels 0 and 1, where tools and harness are ordinary
-          software. AGENT TESTS, level 2, where the model is real and the tool responses
-          come from the dataset. Everything in the next twenty minutes is one of those two.
+          THE HEADLINE: there are TWO kinds of test, and that is the whole story. About 80%
+          of what you write is one of these two.
 
-          0 HARNESS: nothing real, fake model. Middleware, the assembled prompt, tool
-            schemas, middleware order.
-          1 SMOKE: the model is real, tools are stubs. Did it respond? Format? Which tool
-            did it reach for? This is your /health endpoint.
-          2 MOCKED: tool responses come from the dataset. Behavior given a specific
-            response, INCLUDING failures. THIS IS THE ONE THEY WILL USE MOST.
+          1 HARNESS AND TOOLS: ordinary software. Deterministic, no cost, no wall clock.
+            They already know how to do this, it is pytest. Middleware, the assembled
+            prompt, tool schemas, middleware order, limits.
+          2 LLM TESTS: mocked tools. Given this world, what does the agent do, INCLUDING
+            when a tool fails. LangSmith datasets and experiments, and you watch three
+            numbers: score, cost, latency. THIS IS THE ONE THEY WILL USE MOST.
 
-          3 and 4 are ADVANCED. Say what they are, do not dwell:
-          3 STATEFUL: real mutable state, real side effects. Did the world actually change?
-          4 SIMULATED: a second LLM plays the user. Multi-turn, under a persona.
-          Both cost real money and both flake in ways the first three do not. Reach for
-          them when a property genuinely needs them, not before.
+          The two above them are ADVANCED. Say what they are, do not dwell:
+          STATEFUL: real mutable state, real side effects. Did the world actually change?
+          SIMULATED: a second LLM plays the user. Multi-turn, under a persona.
+          Both cost real money and both flake in ways the first two do not. Reach for them
+          when a property genuinely needs them, not before.
 
           The rule: push every property as far DOWN that ladder as it will go. A property
-          you assert at Level 0 costs nothing and never flakes. The same property at Level 4
-          costs a dollar and gives you a probability.
+          you assert with pytest costs nothing and never flakes. The same property against a
+          simulated user costs a dollar and gives you a probability.
         </aside>
       </section>
 

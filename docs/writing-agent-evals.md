@@ -158,36 +158,31 @@ conversation into two, short enough that tomorrow's questions aren't stapled ont
 ## Two kinds of test
 
 Don't borrow "unit / integration / e2e" here. In ordinary testing the axis is *how many components
-are involved*; for agents, every test involves the whole agent. The useful axis is **how much of
-the world is real**.
+are involved*; for agents, every test involves the whole agent. The useful axis is **what is
+deterministic and what is not**, and that splits your suite in two.
 
-Almost everything you need is two kinds:
+| | What it covers | How you run it |
+| :-- | :-- | :-- |
+| **1. Harness and tools** | Middleware, the assembled prompt, tool schemas, middleware order, limits. Ordinary software, deterministic, no cost and no wall-clock. | `pytest` |
+| **2. LLM tests** | Behavior with **mocked tools**: given this world, what does the agent do, *including when a tool fails*. | LangSmith datasets and experiments. Watch score, cost and latency. |
 
-| | What's real | You assert | Cost |
-| :-- | :-- | :-- | :-- |
-| **Code tests** | Nothing. Tools and harness are ordinary software. | Middleware behavior, the assembled prompt, tool schemas, middleware order, limits | **free** |
-| **Agent tests** | The model. Tool responses come from the dataset. | Behavior given a specific world, *including failures* | cheap |
-
-**That covers about 80% of what you will write**, and it is the whole of the next chapter. The
-full ladder has two more rungs, real state and a simulated user, and they are worth knowing
-about, but they cost real money and flake in ways these two don't. They're in
-[the appendix](#advanced-stateful-and-simulated).
+That's the whole story, and about 80% of what you will write. The first kind you already know how
+to do; the second is what the rest of this post is about.
 
 <figure>
 <div class="ladder">
 <div class="rung prod dear"><p class="lvl">&#9679;</p><p class="nm">Production</p><p class="desc">testing in production &#128517;</p></div>
-<div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="desc">another LLM plays the user</p></div>
-<div class="rung mid"><p class="lvl">3</p><p class="nm">Stateful</p><p class="desc">tool calls alter real state</p></div>
-<div class="rung mid"><p class="lvl">2</p><p class="nm">Mocked Tools</p><p class="desc">tool responses come from the dataset</p></div>
-<div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="desc">the real model, but no tool calls</p></div>
-<div class="rung free"><p class="lvl">0</p><p class="nm">Harness</p><p class="desc">deterministic code, fake model</p></div>
+<div class="rung dear"><p class="lvl">&#9679;</p><p class="nm">Simulated</p><p class="desc">advanced &middot; another LLM plays the user</p></div>
+<div class="rung mid"><p class="lvl">&#9679;</p><p class="nm">Stateful</p><p class="desc">advanced &middot; tool calls alter real state</p></div>
+<div class="rung mid"><p class="lvl">2</p><p class="nm">LLM tests</p><p class="desc">mocked tools, responses from the dataset</p></div>
+<div class="rung free"><p class="lvl">1</p><p class="nm">Harness and tools</p><p class="desc">deterministic code, fake model</p></div>
 </div>
-<figcaption>The full ladder, for orientation. Each level makes more of the world real and costs
-more to run. Levels 0 to 2 are the two kinds above; 3 and 4 are the advanced pair in the
-appendix.</figcaption>
+<figcaption>Ordered by cost. The two numbered rungs are the two kinds above. The two marked
+advanced cost real money and flake in ways the first two don't; they're in
+<a href="#advanced-stateful-and-simulated">the appendix</a>.</figcaption>
 </figure>
 
-**The rule: push every property as far down the ladder as it will go.** At the bottom a property
+**The rule: push every property as far down that ladder as it will go.** At the bottom a property
 costs nothing and never flakes; at the top the same property costs a dollar and returns a
 probability.
 
@@ -195,7 +190,7 @@ probability.
 
 <h1 class="chapter" id="ch-2"><span class="cn">Chapter 2</span>Writing the tests<span class="cb">Two kinds of test, and the evaluators that grade them.</span></h1>
 
-## Code tests: the tools and the harness
+## Harness and tools: code tests
 
 This is the highest value per second in the entire suite. Two kinds.
 
@@ -302,7 +297,7 @@ What else is worth asserting here, all free:
 
 ---
 
-## Agent tests: mock the tools
+## LLM tests: mock the tools
 
 Instead of *waiting* for production to hand you a suspect sensor reading so
 you can see what the agent does, you **script** it.
@@ -696,7 +691,7 @@ Use `1` while iterating. Use `3+` for any decision you intend to act on.
 
 | Situation | What to run | Trigger |
 | :-- | :-- | :-- |
-| **Rapid iteration** | Level 0 + smoke | Manually, on every change. Seconds, free. |
+| **Rapid iteration** | Code tests + `mocked-cheap` | Manually, on every change. Seconds, free. |
 | **Every commit** | Level 0 + code evaluators only | CI. No judge calls, negligible cost. |
 | **Before merging a prompt or model change** | Full suite with judges, `reps=3` | CI, conditional on changed paths, or a PR label |
 | **Nightly** | Everything, including simulated users | Scheduled |
@@ -852,7 +847,7 @@ dollars.
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.
 
-Then add smoke, then mocked. Don't reach for judges or simulated users yet.
+Then add the mocked-tool cases. Don't reach for judges or simulated users yet.
 
 ### If you already have an agent in production
 
@@ -881,7 +876,7 @@ evals/
   harness.py               Level 0: capture the assembled context
   mocking.py               clone a tool's contract, script its behavior
   evaluators.py            code assertions first, judges where a regex can't reach
-  datasets.py              smoke + mocked + the hand-written spec
+  datasets.py              mocked-tool cases + the hand-written spec
   runner.py                aevaluate wiring, model comparison
   test_stateful.py         Level 3: real state, pytest
   simulate.py              Level 4: LLM as user
@@ -898,7 +893,7 @@ tests/
 Two levels past the 80%. Reach for these when the property genuinely needs them, not
 before: both cost real money, and both flake in ways the first two do not.
 
-### Level 3 (Stateful): did the world actually change?
+### Stateful: did the world actually change?
 
 Agent tests script a tool's *response*. That works while the response is a pure function of
 the call. It breaks the moment there's state behind the tool, because **the correct second
@@ -937,7 +932,7 @@ a gate.
 
 ---
 
-### Level 4 (Simulated): a second LLM plays the user
+### Simulated: a second LLM plays the user
 
 The only level that catches anything multi-turn:
 

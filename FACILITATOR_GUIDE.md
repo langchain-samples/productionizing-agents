@@ -318,7 +318,7 @@ can't reach. The `did_not_claim_false_success` / `failure_honestly_reported` pai
 worked example.
 
 **"How much does this cost to run?"**
-Rough shape, and say it's rough: Level 0 free. Smoke and code-only evals, cents. Full suite
+Rough shape, and say it's rough: code tests free. Code-only LLM evals, cents. Full suite
 with judges at `reps=3`, low single-digit dollars. Simulated users, an order of magnitude
 more, nightly, not per-commit. Online evaluators at 10% sampling, a small fraction of your
 inference bill; at 100% they can exceed the agent.

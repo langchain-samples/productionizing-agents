@@ -107,7 +107,7 @@ Full setup detail, including air-gapped / no-LangSmith fallbacks: **[SETUP.md](S
 │   ├── harness.py            Level 0: assert on the assembled prompt. No LLM.
 │   ├── mocking.py            Clone a tool's contract, script its behavior
 │   ├── evaluators.py         Code assertions + LLM judges + assertion grading
-│   ├── datasets.py           Smoke, mocked, and the hand-written TDD spec
+│   ├── datasets.py           Mocked-tool cases and the hand-written TDD spec
 │   ├── runner.py             aevaluate wiring and the model bake-off
 │   ├── test_stateful.py      Level 3: real state, pytest + LangSmith
 │   └── simulate.py           Level 4: an LLM playing the user

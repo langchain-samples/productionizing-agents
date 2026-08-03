@@ -140,7 +140,7 @@ def _verdict(key: str, ok: bool, comment: str) -> dict[str, Any]:
     return {"key": key, "score": bool(ok), "comment": comment}
 
 
-# ------------------------------------------------------------------- LEVEL 1: smoke
+# ----------------------------------------------------------- cheap, always worth having
 #
 # The `/health` endpoint of your agent. These look trivial. They are the ones that catch a
 # bad deploy, a model deprecation, a broken prompt template, or a tool schema that stopped
@@ -641,9 +641,6 @@ JUDGE_EVALUATORS = [
     stayed_within_authority,
     grade_against_assertions,
 ]
-
-#: Cheap and fast: run these on every commit.
-SMOKE_EVALUATORS = [responded, answered_in_english, no_leaked_reasoning, must_call]
 
 #: Everything. This is your pre-release gate.
 ALL_EVALUATORS = [*CODE_EVALUATORS, *JUDGE_EVALUATORS]
