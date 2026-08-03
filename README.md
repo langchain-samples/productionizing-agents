@@ -17,7 +17,7 @@ By the end of this session you will have taken one agent from "works on my lapto
 | Module | Topic | You will have built |
 | :----- | :---- | :------------------ |
 | **1** (30 min) | Agent development best practices & common pitfalls | An agent, built the way you'd build one today: application logic behind a tested MCP server, rules enforced by middleware instead of requested by the prompt, and spend limits |
-| **2** (40 min) | Deploy cost-effective, reliable agents with evals | A five-level test suite (179 deterministic tests + datasets, judges, and simulated users), a live red→green TDD cycle, and a measured answer to "can we run this on a cheaper model?" |
+| **2** (40 min) | Deploy cost-effective, reliable agents with evals | A test suite of code tests and agent tests (179 deterministic tests + datasets and judges), a live red→green TDD cycle, and a measured answer to "can we run this on a cheaper model?" |
 | **3** (20 min) | Protect your agent's reputation with monitoring & alerting | A shipped agent behind a REST endpoint, online evaluators, alert rules, and a real safety-relevant bug that the eval suite passed over |
 | **4** (10 min) | Continually improve your agent 24/7 with self-improving loops | Automations routing production failures to human review, assertions that turn a reviewer's English into a regression test, and an aligned judge |
 
@@ -103,7 +103,7 @@ Full setup detail, including air-gapped / no-LangSmith fallbacks: **[SETUP.md](S
 │   ├── tools.py              Two transports (in-process, MCP) over one application
 │   └── graph.py              The deployable entry point (langgraph.json points here)
 │
-├── evals/                  THE TEST SUITE, five levels
+├── evals/                  THE TEST SUITE, code + agent tests
 │   ├── harness.py            Level 0: assert on the assembled prompt. No LLM.
 │   ├── mocking.py            Clone a tool's contract, script its behavior
 │   ├── evaluators.py         Code assertions + LLM judges + assertion grading

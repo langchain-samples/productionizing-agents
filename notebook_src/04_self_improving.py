@@ -539,7 +539,7 @@ print(Path(".github/workflows/evals.yml").read_text()
 # | | |
 # |:--|:--|
 # | **Module 1** | Built ARIA: app logic behind a tested MCP boundary, rules as middleware, limits |
-# | **Module 2** | A test suite across five levels, and used it to answer "can we run this cheaper?" |
+# | **Module 2** | A test suite, code tests and agent tests, used to answer "can we run this cheaper?" |
 # | **Module 3** | Shipped it, monitored it, and caught a real safety-relevant bug the suite missed |
 # | **Module 4** | Turned that bug into a permanent regression test, and built the loop that finds the next one |
 #

@@ -109,17 +109,24 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to recor
 # flaky, and expensive. A large share of what you want to verify lives on the left and needs
 # no model at all.
 #
-# ## The five levels
+# ## Two kinds of test
 #
 # I'd avoid borrowing "unit / integration / e2e", because the analogy breaks: in ordinary
 # testing the axis is *how many components are involved*, and here every test involves the
 # whole agent. The useful axis is **how much of the world is real**.
 #
+# Almost everything you need is two kinds, and they are the whole of this module:
+#
+# | Kind | Levels | What's real | You can assert | Cost |
+# |:--|:--|:--|:--|:--|
+# | **Code tests** | 0, 1 | Nothing, or the model against stubbed tools | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free** |
+# | **Agent tests** | 2 | Tool responses come from the dataset | Behavior given a specific world, *including failures* | cheap |
+#
+# **That covers about 80% of what you will write.** Two more levels exist and are worth
+# knowing about, but they cost real money and flake in ways these do not:
+#
 # | Level | Name | What's real | You can assert | Cost |
 # |:--|:--|:--|:--|:--|
-# | **0** | **Harness** | Nothing. Fake model. | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free, instant** |
-# | **1** | **Smoke** | The model. Tools are stubs. | It responded; format; which tool it reached for | ~free |
-# | **2** | **Scripted** | Tool responses from the dataset | Behavior given a specific tool response, *including failures* | cheap |
 # | **3** | **Stateful** | Real mutable state, real side effects | The world actually changed | medium |
 # | **4** | **Simulated** | A second LLM playing the user, multi-turn | Behavior over a trajectory, under a persona | expensive |
 #
@@ -854,8 +861,9 @@ print("""
 # | Evaluator | An assertion: exact (code) or fuzzy (judge) |
 # | Experiment | One recorded run of the suite |
 #
-# **The five levels, by how real the world is:** Harness → Smoke → Scripted → Stateful →
-# Simulated. **Push every property as far down that ladder as it will go.**
+# **Two kinds, by how real the world is:** code tests (Harness, Smoke) and agent tests
+# (Scripted), plus Stateful and Simulated when you need them. **Push every property as far
+# down that ladder as it will go.**
 #
 # **Six things worth taking away:**
 # 1. **Code evaluators first.** Judges only where a regex genuinely can't reach.

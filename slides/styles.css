@@ -549,7 +549,7 @@
 .iconrow .ok i   { color: var(--good); }
 .iconrow .hum i  { color: var(--human); }
 
-/* --- the determinism ladder / five levels ----------------------------- */
+/* --- the determinism ladder ------------------------------------------- */
 .ladder { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 .rung {
   display: grid;

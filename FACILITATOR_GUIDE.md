@@ -99,7 +99,7 @@ Don't cut the empty-result demo.
 | 0:30 | Evals = test suite. The mapping table. | `[mapping]` |
 | 0:34 | **Both** reasons: catch bugs *and* make change safe | `[two-reasons]` |
 | 0:37 | ★ Two types of testing: one row of four is expensive | `[determinism]` |
-| 0:41 | The five levels, plus production as the capstone | `[five-levels]` |
+| 0:41 | Two kinds of test, plus the advanced pair and production | `[five-levels]` |
 | 0:46 | TDD: the spec table again, then **red → green live** | `[tdd]` + notebook |
 | 0:54 | **Start the bake-off running here**, then keep talking |, |
 | 0:56 | ★ The bake-off. Opus → Sonnet. Quality, cost, latency. | `[bake-off]` |

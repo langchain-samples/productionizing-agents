@@ -626,8 +626,8 @@
         <div class="content figure">
           <div class="ladder">
             <div class="rung dear" style="opacity:.85"><p class="lvl"><i class="fa-solid fa-satellite-dish"></i></p><p class="nm">Production</p><p class="cost desc">testing in production &#128517;</p></div>
-            <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="cost desc">another LLM plays the user</p></div>
-            <div class="rung cheap"><p class="lvl">3</p><p class="nm">Stateful</p><p class="cost desc">let tool calls alter state</p></div>
+            <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="cost desc">advanced &middot; another LLM plays the user</p></div>
+            <div class="rung cheap"><p class="lvl">3</p><p class="nm">Stateful</p><p class="cost desc">advanced &middot; let tool calls alter state</p></div>
             <div class="rung cheap"><p class="lvl">2</p><p class="nm">Scripted</p><p class="cost desc">mock out the tool responses</p></div>
             <div class="pair">
               <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="cost desc">no tool calls</p></div>
@@ -640,14 +640,23 @@
           whole agent, so "how many components" isn't the interesting axis. The useful axis
           is how much of the world is real.
 
+          THE HEADLINE: it collapses to TWO kinds, and they cover about 80% of what you
+          will write. CODE TESTS, levels 0 and 1, where tools and harness are ordinary
+          software. AGENT TESTS, level 2, where the model is real and the tool responses
+          come from the dataset. Everything in the next twenty minutes is one of those two.
+
           0 HARNESS: nothing real, fake model. Middleware, the assembled prompt, tool
             schemas, middleware order.
           1 SMOKE: the model is real, tools are stubs. Did it respond? Format? Which tool
             did it reach for? This is your /health endpoint.
           2 SCRIPTED: tool responses come from the dataset. Behavior given a specific
-            response, INCLUDING failures.
+            response, INCLUDING failures. THIS IS THE ONE THEY WILL USE MOST.
+
+          3 and 4 are ADVANCED. Say what they are, do not dwell:
           3 STATEFUL: real mutable state, real side effects. Did the world actually change?
           4 SIMULATED: a second LLM plays the user. Multi-turn, under a persona.
+          Both cost real money and both flake in ways the first three do not. Reach for
+          them when a property genuinely needs them, not before.
 
           The rule: push every property as far DOWN that ladder as it will go. A property
           you assert at Level 0 costs nothing and never flakes. The same property at Level 4
@@ -1282,7 +1291,7 @@
 
           Where we ended up:
           1. Built ARIA: app logic behind a tested MCP boundary, rules as middleware, limits
-          2. A test suite across five levels, and used it to answer "can we run this cheaper?"
+          2. A test suite, code tests and agent tests, used to answer "can we run this cheaper?"
           3. Shipped it, monitored it, caught a real safety-relevant bug the suite missed
           4. Turned that bug into a permanent regression test, and built the loop that finds
              the next one
