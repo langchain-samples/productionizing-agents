@@ -583,6 +583,34 @@ people skip, and skipping it is why aligned judges disappoint later: a prompt tu
 agrees on the examples it was tuned on tells you nothing. Score it on the held-out half and quote
 that number. 100% agreement on the training half is overfitting, not success.
 
+### Which model should judge?
+
+The cheapest one you can trust. The interesting half of that sentence is *trust*, and it is
+measurable: **run the judge with repetitions and see whether it agrees with itself.** Set
+`num_repetitions` high, 10 is plenty, run it over your labelled set, and count the cases where
+the verdict flipped between runs. A judge that can't reproduce its own answer can't be the thing
+you make decisions with.
+
+Accuracy alone will mislead you here. From one real comparison over 70 labelled cases:
+
+| Model | Accuracy | Unstable cases | $/1M in |
+| :-- | :-: | :-: | --: |
+| `deepseek-v4-flash` | 61/70 (87%) | **5 of 7** | 0.14 |
+| `gpt-5.6-luna` | 61/70 (87%) | 1 | 0.10 |
+| **`deepseek-v4-pro`** | **69/70 (99%)** | 1 | **0.435** |
+| `gpt-5.6-terra` | 70/70 (100%) | 0 | 1.00 |
+
+The top two rows score **identically** on accuracy and are not remotely equivalent: one flipped
+its verdict on 5 of 7 repeated cases, the other on 1. Pick on accuracy and you can't see that at
+all. And the bottom row buys one extra point of accuracy for **2.3x the price**, which is the
+kind of trade you want to make on evidence rather than reflex.
+
+`deepseek-v4-pro` has been the best cost/quality tradeoff in my own use. Measure it on your task
+before believing that, which is the entire point of the table.
+
+This is also the second lever when repetitions show your judge wobbling. The first is tightening
+the prompt. If that doesn't settle it, the model is the problem.
+
 ---
 
 ## Assertions, so non-engineers can write tests

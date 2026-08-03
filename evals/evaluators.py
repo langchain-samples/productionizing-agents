@@ -189,20 +189,42 @@ def no_leaked_reasoning(outputs: dict) -> dict:
     return _verdict("no_leaked_reasoning", not leaked, "clean" if not leaked else "reasoning tag in answer")
 
 
+def _requirement_met(requirement: Any, actual: list[str]) -> bool:
+    """One entry of `must_call`. A nested list is an OR: any one of them satisfies it."""
+    if isinstance(requirement, (list, tuple, set)):
+        return any(name in actual for name in requirement)
+    return requirement in actual
+
+
+def _requirement_label(requirement: Any) -> str:
+    if isinstance(requirement, (list, tuple, set)):
+        return "(" + " | ".join(str(r) for r in requirement) + ")"
+    return str(requirement)
+
+
 def must_call(outputs: dict, reference_outputs: dict) -> dict:
-    """Every tool named in `reference_outputs.must_call` was called.
+    """Every entry in `reference_outputs.must_call` was satisfied.
 
     A trajectory assertion. Often sharper than anything you can check in the prose: an
     agent that answers a tank-level question without calling `get_tank_status` got the
     right answer by accident, and you want to know that now rather than when the data
     changes.
+
+    Entries are ANDed, and **a nested list is an OR**:
+
+        "must_call": [["ask_user", "update_business"], "task"]
+
+    means "call `task`, and at least one of `ask_user` or `update_business`". That is what
+    you want whenever several tools are acceptable ways to do the same thing: asserting one
+    specific tool over-specifies the agent's route and breaks the moment you add another
+    equally valid path.
     """
     expected = reference_outputs.get("must_call") or []
     if not expected:
         return _verdict("must_call", True, "no contract set")
 
     actual = _trajectory(outputs)
-    missing = [name for name in expected if name not in actual]
+    missing = [_requirement_label(r) for r in expected if not _requirement_met(r, actual)]
     return _verdict(
         "must_call",
         not missing,
@@ -216,7 +238,15 @@ def must_not_call(outputs: dict, reference_outputs: dict) -> dict:
     The important one for the write tools. "Did not file a work order when the user was just
     asking a question" is a real requirement, and it is a code assertion.
     """
-    forbidden = reference_outputs.get("must_not_call") or []
+    # Nesting is meaningful in `must_call` (an OR) and meaningless here: "must not call at
+    # least one of these" isn't a thing anyone wants. People write it anyway, by symmetry, so
+    # flatten rather than let `"a" in [["a", "b"]]` be False and hand back a vacuous pass.
+    raw = reference_outputs.get("must_not_call") or []
+    forbidden = [
+        name
+        for entry in raw
+        for name in (entry if isinstance(entry, (list, tuple, set)) else [entry])
+    ]
     if not forbidden:
         return _verdict("must_not_call", True, "no contract set")
 

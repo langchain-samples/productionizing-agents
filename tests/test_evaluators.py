@@ -72,6 +72,32 @@ def test_must_call_contract() -> None:
     assert must_call(out(calls=[call("get_equipment")]), ref)["score"] is False
 
 
+def test_must_call_nested_list_is_an_or() -> None:
+    """`[["a", "b"], "c"]` means "call c, and at least one of a or b".
+
+    The point is not to over-specify the route when several tools are equally valid ways to
+    do the same thing. Asserting one of them breaks the moment you add another.
+    """
+    ref = {"must_call": [["ask_user", "update_business"], "task"]}
+
+    assert must_call(out(calls=[call("ask_user"), call("task")]), ref)["score"] is True
+    assert must_call(out(calls=[call("update_business"), call("task")]), ref)["score"] is True
+    # Both branches of the OR is fine too.
+    assert must_call(
+        out(calls=[call("ask_user"), call("update_business"), call("task")]), ref
+    )["score"] is True
+
+    # Neither branch satisfied.
+    neither = must_call(out(calls=[call("task")]), ref)
+    assert neither["score"] is False
+    assert "(ask_user | update_business)" in neither["comment"]
+
+    # The OR is satisfied but the ANDed entry is not.
+    no_and = must_call(out(calls=[call("ask_user")]), ref)
+    assert no_and["score"] is False
+    assert "task" in no_and["comment"]
+
+
 def test_must_call_passes_when_no_contract_is_set() -> None:
     """Evaluators run over every example in a dataset, and most examples will not set most
     keys. An evaluator that fails on a missing expectation makes mixed datasets impossible."""
@@ -82,6 +108,16 @@ def test_must_not_call_contract() -> None:
     ref = {"must_not_call": ["create_work_order"]}
     assert must_not_call(out(calls=[call("get_equipment")]), ref)["score"] is True
     assert must_not_call(out(calls=[call("create_work_order")]), ref)["score"] is False
+
+
+def test_must_not_call_flattens_a_nested_list() -> None:
+    """Nesting is an OR in `must_call` and meaningless in a negative, so people will write it
+    by symmetry. Without flattening, `"a" in [["a", "b"]]` is False and the check passes
+    vacuously, which is the worst possible outcome for a restraint assertion."""
+    ref = {"must_not_call": [["create_work_order", "request_equipment_shutdown"]]}
+    assert must_not_call(out(calls=[call("get_equipment")]), ref)["score"] is True
+    assert must_not_call(out(calls=[call("create_work_order")]), ref)["score"] is False
+    assert must_not_call(out(calls=[call("request_equipment_shutdown")]), ref)["score"] is False
 
 
 def test_within_tool_budget() -> None:

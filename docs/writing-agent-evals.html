@@ -163,7 +163,7 @@ pre .copy:hover{color:var(--acc);border-color:var(--acc)}
 pre .copy.ok{opacity:1;color:var(--good);border-color:var(--good)}
 @media (hover:none){pre .copy{opacity:1}}
 @media print{#toc,.tocbtn,pre .copy{display:none!important}body{padding-left:0}}
-</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#before-you-write-a-single-eval">Before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#what-are-you-actually-testing">What are you actually testing?</a></div><ol class="sub"><li><a href="#one-turn-or-the-whole-conversation">One turn, or the whole conversation?</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#two-kinds-of-test">Two kinds of test</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#harness-and-tools-code-tests">Harness and tools: code tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#llm-tests-mock-the-tools">LLM tests: mock the tools</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#five-that-apply-to-almost-any-agent">Five that apply to almost any agent</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#reading-the-results">Reading the results</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#advanced-stateful-and-simulated">Advanced: stateful and simulated</a></div><ol class="sub"><li><a href="#stateful-did-the-world-actually-change">Stateful: did the world actually change?</a></li><li><a href="#simulated-a-second-llm-plays-the-user">Simulated: a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
+</style></head><body><button class="tocbtn" type="button" aria-label="Toggle contents">&#9776;</button><nav id="toc" aria-label="Table of contents"><p class="lbl">Contents</p><ol><li class="chap"><p class="n">Chapter 1</p><p class="t">Groundwork</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#before-you-write-a-single-eval">Before you write a single eval</a></div><ol class="sub"><li><a href="#get-your-application-logic-out-of-the-agent">Get your application logic out of the agent</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-eval-mental-model">The eval mental model</a></div><ol class="sub"><li><a href="#both-reasons-you-want-a-suite">Both reasons you want a suite</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#what-are-you-actually-testing">What are you actually testing?</a></div><ol class="sub"><li><a href="#one-turn-or-the-whole-conversation">One turn, or the whole conversation?</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#two-kinds-of-test">Two kinds of test</a></div></li><li class="chap"><p class="n">Chapter 2</p><p class="t">Writing the tests</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#harness-and-tools-code-tests">Harness and tools: code tests</a></div><ol class="sub"><li><a href="#test-your-middleware-directly">Test your middleware directly</a></li><li><a href="#assert-on-the-assembled-context">Assert on the assembled context</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#llm-tests-mock-the-tools">LLM tests: mock the tools</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#writing-evaluators-that-dont-lie">Writing evaluators that don&#x27;t lie</a></div><ol class="sub"><li><a href="#code-first-every-time">Code first. Every time.</a></li><li><a href="#five-that-apply-to-almost-any-agent">Five that apply to almost any agent</a></li><li><a href="#three-rules-for-judges">Three rules for judges</a></li><li><a href="#which-model-should-judge">Which model should judge?</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</a></div><ol class="sub"><li><a href="#write-the-dataset-first">Write the dataset first</a></li></ol></li><li class="chap"><p class="n">Chapter 3</p><p class="t">Running it, and closing the loop</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#running-them">Running them</a></div><ol class="sub"><li><a href="#repetitions">Repetitions</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#use-async">Use async</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#reading-the-results">Reading the results</a></div></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#the-limit-and-the-loop">The limit, and the loop</a></div><ol class="sub"><li><a href="#closing-the-loop">Closing the loop</a></li></ol></li><li class="chap"><p class="n">Appendix</p><p class="t">Reference</p></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#starter-kit">Starter kit</a></div><ol class="sub"><li><a href="#if-youre-starting-out">If you&#x27;re starting out</a></li><li><a href="#if-you-already-have-an-agent-in-production">If you already have an agent in production</a></li><li><a href="#file-skeleton">File skeleton</a></li></ol></li><li class="grp"><div class="row"><button class="car" type="button" aria-label="Toggle section">&#9654;</button><a href="#advanced-stateful-and-simulated">Advanced: stateful and simulated</a></div><ol class="sub"><li><a href="#stateful-did-the-world-actually-change">Stateful: did the world actually change?</a></li><li><a href="#simulated-a-second-llm-plays-the-user">Simulated: a second LLM plays the user</a></li></ol></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#going-further">Going further</a></div></li><li class="grp"><div class="row"><span class="car none">&#9654;</span><a href="#the-short-version">The short version</a></div></li></ol></nav><div class="wrap"><h1 id="your-agent-needs-a-test-suite">Your Agent Needs a Test Suite</h1>
 <h3 id="how-to-save-and-produce-incredible-agents">How to save $$$ and produce incredible agents</h3>
 <div class="bio">
 <p><strong>Hi, I'm Josiah.</strong> I've been building LLM applications in production, with
@@ -756,6 +756,57 @@ are what make this work, because they say <em>why</em> it was wrong rather than 
 people skip, and skipping it is why aligned judges disappoint later: a prompt tuned until it
 agrees on the examples it was tuned on tells you nothing. Score it on the held-out half and quote
 that number. 100% agreement on the training half is overfitting, not success.</p>
+<h3 id="which-model-should-judge">Which model should judge?</h3>
+<p>The cheapest one you can trust. The interesting half of that sentence is <em>trust</em>, and it is
+measurable: <strong>run the judge with repetitions and see whether it agrees with itself.</strong> Set
+<code>num_repetitions</code> high, 10 is plenty, run it over your labelled set, and count the cases where
+the verdict flipped between runs. A judge that can't reproduce its own answer can't be the thing
+you make decisions with.</p>
+<p>Accuracy alone will mislead you here. From one real comparison over 70 labelled cases:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model</th>
+<th style="text-align: center;">Accuracy</th>
+<th style="text-align: center;">Unstable cases</th>
+<th style="text-align: right;">$/1M in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>deepseek-v4-flash</code></td>
+<td style="text-align: center;">61/70 (87%)</td>
+<td style="text-align: center;"><strong>5 of 7</strong></td>
+<td style="text-align: right;">0.14</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpt-5.6-luna</code></td>
+<td style="text-align: center;">61/70 (87%)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>deepseek-v4-pro</code></strong></td>
+<td style="text-align: center;"><strong>69/70 (99%)</strong></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;"><strong>0.435</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>gpt-5.6-terra</code></td>
+<td style="text-align: center;">70/70 (100%)</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: right;">1.00</td>
+</tr>
+</tbody>
+</table>
+<p>The top two rows score <strong>identically</strong> on accuracy and are not remotely equivalent: one flipped
+its verdict on 5 of 7 repeated cases, the other on 1. Pick on accuracy and you can't see that at
+all. And the bottom row buys one extra point of accuracy for <strong>2.3x the price</strong>, which is the
+kind of trade you want to make on evidence rather than reflex.</p>
+<p><code>deepseek-v4-pro</code> has been the best cost/quality tradeoff in my own use. Measure it on your task
+before believing that, which is the entire point of the table.</p>
+<p>This is also the second lever when repetitions show your judge wobbling. The first is tightening
+the prompt. If that doesn't settle it, the model is the problem.</p>
 <h2 id="assertions-so-non-engineers-can-write-tests">Assertions, so non-engineers can write tests</h2>
 <p>Instead of writing a correct answer by hand, describe <strong>what a correct answer looks like</strong> in
 free-form English, one claim per row:</p>

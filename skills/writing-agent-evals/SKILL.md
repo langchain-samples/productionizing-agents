@@ -90,7 +90,10 @@ invisible on dashboards, and the one that breaks trust.
 The mechanically checkable half and the semantic half are separate on purpose: `tool_calls` is a
 code evaluator, `assertions` costs a model call. That is rule 6 expressed in the data.
 
-- `must_call` means "appeared at least once, any order". Add `order: [...]` only when the
+- `must_call` means "appeared at least once, any order". Entries are ANDed, and a **nested
+  list is an OR**: `[["ask_user", "update_business"], "task"]` means "call `task`, and at
+  least one of the other two". Use it whenever several tools are equally valid routes, since
+  naming one over-specifies and breaks when you add another. Add `order: [...]` only when the
   sequence is the property being tested.
 - `must_not_call` is the highest-value one and the one people forget. It is how you assert
   restraint on a destructive tool.
@@ -168,6 +171,13 @@ every one.
 **10. Pin the judge model** in config and leave it alone, including while swapping the agent's
 model. Require a `reasoning` field on its output. Until it is aligned, treat its absolute numbers
 with suspicion and its relative numbers as useful.
+
+Pick the cheapest model you can *trust*, and measure trust rather than assuming it: run the
+judge with `num_repetitions` high (10 is plenty) over your labelled set and count the cases
+where its verdict flipped between runs. Accuracy alone hides this. Two models can score
+identically and have wildly different instability, and the unstable one cannot be the thing
+you make decisions with. If repetitions show a wobble, tighten the prompt first; if that does
+not settle it, change the model.
 
 ## Run
 
