@@ -169,7 +169,7 @@ generates the traces Module 4 reviews, and unanticipated failures land better th
 ones. Protect it. Write down what people try, you'll use it in Module 4's exercise.
 
 **Module 3 is now the tightest module in the session, 20 minutes, and two of them are
-unscripted.** The five minutes of the room breaking ARIA and the benzene reveal are both
+unmocked.** The five minutes of the room breaking ARIA and the benzene reveal are both
 protected; everything else gives. If you're over, build the online evaluator in the UI *while
 narrating* rather than as a separate exercise, and cut the alert to a preview you've already
 configured.

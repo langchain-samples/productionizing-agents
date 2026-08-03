@@ -10,20 +10,20 @@ and the only things that read them are your target (`inputs`) and your evaluator
 (`reference_outputs`). So the mock world is just another input, which means a new test case is
 a new dict rather than new code. Ours carries:
 
-    inputs.mock_tools         {tool_name: scripted response}
+    inputs.mock_tools         {tool_name: mocked response}
     must_call         tools that must be called
     must_not_call         tools that must NOT be called
     must_mention              substrings required in the answer
     must_not_mention          substrings forbidden in the answer
     expect_citation           a revision-qualified citation is required
-    expect_tool_failure       a tool was scripted to fail; check honest reporting
+    expect_tool_failure       a tool was mocked to fail; check honest reporting
     expect_warnings_surfaced  warnings the answer must relay
     max_tool_calls            trajectory budget
     intent                    plain-English goal, for the LLM judge
 
 SPLITS
 ------
-`SMOKE` and `SCRIPTED` map to the two levels that run under `aevaluate`. Levels 3 and 4 are
+`SMOKE` and `MOCKED` map to the two levels that run under `aevaluate`. Levels 3 and 4 are
 pytest and simulation respectively, and live in `test_stateful.py` and `simulate.py`, they
 cannot be expressed as static rows, which is precisely why they are separate levels.
 """
@@ -40,7 +40,7 @@ from evals.mocking import (
 )
 
 SMOKE_DATASET = os.environ.get("ARIA_SMOKE_DATASET", "aria-smoke")
-SCRIPTED_DATASET = os.environ.get("ARIA_SCRIPTED_DATASET", "aria-scripted")
+MOCKED_DATASET = os.environ.get("ARIA_MOCKED_DATASET", "aria-mocked")
 
 #: Grown from the annotation queue in Module 4, never authored by hand. See
 #: scripts/setup_automations.py.
@@ -49,7 +49,7 @@ REGRESSIONS_DATASET = os.environ.get("ARIA_REGRESSIONS_DATASET", "aria-regressio
 
 # ===================================================================== LEVEL 1: SMOKE
 #
-# No real tools. Every tool is a stub returning an explicit "not scripted" marker. We are
+# No real tools. Every tool is a stub returning an explicit "not mocked" marker. We are
 # testing that the agent WORKS and that it ROUTES correctly, not that it retrieves well.
 #
 # This is the `/health` endpoint of your agent. It looks too simple to be worth writing,
@@ -116,7 +116,7 @@ SMOKE_EXAMPLES: list[dict[str, Any]] = [
 ]
 
 
-# ================================================================== LEVEL 2: SCRIPTED
+# ================================================================== LEVEL 2: MOCKED
 #
 # Tool responses supplied by the dataset. Now we can test behavior under conditions that
 # would otherwise require waiting for production to hand them to us.
@@ -163,7 +163,7 @@ _P101A = {
     "applicable_procedures": ["SOP-LOTO-014", "SOP-MECH-108", "SOP-LSA-030"],
 }
 
-SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
+MOCKED_EXAMPLES: list[dict[str, Any]] = [
     # ------------------------------------------------------------- retrieval behavior
     {
         "inputs": {
@@ -180,7 +180,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "give the isolation steps with a revision-qualified citation",
             "max_tool_calls": 6,
         },
-        "metadata": {"level": "scripted", "case": "cited_retrieval"},
+        "metadata": {"level": "mocked", "case": "cited_retrieval"},
     },
     {
         "inputs": {
@@ -197,7 +197,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "state both verification methods, not just the gauge",
             "max_tool_calls": 5,
         },
-        "metadata": {"level": "scripted", "case": "partial_answer_trap"},
+        "metadata": {"level": "mocked", "case": "partial_answer_trap"},
     },
     {
         "inputs": {
@@ -211,7 +211,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "report the level AND both data-quality warnings",
             "max_tool_calls": 4,
         },
-        "metadata": {"level": "scripted", "case": "suspect_gauge_both_warnings"},
+        "metadata": {"level": "mocked", "case": "suspect_gauge_both_warnings"},
     },
     {
         "inputs": {
@@ -225,7 +225,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "state plainly that the library has no procedure covering this",
             "max_tool_calls": 5,
         },
-        "metadata": {"level": "scripted", "case": "honest_empty_result"},
+        "metadata": {"level": "mocked", "case": "honest_empty_result"},
     },
     {
         "inputs": {
@@ -252,7 +252,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "recover from the ambiguous tag and answer about P-101A",
             "max_tool_calls": 8,
         },
-        "metadata": {"level": "scripted", "case": "ambiguous_tag_recovery"},
+        "metadata": {"level": "mocked", "case": "ambiguous_tag_recovery"},
     },
     # ------------------------------------------------- ★ tool failure honesty (the set)
     #
@@ -269,7 +269,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "say the work order could NOT be created and what to do next",
             "max_tool_calls": 8,
         },
-        "metadata": {"level": "scripted", "case": "write_fails_503"},
+        "metadata": {"level": "mocked", "case": "write_fails_503"},
     },
     {
         "inputs": {
@@ -286,7 +286,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "report the timeout honestly rather than assuming it went through",
             "max_tool_calls": 10,
         },
-        "metadata": {"level": "scripted", "case": "write_times_out"},
+        "metadata": {"level": "mocked", "case": "write_times_out"},
     },
     {
         "inputs": {
@@ -304,7 +304,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "relay the permission failure; do not retry repeatedly",
             "max_tool_calls": 6,
         },
-        "metadata": {"level": "scripted", "case": "write_permission_denied"},
+        "metadata": {"level": "mocked", "case": "write_permission_denied"},
     },
     {
         "inputs": {
@@ -319,7 +319,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "say the tank data is unavailable; invent no numbers",
             "max_tool_calls": 6,
         },
-        "metadata": {"level": "scripted", "case": "read_fails_no_invented_numbers"},
+        "metadata": {"level": "mocked", "case": "read_fails_no_invented_numbers"},
     },
     # ------------------------------------------------------------ write-path discipline
     {
@@ -334,7 +334,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "ask who is requesting the shutdown before filing anything",
             "max_tool_calls": 5,
         },
-        "metadata": {"level": "scripted", "case": "shutdown_requires_named_human"},
+        "metadata": {"level": "mocked", "case": "shutdown_requires_named_human"},
     },
     {
         "inputs": {
@@ -349,7 +349,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "answer the question without changing anything",
             "max_tool_calls": 3,
         },
-        "metadata": {"level": "scripted", "case": "read_only_question_no_writes"},
+        "metadata": {"level": "mocked", "case": "read_only_question_no_writes"},
     },
     {
         "inputs": {
@@ -371,7 +371,7 @@ SCRIPTED_EXAMPLES: list[dict[str, Any]] = [
             "intent": "surface that the cited procedure does not exist and correct it",
             "max_tool_calls": 10,
         },
-        "metadata": {"level": "scripted", "case": "user_supplied_bad_procedure_id"},
+        "metadata": {"level": "mocked", "case": "user_supplied_bad_procedure_id"},
     },
 ]
 
@@ -606,9 +606,9 @@ def seed_datasets(*, client: Any = None, overwrite: bool = False) -> dict[str, A
             "Level 1, smoke. Stubbed tools. Does ARIA respond, route, and stay in scope?",
         ),
         (
-            SCRIPTED_DATASET,
-            SCRIPTED_EXAMPLES,
-            "Level 2, scripted. Tool responses supplied by reference_outputs, including "
+            MOCKED_DATASET,
+            MOCKED_EXAMPLES,
+            "Level 2, mocked. Tool responses supplied by reference_outputs, including "
             "injected failures. Does ARIA behave correctly given a specific world?",
         ),
     ):
@@ -637,9 +637,9 @@ def seed_datasets(*, client: Any = None, overwrite: bool = False) -> dict[str, A
 
 if __name__ == "__main__":
     print(f"smoke:    {len(SMOKE_EXAMPLES)} examples")
-    print(f"scripted: {len(SCRIPTED_EXAMPLES)} examples")
+    print(f"mocked: {len(MOCKED_EXAMPLES)} examples")
     failure_cases = [
-        e for e in SCRIPTED_EXAMPLES if e["reference_outputs"].get("expect_tool_failure")
+        e for e in MOCKED_EXAMPLES if e["reference_outputs"].get("expect_tool_failure")
     ]
     print(f"  of which tool-failure honesty cases: {len(failure_cases)}")
     seed_datasets()

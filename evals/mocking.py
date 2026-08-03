@@ -60,9 +60,9 @@ from aria.tools import LOCAL_TOOLS, arg_schema
 REAL_TOOLS: dict[str, Any] = {t.name: t for t in LOCAL_TOOLS}
 
 #: What a stub returns when the dataset didn't script it. Deliberately an explicit marker
-#: rather than something plausible: if the agent leans on an unscripted tool, you want that
+#: rather than something plausible: if the agent leans on an unmocked tool, you want that
 #: to be visible in the trace, not silently absorbed into a confident answer.
-UNSCRIPTED = {"error": "This tool was not scripted for this test case.", "recoverable": False}
+UNMOCKED = {"error": "This tool was not mocked for this test case.", "recoverable": False}
 
 
 @dataclass(slots=True)
@@ -102,7 +102,7 @@ def _truncate(value: Any, limit: int = 600) -> Any:
 
 
 def make_mock_tool(name: str, script: Any, recorder: CallRecorder) -> StructuredTool:
-    """Clone a real tool's contract, replace its body with a scripted response.
+    """Clone a real tool's contract, replace its body with a mocked response.
 
     Args:
         name: A real ARIA tool name.
@@ -145,7 +145,7 @@ def mocked_toolset(
     mock_spec: dict[str, Any] | None,
     recorder: CallRecorder,
     *,
-    stub_unscripted: bool = True,
+    stub_unmocked: bool = True,
 ) -> list[StructuredTool]:
     """The full ARIA toolset, with behavior from `mock_spec`.
 
@@ -155,14 +155,14 @@ def mocked_toolset(
             for "does the agent work at all" and "did it pick the right tool", you are
             testing routing, and a stub answers that as well as real data would, for free.
         recorder: Collects the trajectory.
-        stub_unscripted: Stub out tools the dataset didn't mention. Keep True, the whole
+        stub_unmocked: Stub out tools the dataset didn't mention. Keep True, the whole
             point is a hermetic test, and a single un-mocked tool reaching real data is how
             a test suite becomes quietly non-deterministic.
     """
     spec = dict(mock_spec or {})
-    if stub_unscripted:
+    if stub_unmocked:
         for name in REAL_TOOLS:
-            spec.setdefault(name, UNSCRIPTED)
+            spec.setdefault(name, UNMOCKED)
 
     return [make_mock_tool(name, script, recorder) for name, script in spec.items()]
 

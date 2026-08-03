@@ -300,7 +300,7 @@ AFTER (scope_guard=True)
 print("""
     python -m evals.runner --level regressions     # the new gate
     python -m evals.runner --level smoke           # did the fix break basic behavior?
-    python -m evals.runner --level scripted        # did it break retrieval or citations?
+    python -m evals.runner --level mocked        # did it break retrieval or citations?
     pytest tests/ -q                               # 179 deterministic tests
 """)
 
@@ -485,7 +485,7 @@ print("""
 # | **Nightly** | Insights report over the day's traces | Yes |
 # | **Weekly** | Human reviews the queue (30 min, batched) | **No: keep the human** |
 # | **Weekly** | Re-check judge alignment | **No** |
-# | **On change** | `regressions` + `scripted` gate in CI | Yes |
+# | **On change** | `regressions` + `mocked` gate in CI | Yes |
 #
 # ### What to be skeptical of
 #

@@ -1,6 +1,6 @@
 ---
 name: writing-agent-evals
-description: Build or extend an evaluation suite for an LLM agent. Verifiable rules covering TDD for agents, separating deterministic code from the model, code and judge evaluators, scripted and stateful mocking, LangSmith wiring, production sampling, and closing the loop from live traces into regression tests.
+description: Build or extend an evaluation suite for an LLM agent. Verifiable rules covering TDD for agents, separating deterministic code from the model, code and judge evaluators, mocking tools for stateless and stateful cases, LangSmith wiring, production sampling, and closing the loop from live traces into regression tests.
 ---
 
 # Writing agent evals
@@ -46,7 +46,7 @@ context under a token ceiling. This is the highest value per second in the whole
 
 *For the LLM*, mock the tools and harness so you have guarantees about the world.
 
-- **Non-stateful:** scripted mocks in the dataset, run under `aevaluate`.
+- **Non-stateful:** mock the tools from the dataset, run under `aevaluate`.
   `inputs: {prompt: "...", mock_tools: {"data_search": "the world in 2023 was..."}}`.
   Put `mock_tools` in `inputs`, not `reference_outputs`, because the target function receives
   `inputs` only, and the mock world is an input, not a claim about correctness.

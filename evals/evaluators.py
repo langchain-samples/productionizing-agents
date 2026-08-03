@@ -236,7 +236,7 @@ def within_tool_budget(outputs: dict, reference_outputs: dict) -> dict:
     return _verdict("within_tool_budget", count <= budget, f"{count} calls (budget {budget})")
 
 
-# ------------------------------------------------------------- LEVEL 2: scripted world
+# ------------------------------------------------------------- LEVEL 2: mocked world
 
 
 def mentions_required(outputs: dict, reference_outputs: dict) -> dict:
@@ -306,7 +306,7 @@ def did_not_claim_false_success(outputs: dict, reference_outputs: dict) -> dict:
     their work order was filed. It was not. They find out days later when the work does not
     happen.
 
-    Applies when the dataset scripted a failure (`expect_tool_failure: true`) or when any
+    Applies when the dataset mocked a failure (`expect_tool_failure: true`) or when any
     tool actually errored during the run.
 
     Honest about its own limits: this is a lexical check. It reliably catches "I've created

@@ -3,7 +3,7 @@
     python -m evals.runner --seed                       # create the datasets
     python -m evals.runner --level smoke                # run one split
     python -m evals.runner --compare                    # the money shot: model bake-off
-    python -m evals.runner --level scripted --reps 3    # repeat for stochasticity
+    python -m evals.runner --level mocked --reps 3      # repeat for stochasticity
 
 WHY `aevaluate` AND NOT `evaluate`
 ----------------------------------
@@ -34,7 +34,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from evals.datasets import (
     REGRESSIONS_DATASET,
-    SCRIPTED_DATASET,
+    MOCKED_DATASET,
     SMOKE_DATASET,
     TDD_DATASET,
     seed_datasets,
@@ -130,10 +130,10 @@ LEVELS: dict[str, dict[str, Any]] = {
         "evaluators": SMOKE_EVALUATORS,
         "description": "Level 1, does it work at all, and does it route correctly",
     },
-    "scripted": {
-        "dataset": SCRIPTED_DATASET,
+    "mocked": {
+        "dataset": MOCKED_DATASET,
         "evaluators": ALL_EVALUATORS,
-        "description": "Level 2, behavior under scripted tool responses, failures included",
+        "description": "Level 2, behavior under mocked tool responses, failures included",
     },
     "regressions": {
         # Populated from the annotation queue, not by hand. Every row is a failure that
@@ -144,11 +144,11 @@ LEVELS: dict[str, dict[str, Any]] = {
         "evaluators": ALL_EVALUATORS,
         "description": "Production failures, promoted from human review. The regression gate.",
     },
-    "scripted-cheap": {
+    "mocked-cheap": {
         # Code evaluators only. Same dataset, no judge calls, so it is ~free and fast
         # enough for a pre-commit hook. This is the split you gate every PR on; the full
-        # `scripted` split is the pre-release gate.
-        "dataset": SCRIPTED_DATASET,
+        # `mocked` split is the pre-release gate.
+        "dataset": MOCKED_DATASET,
         "evaluators": CODE_EVALUATORS,
         "description": "Level 2, code assertions only, cheap enough for every commit",
     },
@@ -318,7 +318,7 @@ def print_comparison(stats: list[dict[str, Any]]) -> None:
 async def compare_models(
     models: list[str] | None = None,
     *,
-    level: str = "scripted",
+    level: str = "mocked",
     reps: int = 1,
 ) -> list[dict[str, Any]]:
     """Run the same dataset and the same evaluators across several models.
@@ -375,7 +375,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.compare:
-        asyncio.run(compare_models(level=args.level or "scripted", reps=args.reps))
+        asyncio.run(compare_models(level=args.level or "mocked", reps=args.reps))
         return 0
 
     if not args.level:

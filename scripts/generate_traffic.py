@@ -89,7 +89,7 @@ class Request:
     question: str
     persona: str
     category: str
-    #: Tool name -> scripted failure. None means real tools.
+    #: Tool name -> mocked failure. None means real tools.
     inject_failure: str | None = None
 
 

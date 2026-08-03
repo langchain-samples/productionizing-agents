@@ -628,9 +628,9 @@
             <div class="rung dear" style="opacity:.85"><p class="lvl"><i class="fa-solid fa-satellite-dish"></i></p><p class="nm">Production</p><p class="cost desc">testing in production &#128517;</p></div>
             <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated <span class="paren">advanced</span></p><p class="cost desc">another LLM plays the user</p></div>
             <div class="rung cheap"><p class="lvl">3</p><p class="nm">Stateful <span class="paren">advanced</span></p><p class="cost desc">let tool calls alter state</p></div>
-            <div class="rung cheap"><p class="lvl">2</p><p class="nm">Scripted <span class="paren">agent test</span></p><p class="cost desc">mock out the tool responses</p></div>
+            <div class="rung cheap"><p class="lvl">2</p><p class="nm">Mocked Tools <span class="paren">agent test</span></p><p class="cost desc">mock out the tool responses</p></div>
             <div class="pair">
-              <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke <span class="paren">code test</span></p><p class="cost desc">no tool calls</p></div>
+              <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke <span class="paren">agent test</span></p><p class="cost desc">no tool calls</p></div>
               <div class="rung free"><p class="lvl">0</p><p class="nm">Harness <span class="paren">code test</span></p><p class="cost desc">deterministic code</p></div>
             </div>
           </div>
@@ -649,7 +649,7 @@
             schemas, middleware order.
           1 SMOKE: the model is real, tools are stubs. Did it respond? Format? Which tool
             did it reach for? This is your /health endpoint.
-          2 SCRIPTED: tool responses come from the dataset. Behavior given a specific
+          2 MOCKED: tool responses come from the dataset. Behavior given a specific
             response, INCLUDING failures. THIS IS THE ONE THEY WILL USE MOST.
 
           3 and 4 are ADVANCED. Say what they are, do not dwell:
@@ -1427,7 +1427,7 @@
           Continuous and automatic: online evaluators, automations routing to the queue,
           alerts on regression / errors / cost / run-count drop.
           Nightly: full suite including simulated users, plus an Insights report.
-          On change: regression + scripted gate in CI.
+          On change: regression + mocked gate in CI.
           Weekly and HUMAN: review the queue (30 min, batched), re-check judge alignment.
 
           Note what's on the left: Engine will go as far as writing the fix and opening a

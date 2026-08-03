@@ -178,7 +178,7 @@ about, but they cost real money and flake in ways these two don't. They're in
 <div class="rung prod dear"><p class="lvl">&#9679;</p><p class="nm">Production</p><p class="desc">testing in production &#128517;</p></div>
 <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="desc">another LLM plays the user</p></div>
 <div class="rung mid"><p class="lvl">3</p><p class="nm">Stateful</p><p class="desc">tool calls alter real state</p></div>
-<div class="rung mid"><p class="lvl">2</p><p class="nm">Scripted</p><p class="desc">tool responses come from the dataset</p></div>
+<div class="rung mid"><p class="lvl">2</p><p class="nm">Mocked Tools</p><p class="desc">tool responses come from the dataset</p></div>
 <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="desc">the real model, but no tool calls</p></div>
 <div class="rung free"><p class="lvl">0</p><p class="nm">Harness</p><p class="desc">deterministic code, fake model</p></div>
 </div>
@@ -336,7 +336,7 @@ never interprets, so one row can carry the world *and* the expectations:
     ],
   },
   # Not graded. What you filter and slice by when reading results.
-  "metadata": {"level": "scripted", "case": "suspect_gauge_not_stated_as_fact"},
+  "metadata": {"level": "mocked", "case": "suspect_gauge_not_stated_as_fact"},
 }
 ```
 
@@ -449,7 +449,7 @@ the next one fails, and the expectations say what the agent owes you when it doe
                          "i've created work order"],
     "intent": "say the work order could NOT be created, and what to do next",
   },
-  "metadata": {"level": "scripted", "case": "write_fails_503"},
+  "metadata": {"level": "mocked", "case": "write_fails_503"},
 }
 ```
 
@@ -852,7 +852,7 @@ dollars.
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.
 
-Then add smoke, then scripted. Don't reach for judges or simulated users yet.
+Then add smoke, then mocked. Don't reach for judges or simulated users yet.
 
 ### If you already have an agent in production
 
@@ -881,7 +881,7 @@ evals/
   harness.py               Level 0: capture the assembled context
   mocking.py               clone a tool's contract, script its behavior
   evaluators.py            code assertions first, judges where a regex can't reach
-  datasets.py              smoke + scripted + the hand-written spec
+  datasets.py              smoke + mocked + the hand-written spec
   runner.py                aevaluate wiring, model comparison
   test_stateful.py         Level 3: real state, pytest
   simulate.py              Level 4: LLM as user

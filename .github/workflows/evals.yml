@@ -73,7 +73,7 @@ jobs:
       - run: pip install -r requirements.txt
         if: steps.changed.outputs.run == 'true'
 
-      - name: Smoke + scripted (code assertions only)
+      - name: Smoke + mocked (code assertions only)
         if: steps.changed.outputs.run == 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -85,7 +85,7 @@ jobs:
         run: |
           python -m evals.runner --seed
           python -m evals.runner --level smoke --reps 1
-          python -m evals.runner --level scripted-cheap --reps 1
+          python -m evals.runner --level mocked-cheap --reps 1
 
   # ---------------------------------------------------------------------------
   # TIER 3: the real gate. Judges, repetitions, and the regression dataset grown
@@ -122,7 +122,7 @@ jobs:
           python -m evals.runner --seed
           # reps=3 because a case that fails 1 in 3 times looks fine or broken
           # depending on the coin flip, and you are about to make a merge decision.
-          python -m evals.runner --level scripted --reps 3
+          python -m evals.runner --level mocked --reps 3
 
       # Production failures, promoted from human review. This is the gate that
       # matters most, it can only fail on something that already hurt someone.

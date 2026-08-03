@@ -119,8 +119,8 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to recor
 #
 # | Kind | Levels | What's real | You can assert | Cost |
 # |:--|:--|:--|:--|:--|
-# | **Code tests** | 0, 1 | Nothing, or the model against stubbed tools | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free** |
-# | **Agent tests** | 2 | Tool responses come from the dataset | Behavior given a specific world, *including failures* | cheap |
+# | **Code tests** | 0 | Nothing. Tools and harness are ordinary software. | Middleware behavior; the *assembled prompt*; tool schemas; limits; middleware order | **free** |
+# | **Agent tests** | 1, 2 | The model. Tools stubbed, or their responses mocked per case. | Behavior given a specific world, *including failures* | cheap |
 #
 # **That covers about 80% of what you will write.** Two more levels exist and are worth
 # knowing about, but they cost real money and flake in ways these do not:
@@ -342,7 +342,7 @@ print("Nothing tells you that except a test.")
 # ---
 # ## Level 1. Smoke: the `/health` endpoint of your agent
 #
-# No real tools. Every tool is a stub returning `{"error": "not scripted for this test"}`.
+# No real tools. Every tool is a stub returning `{"error": "not mocked for this test"}`.
 # We're testing that the agent **works** and that it **routes** correctly.
 #
 # These look too simple to bother writing. They are the split that catches a model
@@ -368,7 +368,7 @@ for example in SMOKE_EXAMPLES[:4]:
 # Seed the datasets:
 
 # %%
-from evals.datasets import SCRIPTED_DATASET, SMOKE_DATASET, seed_datasets
+from evals.datasets import MOCKED_DATASET, SMOKE_DATASET, seed_datasets
 
 if HAS_LANGSMITH:
     seed_datasets()
@@ -408,7 +408,7 @@ else:
 
 # %% [markdown]
 # ---
-# ## Level 2. Scripted: build the world the test needs
+# ## Level 2. Mocked Tools: build the world the test needs
 #
 # Now the useful part. Instead of *waiting* for production to hand you a suspect tank gauge
 # so you can see what the agent does, you **script** the suspect gauge.
@@ -473,11 +473,11 @@ mock_ge = next(t for t in tools if t.name == "get_equipment")
 print("real vs mock get_equipment:")
 print(f"  same description: {mock_ge.description == get_equipment.description}")
 print(f"  same args schema: {arg_schema(mock_ge) == arg_schema(get_equipment)}")
-print(f"\n  scripted call   -> {mock_ge.invoke({'tag': 'P-101A'})}")
-print(f"  unscripted tool -> {next(t for t in tools if t.name == 'get_procedure').invoke({'procedure_id': 'X'})}")
+print(f"\n  mocked call   -> {mock_ge.invoke({'tag': 'P-101A'})}")
+print(f"  unmocked tool -> {next(t for t in tools if t.name == 'get_procedure').invoke({'procedure_id': 'X'})}")
 
 # %% [markdown]
-# The unscripted stub returns an explicit marker rather than something plausible. If the
+# The unmocked stub returns an explicit marker rather than something plausible. If the
 # agent leans on a tool the test didn't script, you want that **visible in the trace**, not
 # silently absorbed into a confident answer.
 
@@ -493,10 +493,10 @@ print(f"  unscripted tool -> {next(t for t in tools if t.name == 'get_procedure'
 # Four flavors in the dataset, because they fail differently:
 
 # %%
-from evals.datasets import SCRIPTED_EXAMPLES
+from evals.datasets import MOCKED_EXAMPLES
 
-failure_cases = [e for e in SCRIPTED_EXAMPLES if e["reference_outputs"].get("expect_tool_failure")]
-print(f"{len(failure_cases)} of {len(SCRIPTED_EXAMPLES)} scripted cases inject a failure:\n")
+failure_cases = [e for e in MOCKED_EXAMPLES if e["reference_outputs"].get("expect_tool_failure")]
+print(f"{len(failure_cases)} of {len(MOCKED_EXAMPLES)} mocked cases inject a failure:\n")
 for e in failure_cases:
     mocks = e["inputs"]["mock_tools"]
     failing = {
@@ -588,7 +588,7 @@ print(result.stdout[-600:])
 
 # %%
 if HAS_LLM and HAS_LANGSMITH:
-    scripted_results = await run_level("scripted", reps=1)
+    mocked_results = await run_level("mocked", reps=1)
 else:
     print("Skipped.")
 
@@ -741,7 +741,7 @@ print(f"\njudge (FIXED across all runs): {os.environ.get('JUDGE_MODEL')}")
 # %%
 if HAS_LLM and HAS_LANGSMITH:
     from evals.runner import compare_models
-    stats = await compare_models(level="scripted", reps=1)
+    stats = await compare_models(level="mocked", reps=1)
 else:
     print("Skipped.")
 
@@ -821,9 +821,9 @@ print("""
 #
 # | Situation | What to run | Trigger |
 # |:--|:--|:--|
-# | **Rapid iteration**: swapping models, rewriting the prompt | `smoke` + `scripted-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
-# | **Every commit / PR** | `smoke` + `scripted-cheap` | CI. No judge calls, so cost is negligible. |
-# | **Before merging a prompt or model change** | full `scripted` with judges, `reps=3` | CI, conditional: see below |
+# | **Rapid iteration**: swapping models, rewriting the prompt | `smoke` + `mocked-cheap` (code only), `reps=1` | Manually, whenever you change something. Seconds and ~free. |
+# | **Every commit / PR** | `smoke` + `mocked-cheap` | CI. No judge calls, so cost is negligible. |
+# | **Before merging a prompt or model change** | full `mocked` with judges, `reps=3` | CI, conditional: see below |
 # | **Nightly** | everything including `simulate` | Scheduled |
 # | **Pre-release** | everything, `reps=5` | Manual gate |
 #
@@ -831,7 +831,7 @@ print("""
 #
 # **1. Tag your tests and run subsets.** If cost is a real constraint, don't run everything
 # every time. `pytest -m "not expensive"`, or split by dataset as we've done with
-# `scripted-cheap`.
+# `mocked-cheap`.
 #
 # **2. Make CI conditional on what changed.** Teams commonly gate the expensive suite on:
 # - the system prompt file changed (`paths:` in GitHub Actions)
@@ -862,7 +862,7 @@ print("""
 # | Experiment | One recorded run of the suite |
 #
 # **Two kinds, by how real the world is:** code tests (Harness, Smoke) and agent tests
-# (Scripted), plus Stateful and Simulated when you need them. **Push every property as far
+# (Mocked Tools), plus Stateful and Simulated when you need them. **Push every property as far
 # down that ladder as it will go.**
 #
 # **Six things worth taking away:**
@@ -893,10 +893,10 @@ print("""
 #    assertion, run it.
 #
 # 2. **Break an evaluator on purpose.** Invert the condition in `did_not_claim_false_success`,
-#    run `scripted`, and look at the results table. How obvious is it that the numbers are
+#    run `mocked`, and look at the results table. How obvious is it that the numbers are
 #    lying? Now run `pytest tests/test_evaluators.py`.
 #
-# 3. **Find the flake.** Run `scripted` with `reps=5`. Any evaluator scoring strictly between
+# 3. **Find the flake.** Run `mocked` with `reps=5`. Any evaluator scoring strictly between
 #    0 and 1 on a single example is non-deterministic behavior. Is it the agent or the judge?
 #    (Re-run with the same agent output to find out.)
 #

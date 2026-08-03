@@ -358,7 +358,7 @@ about, but they cost real money and flake in ways these two don't. They're in
 <div class="rung prod dear"><p class="lvl">&#9679;</p><p class="nm">Production</p><p class="desc">testing in production &#128517;</p></div>
 <div class="rung dear"><p class="lvl">4</p><p class="nm">Simulated</p><p class="desc">another LLM plays the user</p></div>
 <div class="rung mid"><p class="lvl">3</p><p class="nm">Stateful</p><p class="desc">tool calls alter real state</p></div>
-<div class="rung mid"><p class="lvl">2</p><p class="nm">Scripted</p><p class="desc">tool responses come from the dataset</p></div>
+<div class="rung mid"><p class="lvl">2</p><p class="nm">Mocked Tools</p><p class="desc">tool responses come from the dataset</p></div>
 <div class="rung free"><p class="lvl">1</p><p class="nm">Smoke</p><p class="desc">the real model, but no tool calls</p></div>
 <div class="rung free"><p class="lvl">0</p><p class="nm">Harness</p><p class="desc">deterministic code, fake model</p></div>
 </div>
@@ -509,7 +509,7 @@ never interprets, so one row can carry the world <em>and</em> the expectations:<
     <span class="p">],</span>
   <span class="p">},</span>
   <span class="c1"># Not graded. What you filter and slice by when reading results.</span>
-  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;scripted&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;suspect_gauge_not_stated_as_fact&quot;</span><span class="p">},</span>
+  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;mocked&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;suspect_gauge_not_stated_as_fact&quot;</span><span class="p">},</span>
 <span class="p">}</span></code></pre>
 <p><strong>A new test case is a new dict, not new code.</strong> That's what makes this scale to 200 cases.</p>
 <p>Three things about that row are worth calling out. The <strong>code-checkable and semantic halves are
@@ -608,7 +608,7 @@ the next one fails, and the expectations say what the agent owes you when it doe
                          <span class="s2">&quot;i&#39;ve created work order&quot;</span><span class="p">],</span>
     <span class="s2">&quot;intent&quot;</span><span class="p">:</span> <span class="s2">&quot;say the work order could NOT be created, and what to do next&quot;</span><span class="p">,</span>
   <span class="p">},</span>
-  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;scripted&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;write_fails_503&quot;</span><span class="p">},</span>
+  <span class="s2">&quot;metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;mocked&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="s2">&quot;write_fails_503&quot;</span><span class="p">},</span>
 <span class="p">}</span></code></pre>
 <p>Script four flavors, because they fail differently:</p>
 <table>
@@ -1069,7 +1069,7 @@ dollars.</p>
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.</li>
 </ol>
-<p>Then add smoke, then scripted. Don't reach for judges or simulated users yet.</p>
+<p>Then add smoke, then mocked. Don't reach for judges or simulated users yet.</p>
 <h3 id="if-you-already-have-an-agent-in-production">If you already have an agent in production</h3>
 <p>You have something better than a dataset: <strong>traffic.</strong> Use it.</p>
 <ol>
@@ -1093,7 +1093,7 @@ evals/
   harness.py               Level 0: capture the assembled context
   mocking.py               clone a tool's contract, script its behavior
   evaluators.py            code assertions first, judges where a regex can't reach
-  datasets.py              smoke + scripted + the hand-written spec
+  datasets.py              smoke + mocked + the hand-written spec
   runner.py                aevaluate wiring, model comparison
   test_stateful.py         Level 3: real state, pytest
   simulate.py              Level 4: LLM as user
