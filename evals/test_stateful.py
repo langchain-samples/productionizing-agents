@@ -1,10 +1,10 @@
-"""Level 3: stateful evals. pytest, real side effects, results reported to LangSmith.
+"""Advanced: stateful evals. pytest, real side effects, results reported to LangSmith.
 
     pytest evals/test_stateful.py --langsmith-output -v
 
 WHY THESE CANNOT BE A DATASET ROW
 ---------------------------------
-Levels 1 and 2 script a tool's *response*. That works as long as the response is a pure
+The mocked-tool tests mock a tool's *response*. That works as long as the response is a pure
 function of the call. It stops working the moment there is state behind the tool:
 
     "Create a work order, then confirm it exists."
@@ -27,7 +27,7 @@ gain the three things pytest does not give you:
   2. **A durable record across runs.** Agent work is stochastic and exploratory; you will
      run hundreds of experiments. "Did we already try tool-choice=required with the cheap
      model?" is a question you will ask, and `git log` will not answer it.
-  3. **One place to look.** Levels 1-4 land in the same UI, comparable side by side.
+  3. **One place to look.** Every kind of test lands in the same UI, comparable side by side.
 
 THE ASSERTION THAT MATTERS
 --------------------------
@@ -205,7 +205,7 @@ def test_failed_write_leaves_no_state_and_is_reported_honestly(
 ) -> None:
     """★ The headline failure mode, tested against real state.
 
-    Level 2 could only check what the agent *said*. Here we can check both halves
+    The mocked-tool tests could only check what the agent *said*. Here we can check both halves
     independently:
 
         1. Nothing was written.  (the world)

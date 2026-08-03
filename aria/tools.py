@@ -361,7 +361,7 @@ def local_tools(*, include_writes: bool = True) -> list[Any]:
     """In-process tools. Synchronous, fast, no subprocess. Use in notebooks and evals.
 
     Args:
-        include_writes: Set False for a read-only agent, useful for the Level 1 and 2
+        include_writes: Set False for a read-only agent, useful for the mocked-tool
             evals in Module 2, where you want to measure retrieval behavior without any
             chance of a test run filing work orders.
     """

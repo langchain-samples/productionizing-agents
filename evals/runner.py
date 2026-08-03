@@ -126,7 +126,7 @@ LEVELS: dict[str, dict[str, Any]] = {
     "mocked": {
         "dataset": MOCKED_DATASET,
         "evaluators": ALL_EVALUATORS,
-        "description": "Level 2, behavior under mocked tool responses, failures included",
+        "description": "Behavior under mocked tool responses, failures included",
     },
     "regressions": {
         # Populated from the annotation queue, not by hand. Every row is a failure that
@@ -143,7 +143,7 @@ LEVELS: dict[str, dict[str, Any]] = {
         # `mocked` split is the pre-release gate.
         "dataset": MOCKED_DATASET,
         "evaluators": CODE_EVALUATORS,
-        "description": "Level 2, code assertions only, cheap enough for every commit",
+        "description": "Code assertions only, cheap enough for every commit",
     },
 }
 

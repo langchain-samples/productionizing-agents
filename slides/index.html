@@ -40,7 +40,7 @@
           Doing it in production is grown-up work. That's the whole two hours."
 
           Then set expectations: 30 Build, 30 Test, 30 Monitor, 10 Improve, 20 Q&A. Everything
-          in this deck runs, there's a repo with the agent, 179 tests, four notebooks and a
+          in this deck runs, there's a repo with the agent, 181 tests, four notebooks and a
           working deployment.
 
           The promise: take one agent from "works on my laptop" to "I'd let this face a
@@ -122,7 +122,7 @@
 
           CONTEXT MANAGEMENT: skills, memory, summarization, context offloading, prompt
           caching. Everything here is about what the model sees on this turn. Module 2's
-          Level 0 tests assert on exactly this: what actually got assembled.
+          harness tests assert on exactly this: what actually got assembled.
 
           STEERING: human-in-the-loop. Our `request_equipment_shutdown` gate.
 
@@ -409,7 +409,7 @@
 
           ONE THING THAT IS *NOT* IN THERE, and it matters in Module 2: there is no
           TodoListMiddleware. `write_todos` is not injected by default. Our prompt told the
-          model to plan with it anyway, and a Level 0 test caught that in two seconds. So
+          model to plan with it anyway, and a harness test caught that in two seconds. So
           "the harness gives you a lot" and "check what it actually gave you" are both true.
 
           Note also what ISN'T here: call limits. No cap on model or tool calls ships by
@@ -608,8 +608,8 @@
 
           THE MISTAKE: most teams build ONLY for the top row, every test is an agent
           invocation, then wonder why the suite is slow, flaky and expensive. A large share
-          of what you want to verify needs no model at all. That's Level 0, and it's the
-          level nobody writes.
+          of what you want to verify needs no model at all. That's the code tests, and they're
+          the ones nobody writes.
 
           One nuance if someone pushes on the Tools row: it says deterministic because that's
           your JOB, not because it's free. A tool returning {} for an unknown id is perfectly
@@ -621,7 +621,7 @@
         </aside>
       </section>
 
-      <section id="five-levels">
+      <section id="two-kinds">
         <h2>Two kinds of test</h2>
         <div class="content figure">
           <div class="ladder">
@@ -863,7 +863,7 @@
         <h2>When to run evals</h2>
         <div class="content figure">
           <div class="cadence">
-            <div class="row"><p class="when">Iterating</p><p class="bar free">Level 0</p></div>
+            <div class="row"><p class="when">Iterating</p><p class="bar free">Code tests</p></div>
             <div class="row"><p class="when">Every commit</p><p class="bar free">+ code evaluators</p></div>
             <div class="row"><p class="when">Before merge</p><p class="bar mid">+ judges</p></div>
             <div class="row"><p class="when">Nightly</p><p class="bar dear">+ simulated users</p></div>
@@ -1296,7 +1296,7 @@
           deterministic as you can, measure what's left, watch it in production, and make
           sure everything you learn there becomes something you can never learn again.
 
-          The repo has all of it: 179 tests, four notebooks, five eval levels, a traffic
+          The repo has all of it: 181 tests, four notebooks, both kinds of eval, a traffic
           generator, a working deployment, and CI. Everything in this deck runs.
         </aside>
       </section>
@@ -1309,7 +1309,7 @@
           20 minutes. Prompts if the room is quiet:
 
           - What's the first thing you'd add to an agent you already have?
-            (Answer: limits, then Level 0 context assertions. Both cheap, both immediate.)
+            (Answer: limits, then context assertions. Both cheap, both immediate.)
           - What would your out-of-scope failure look like? What's the question a user asks
             that your agent shouldn't answer but probably would?
           - Who in your org would write the assertions? That's the real adoption question,

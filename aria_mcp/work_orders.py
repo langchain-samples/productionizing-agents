@@ -6,7 +6,7 @@ world*, which makes it a different kind of thing and worth keeping separate:
 * Reads can be retried freely. Writes cannot. A retried `create_work_order` is a duplicate
   work order that a planner has to go clean up.
 * Writes are what you gate with human-in-the-loop.
-* Writes are what makes Level 3 ("stateful") evaluation possible in Module 2, you can
+* Writes are what makes stateful evaluation possible in Module 2, you can
   assert the world actually changed, not just that the agent said the right words.
 
 The store is deliberately in-memory and resettable. In production this is your maintenance

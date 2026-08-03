@@ -531,7 +531,7 @@ def seed_datasets(*, client: Any = None, overwrite: bool = False) -> dict[str, A
         (
             MOCKED_DATASET,
             MOCKED_EXAMPLES,
-            "Level 2, mocked. Tool responses supplied by reference_outputs, including "
+            "Mocked tools. Tool responses supplied by reference_outputs, including "
             "injected failures. Does ARIA behave correctly given a specific world?",
         ),
     ):

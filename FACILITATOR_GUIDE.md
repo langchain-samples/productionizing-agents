@@ -68,7 +68,7 @@ Times are **elapsed**. The deck is `slides/index.html`; slide ids are in bracket
 | 0:05 | Anatomy: **your diagram** | `[anatomy]` |
 | 0:08 | Five practices ahead | `[divider-practices]` |
 | 0:09 | Practice 0: workflows, not capabilities. Show the spec table. | `[practice-0]` `[spec]` |
-| 0:12 | Practice 1: app logic out. **Run the tests live**, 179, no API key, 6s. | `[practice-1]` |
+| 0:12 | Practice 1: app logic out. **Run the tests live**, 181, no API key, 6s. | `[practice-1]` |
 | 0:15 | ★ The empty-result bug. `get_equipment("P-101")` in both versions. | `[empty-result]` |
 | 0:20 | Practice 2: middleware, not prompts. Three guards, no model. Deep Agents' stack. | `[practice-2]` `[mw-stack]` |
 | 0:25 | Practice 3: limits | `[practice-3]` |
@@ -99,20 +99,20 @@ Don't cut the empty-result demo.
 | 0:30 | Evals = test suite. The mapping table. | `[mapping]` |
 | 0:34 | **Both** reasons: catch bugs *and* make change safe | `[two-reasons]` |
 | 0:37 | ★ Two types of testing: one row of four is expensive | `[determinism]` |
-| 0:41 | Two kinds of test, plus the advanced pair and production | `[five-levels]` |
+| 0:41 | Two kinds of test, plus the advanced pair and production | `[two-kinds]` |
 | 0:46 | TDD: the spec table again, then **red → green live** | `[tdd]` + notebook |
 | 0:54 | **Start the bake-off running here**, then keep talking |, |
 | 0:56 | ★ The bake-off. Opus → Sonnet. Quality, cost, latency. | `[bake-off]` |
 | 1:02 | ★ Make your evals pass/fail: decompose into binaries | `[scoring]` |
 | 1:06 | Cadence: what runs on every commit vs nightly | `[when-to-run]` |
 
-The module lost four slides in the last edit (the Level 0 `write_todos` bug, tool-failure
+The module lost four slides in the last edit (the `write_todos` harness bug, tool-failure
 honesty, test-your-evaluators, and read-which-metric-moved). All four are still in the notebook
 and in the blog, and they're good Q&A material, **know where they live**:
 
 | If it comes up | Where it is |
 |:--|:--|
-| Level 0 caught a real bug we didn't plant | `pytest tests/test_harness_context.py`, notebook §Level 0 |
+| A code test caught a real bug we didn't plant | `pytest tests/test_harness_context.py`, notebook §Harness and tools |
 | "Claimed success anyway" when a tool errors | `evals/mocking.py`, notebook §tool failures |
 | A broken evaluator manufactures false confidence | the citation-regex story, `tests/test_evaluators.py` |
 | Don't read the mean and stop | blog Part 10 |
@@ -121,11 +121,11 @@ and in the blog, and they're good Q&A material, **know where they live**:
 off at 0:54** and talk over it, or pre-run it and open the saved experiments, a comparison you
 can actually read beats one you're waiting for.
 
-**If you're behind:** cut Level 4 (`simulate`) to the slide only. It's the most expensive
+**If you're behind:** cut the simulated-user pass (`simulate`) to the slide only. It's the most expensive
 thing in the module and the least likely to finish in time.
 
 **With four slides gone this module now has slack.** Spend it on the TDD red → green cycle,
-it's the only live coding in Module 2 and it's what makes the whole level ladder concrete.
+it's the only live coding in Module 2 and it's what makes the two kinds of test concrete.
 
 ### Module 3: Monitoring & Alerting · 1:10–1:30
 
@@ -154,7 +154,7 @@ Then the three lines that matter:
 - It's **confident**, it's **specific**, and it is *correct*, which makes it worse, because
   being right builds the trust a later wrong answer will spend.
 - Nothing failed. No error, no exception, every dashboard green.
-- **Our five-level suite passed clean over this.** We never wrote an out-of-scope case, because
+- **Our whole suite passed clean over this.** We never wrote an out-of-scope case, because
   we didn't think of one.
 
 Contrast it with *"What should I cook for dinner?"*, which ARIA declines correctly, **the
@@ -253,7 +253,7 @@ One thread runs through all four modules. If you remember nothing else, remember
 
 1. **Module 1** ships ARIA with a system prompt containing a plausible, well-intentioned
    bullet: *"answer directly and confidently from your own knowledge. Technicians are busy."*
-2. **Module 2** builds a five-level test suite. Every level passes. **No case tests for
+2. **Module 2** builds the test suite. Everything passes. **No case tests for
    out-of-scope**, we didn't think of one.
 3. **Module 3** puts real traffic through it. ARIA states the OSHA benzene PEL, 1 ppm TWA,
    5 ppm STEL, with **zero tool calls**. Confident, specific, and *correct*, which makes it
@@ -271,7 +271,7 @@ still naming the governing standard.
 this specific class of gap is realistic, invisible to a reasonable eval suite, and only
 findable in production. Pretending otherwise invites someone to poke the story.
 
-**Level 0 found a real bug we did NOT plant.** `test_harness_injected_tools_are_present`
+**A code test found a real bug we did NOT plant.** `test_harness_injected_tools_are_present`
 failed on its first run because the prompt referenced `write_todos` and `deepagents` 0.7
 doesn't inject `TodoListMiddleware`. That one is genuine, and it lands harder for it. Same
 with the citation regex false negative, found by reading real output, not by imagining it.
@@ -307,7 +307,7 @@ the fix for each.
 
 ## What to say if someone asks…
 
-**"Isn't 179 tests overkill for a demo agent?"**
+**"Isn't 181 tests overkill for a demo agent?"**
 The count isn't the point, the *cost* is. No API key, no model, six seconds. That's what
 makes it runnable on every commit, and runnable-on-every-commit is what makes it real.
 

@@ -151,7 +151,7 @@ def mocked_toolset(
 
     Args:
         mock_spec: `{tool_name: script}` from the dataset example's `inputs.mock_tools`.
-            `None` or `{}` gives you Level 1: every tool is a stub. That is the right setup
+            `None` or `{}` stubs every tool. That is the right setup
             for "does the agent work at all" and "did it pick the right tool", you are
             testing routing, and a stub answers that as well as real data would, for free.
         recorder: Collects the trajectory.

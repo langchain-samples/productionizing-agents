@@ -9,7 +9,7 @@ pass rather than fixing one thing at a time:
     1. Python version
     2. Imports            every package the workshop needs
     3. Fixture data       the JSON files load and cross-reference correctly
-    4. Deterministic      the 179 no-LLM tests
+    4. Deterministic      the 181 no-LLM tests
     5. MCP server         real subprocess handshake
     6. Notebooks          built and current
     7. Model provider     ONE cheap real call

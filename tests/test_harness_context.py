@@ -1,4 +1,4 @@
-"""Level 0: assertions on the context the model actually receives. No LLM, no network.
+"""Assertions on the context the model actually receives. No LLM, no network.
 
 The prompt reaching your model is *assembled at runtime* from your system prompt, your tool
 schemas, harness-injected tools, middleware rewrites, and any dynamically loaded files,

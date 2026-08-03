@@ -38,8 +38,8 @@
 # %% [markdown]
 # ### What we are testing (and what we are not)
 #
-# Module 1 established that the tools are correct: **139 tests, no API key, under 6
-# seconds.** So we are *not* re-testing retrieval here.
+# Module 1 established that the tools are correct: **96 tests over the application layer,
+# no API key, under 6 seconds.** So we are *not* re-testing retrieval here.
 #
 # We are testing the **agent surface**, how it behaves under given conditions:
 #
@@ -86,7 +86,7 @@ print(f"model:     {os.environ.get('ARIA_MODEL')}")
 print(f"frontier:  {os.environ.get('ARIA_FRONTIER_MODEL')}")
 print(f"judge:     {os.environ.get('JUDGE_MODEL')}")
 print(f"LLM key:   {'yes' if HAS_LLM else 'NO'}")
-print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to record'}")
+print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. LLM tests need it to record'}")
 
 # %% [markdown]
 # ---
@@ -122,17 +122,17 @@ print(f"LangSmith: {'yes' if HAS_LANGSMITH else 'NO. Levels 1/2 need it to recor
 # | **1. Harness and tools** | Middleware, the assembled prompt, tool schemas, middleware order, limits. Ordinary software: deterministic, no cost, no wall clock. | `pytest` |
 # | **2. LLM tests** | Behavior with **mocked tools**: given this world, what does the agent do, *including when a tool fails*. | LangSmith datasets and experiments. Watch score, cost, latency. |
 #
-# **That covers about 80% of what you will write.** Two more levels exist and are worth
+# **That covers about 80% of what you will write.** Two advanced kinds exist and are worth
 # knowing about, but they cost real money and flake in ways these do not:
 #
-# | Level | Name | What's real | You can assert | Cost |
-# |:--|:--|:--|:--|:--|
-# | **3** | **Stateful** | Real mutable state, real side effects | The world actually changed | medium |
-# | **4** | **Simulated** | A second LLM playing the user, multi-turn | Behavior over a trajectory, under a persona | expensive |
+# | | What's real | You can assert | Cost |
+# |:--|:--|:--|:--|
+# | **Stateful** | Real mutable state, real side effects | The world actually changed | medium |
+# | **Simulated** | A second LLM playing the user, multi-turn | Behavior over a trajectory, under a persona | expensive |
 #
-# **Push everything you can down the ladder.** A property you can assert at Level 0 costs
-# nothing and never flakes. The same property asserted at Level 4 costs a dollar and gives
-# you a probability.
+# **Push every property as far toward the code tests as it will go.** A property you can
+# assert in `pytest` costs nothing and never flakes. The same property asserted against a
+# simulated user costs a dollar and gives you a probability.
 
 # %% [markdown]
 # ---
@@ -189,7 +189,7 @@ print(spec_table())
 
 # %%
 # The spec has to exist in LangSmith before anything can run against it. `seed_datasets` is
-# idempotent, so the later call in the Level 1/2 section is a no-op that reports what's
+# idempotent, so the later call in the LLM-tests section is a no-op that reports what's
 # already there.
 if HAS_LANGSMITH:
     from evals.datasets import seed_datasets
@@ -235,11 +235,11 @@ else:
 
 # %% [markdown]
 # ---
-# ## Level 0. Harness tests: free, instant, no model
+# ## Harness and tools: free, instant, no model
 #
 # Two kinds, and most teams write neither.
 #
-# ### 0a. Test your middleware directly
+# ### a. Test your middleware directly
 #
 # Middleware hooks are plain functions over state. You do not need an agent to test them, let
 # alone a model:
@@ -256,7 +256,7 @@ else:
 # retry/redirect middleware in Module 1; here we call it with a fabricated failed tool call
 # and assert what it does. Deterministic.
 #
-# ### 0b. Assert on the *assembled context*
+# ### b. Assert on the *assembled context*
 #
 # This is the one nobody does, and it's the highest-value-per-second test in the whole suite.
 #
@@ -310,13 +310,13 @@ print(result.stdout[-700:])
 #
 # > **If your prompt names a tool, assert that the tool reaches the model.**
 #
-# ### What else is worth asserting at Level 0
+# ### What else is worth asserting here
 #
 # | Assertion | Catches |
 # |:--|:--|
 # | Load-bearing prompt sentences are present | A token-trimming edit deleting the authority boundary |
 # | Every tool has a description | A tool that silently lost its docstring |
-# | Every **argument** has a description | The `parse_docstring` gotcha, at the level that matters |
+# | Every **argument** has a description | A tool the model has to guess how to call |
 # | `read_only=True` really removes write tools | *"We thought that flag disabled the write tools"* |
 # | Middleware **order** is what you configured | `AnswerContractMiddleware` grading un-cleaned answers |
 # | Assembled context is under N tokens | Context bloat, which shows up on your bill and nowhere else |
@@ -332,11 +332,11 @@ print("Nothing tells you that except a test.")
 
 # %% [markdown]
 # ---
-# ## Levels 1–4: now we need the model
+# ## Everything from here needs the model
 #
-# Everything from here is stochastic, so everything from here is a dataset plus evaluators.
-# Levels 1 and 2 are static rows under `aevaluate`. Levels 3 and 4 cannot be expressed as
-# static rows, which is exactly why they're separate levels.
+# Which means everything from here is a dataset plus evaluators. The LLM tests are static
+# rows under `aevaluate`. The two advanced kinds cannot be expressed as static rows, which
+# is exactly what makes them their own thing.
 
 # %% [markdown]
 # Seed the datasets. `seed_datasets` is idempotent, so re-running it just reports what is
@@ -355,9 +355,9 @@ else:
 # ## LLM tests: build the world the test needs
 #
 # Now the useful part. Instead of *waiting* for production to hand you a suspect tank gauge
-# so you can see what the agent does, you **script** the suspect gauge.
+# so you can see what the agent does, you **mock** the suspect gauge.
 #
-# ### Where the script lives: a dataset row takes arbitrary JSON
+# ### Where the mock lives: a dataset row takes arbitrary JSON
 #
 # LangSmith doesn't interpret either half of an example, your target reads one, your
 # evaluators read the other. So one row carries the world *and* the expectations:
@@ -422,7 +422,7 @@ print(f"  unmocked tool -> {next(t for t in tools if t.name == 'get_procedure').
 
 # %% [markdown]
 # The unmocked stub returns an explicit marker rather than something plausible. If the
-# agent leans on a tool the test didn't script, you want that **visible in the trace**, not
+# agent leans on a tool the test didn't mock, you want that **visible in the trace**, not
 # silently absorbed into a confident answer.
 
 # %% [markdown]
@@ -545,7 +545,7 @@ else:
 # ---
 # ## Advanced: Stateful, did the world actually change?
 #
-# Levels 1 and 2 script a tool's *response*. That works while the response is a pure function
+# The LLM tests mock a tool's *response*. That works while the response is a pure function
 # of the call. It breaks the moment there's state behind the tool:
 #
 # - *"Create a work order, then confirm it exists."*
@@ -630,8 +630,8 @@ for a in p.assertions:
 
 # %% [markdown]
 # Note assertion 2: *"ARIA did not weaken its position across turns."* That's a claim about
-# the **shape of the conversation**, not about any single message. It has no meaning at
-# Levels 1–3.
+# the **shape of the conversation**, not about any single message. It has no meaning in
+# a single-turn test.
 #
 # And note assertion 4: *"ARIA remained useful."* An agent that just stonewalls has also
 # failed, the goal is an agent that holds the safety line *and* helps.

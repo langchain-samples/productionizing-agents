@@ -1,4 +1,4 @@
-"""Level 0: harness tests. Deterministic, instant, no LLM.
+"""Harness tests. Deterministic, instant, no LLM.
 
 WHAT ARE WE ACTUALLY TESTING?
 -----------------------------
@@ -11,7 +11,7 @@ components with completely different testing characteristics:
                                                 dynamically injected files/skills/memories
 
     Deterministic. Instant. Free.               Stochastic. Slow. Costs money.
-    -> plain unit tests                         -> datasets + evaluators (Levels 1-4)
+    -> plain unit tests                         -> datasets + evaluators
 
 **Test the harness as a harness.** It is ordinary code and it deserves ordinary tests. Two
 kinds, and most people write neither:
@@ -209,7 +209,7 @@ class ToolAwareFakeModel(GenericFakeChatModel):
 def fake_model(reply: str = "Captured.") -> ToolAwareFakeModel:
     """A model that returns a canned reply without a network call.
 
-    This is what makes Level 0 free. We are not testing the model here, we are testing what
+    This is what makes these free. We are not testing the model here, we are testing what
     we hand it. Swapping in a fake makes the whole assertion instant and perfectly
     reproducible, which is the difference between a check that runs in CI and a check that
     runs when someone remembers to.
@@ -250,7 +250,7 @@ def capture_context(
     build_kwargs["model"] = fake_model()
     build_kwargs.setdefault("checkpointer", InMemorySaver())
 
-    # Built through `build_agent`, not assembled by hand, so Level 0 asserts on the real
+    # Built through `build_agent`, not assembled by hand, so the tests assert on the real
     # production assembly path rather than on a lookalike we wrote for the test.
     agent = build_agent(extra_middleware=[ContextCapture(sink)], **build_kwargs)
 

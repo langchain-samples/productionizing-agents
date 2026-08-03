@@ -151,7 +151,7 @@ figure{margin:34px 0;padding:0}
 figure figcaption{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.55;
                   text-align:center}
 figure svg{display:block;width:100%;height:auto}
-/* --- the five-levels ladder --- */
+/* --- the two-kinds ladder --- */
 .ladder{display:flex;flex-direction:column;gap:7px}
 .ladder .rung{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:16px;
               padding:11px 16px;border-radius:9px;border:1px solid var(--line);

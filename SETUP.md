@@ -130,12 +130,12 @@ You can still do most of Modules 1 and 2:
 | | Works? |
 | :-- | :-- |
 | Module 1: everything except viewing traces | ✅ |
-| Module 2: Level 0 (harness), the middleware and evaluator unit tests | ✅ |
-| Module 2: Levels 1–2 (need datasets and experiments) | ❌ |
-| Module 2: Level 3 pytest (runs; results just aren't recorded) | ⚠️ |
+| Module 2: the code tests (harness, middleware, evaluator unit tests) | ✅ |
+| Module 2: the LLM tests (need datasets and experiments) | ❌ |
+| Module 2: the stateful pytest pass (runs; results just aren't recorded) | ⚠️ |
 | Modules 3 and 4 | ❌ platform features |
 
-Set `LANGSMITH_TRACING=false` and the agent runs normally. `pytest tests/`, all 179, needs
+Set `LANGSMITH_TRACING=false` and the agent runs normally. `pytest tests/`, all 181, needs
 no key at all. For Modules 3 and 4, **pair up with someone who has a key.**
 
 ## No model provider key
@@ -143,7 +143,7 @@ no key at all. For Modules 3 and 4, **pair up with someone who has a key.**
 Every deterministic test still runs, which is more than it sounds:
 
 ```bash
-pytest tests/ -q                            # 179 tests, no key, ~6 seconds
+pytest tests/ -q                            # 181 tests, no key, ~6 seconds
 python -m evals.harness                     # print the assembled prompt
 python scripts/build_notebooks.py
 ```
@@ -156,11 +156,11 @@ You'll be reading rather than running for the model-backed cells. Pair up.
 
 | | LangSmith | Model key | Plan |
 | :-- | :--: | :--: | :-- |
-| `pytest tests/` (179) | - | - | any |
-| Level 0 harness / context assertions | - | - | any |
+| `pytest tests/` (181) | - | - | any |
+| Harness / context assertions | - | - | any |
 | Agent invocation | optional | ✅ | any |
 | MCP server | - | - | any |
-| Datasets, experiments, Levels 1–4 | ✅ | ✅ | any |
+| Datasets, experiments, the LLM tests | ✅ | ✅ | any |
 | Online evaluators, alerts, automations | ✅ | ✅ | any |
 | Annotation queues + assertions | ✅ | - | any |
 | `langgraph deploy` | ✅ | ✅ | **Plus+** |

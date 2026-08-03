@@ -720,7 +720,7 @@ Use `1` while iterating. Use `3+` for any decision you intend to act on.
 | Situation | What to run | Trigger |
 | :-- | :-- | :-- |
 | **Rapid iteration** | Code tests + `mocked-cheap` | Manually, on every change. Seconds, free. |
-| **Every commit** | Level 0 + code evaluators only | CI. No judge calls, negligible cost. |
+| **Every commit** | Code tests + code evaluators only | CI. No judge calls, negligible cost. |
 | **Before merging a prompt or model change** | Full suite with judges, `reps=3` | CI, conditional on changed paths, or a PR label |
 | **Nightly** | Everything, including simulated users | Scheduled |
 | **Pre-release** | Everything, `reps=5` | Manual gate |
@@ -871,7 +871,7 @@ dollars.
    do Y, and the world should look like Z.* Show it to a domain expert and let them argue with
    it. That conversation is worth more than the rows.
 2. **Move your application logic behind a tested boundary.** Unit test it with no LLM.
-3. **Write Level 0.** Capture the assembled prompt and assert on it: every tool present, every
+3. **Write the harness tests.** Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.
 
@@ -890,7 +890,7 @@ You have something better than a dataset: **traffic.** Use it.
 4. **Run those assertions as a dataset. Watch them fail.** Now fix. Now watch them pass. You have
    a regression suite whose every row is a thing that actually happened.
 
-Then backfill Level 0, because you almost certainly have a `write_todos`-shaped bug sitting in
+Then backfill the harness tests, because you almost certainly have a `write_todos`-shaped bug sitting in
 your assembled context right now.
 
 ### File skeleton
@@ -901,13 +901,13 @@ agent/
   agent.py                 prompt, middleware, model
   middleware.py            your deterministic guards
 evals/
-  harness.py               Level 0: capture the assembled context
-  mocking.py               clone a tool's contract, script its behavior
+  harness.py               capture the assembled context
+  mocking.py               clone a tool's contract, mock its behavior
   evaluators.py            code assertions first, judges where a regex can't reach
   datasets.py              mocked-tool cases + the hand-written spec
   runner.py                aevaluate wiring, model comparison
-  test_stateful.py         Level 3: real state, pytest
-  simulate.py              Level 4: LLM as user
+  test_stateful.py         advanced: real state, pytest
+  simulate.py              advanced: LLM as user
 tests/
   test_app.py              the application. No API key.
   test_middleware.py       call the hooks directly

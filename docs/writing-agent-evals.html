@@ -74,7 +74,7 @@ figure{margin:34px 0;padding:0}
 figure figcaption{margin-top:14px;color:var(--dim);font-size:14px;line-height:1.55;
                   text-align:center}
 figure svg{display:block;width:100%;height:auto}
-/* --- the five-levels ladder --- */
+/* --- the two-kinds ladder --- */
 .ladder{display:flex;flex-direction:column;gap:7px}
 .ladder .rung{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:16px;
               padding:11px 16px;border-radius:9px;border:1px solid var(--line);
@@ -949,7 +949,7 @@ flaky usually means an underspecified prompt; broken usually means a missing cap
 </tr>
 <tr>
 <td style="text-align: left;"><strong>Every commit</strong></td>
-<td style="text-align: left;">Level 0 + code evaluators only</td>
+<td style="text-align: left;">Code tests + code evaluators only</td>
 <td style="text-align: left;">CI. No judge calls, negligible cost.</td>
 </tr>
 <tr>
@@ -1109,7 +1109,7 @@ dollars.</p>
    do Y, and the world should look like Z.</em> Show it to a domain expert and let them argue with
    it. That conversation is worth more than the rows.</li>
 <li><strong>Move your application logic behind a tested boundary.</strong> Unit test it with no LLM.</li>
-<li><strong>Write Level 0.</strong> Capture the assembled prompt and assert on it: every tool present, every
+<li><strong>Write the harness tests.</strong> Capture the assembled prompt and assert on it: every tool present, every
    argument described, your load-bearing prompt sentences intact, middleware in the order you
    configured. Free, instant, and it will find something.</li>
 </ol>
@@ -1126,7 +1126,7 @@ dollars.</p>
 <li><strong>Run those assertions as a dataset. Watch them fail.</strong> Now fix. Now watch them pass. You have
    a regression suite whose every row is a thing that actually happened.</li>
 </ol>
-<p>Then backfill Level 0, because you almost certainly have a <code>write_todos</code>-shaped bug sitting in
+<p>Then backfill the harness tests, because you almost certainly have a <code>write_todos</code>-shaped bug sitting in
 your assembled context right now.</p>
 <h3 id="file-skeleton">File skeleton</h3>
 <pre><code>app/                     application logic, no LLM import anywhere
@@ -1134,13 +1134,13 @@ agent/
   agent.py                 prompt, middleware, model
   middleware.py            your deterministic guards
 evals/
-  harness.py               Level 0: capture the assembled context
-  mocking.py               clone a tool's contract, script its behavior
+  harness.py               capture the assembled context
+  mocking.py               clone a tool's contract, mock its behavior
   evaluators.py            code assertions first, judges where a regex can't reach
   datasets.py              mocked-tool cases + the hand-written spec
   runner.py                aevaluate wiring, model comparison
-  test_stateful.py         Level 3: real state, pytest
-  simulate.py              Level 4: LLM as user
+  test_stateful.py         advanced: real state, pytest
+  simulate.py              advanced: LLM as user
 tests/
   test_app.py              the application. No API key.
   test_middleware.py       call the hooks directly

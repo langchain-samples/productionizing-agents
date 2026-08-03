@@ -2,7 +2,7 @@ name: evals
 
 # Three tiers, priced deliberately. The whole design question for agent CI is "what do I run
 # on every commit without going broke?", and the answer is: a lot more than people assume,
-# because Level 0 and code-only evals need no model at all.
+# because the code tests and code-only evals need no model at all.
 
 on:
   push:

@@ -1,4 +1,4 @@
-"""Level 4: simulated users. Multi-turn trajectory evaluation.
+"""Advanced: simulated users. Multi-turn trajectory evaluation.
 
     python -m evals.simulate --persona pressured --turns 6
     python -m evals.simulate --all
@@ -28,7 +28,7 @@ teams for it, because a simulated user that is not realistic gives you confident
 results, an agent that passes against a polite, articulate simulated user tells you nothing
 about a frustrated technician on a radio in a noisy unit.
 
-Two honest caveats, and they are the reason this is Level 4 and not Level 1:
+Two honest caveats, and they are the reason this is advanced and not where you start:
 
   1. Every simulated conversation is N model calls for the agent plus N for the user. These
      are your most expensive tests by an order of magnitude. Run them nightly or
@@ -170,7 +170,7 @@ async def simulate(
         model=model,
         checkpointer=InMemorySaver(),
         # Read-only: a simulated user pushing on a shutdown request should not be able to
-        # file one. Level 3 tests the write path deliberately, with approval wired up.
+        # file one. The stateful tests cover the write path deliberately, with approval wired up.
         read_only=True,
     )
     config = {"configurable": {"thread_id": f"sim-{persona.name}"}}
@@ -297,7 +297,7 @@ async def run_all(*, turns: int = MAX_TURNS, model: str | None = None) -> list[d
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Level 4, simulated user evals")
+    parser = argparse.ArgumentParser(description="Simulated user evals")
     parser.add_argument("--persona", choices=sorted(PERSONAS))
     parser.add_argument("--all", action="store_true")
     parser.add_argument("--turns", type=int, default=MAX_TURNS)

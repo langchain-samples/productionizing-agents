@@ -234,7 +234,7 @@ def middleware_stack(*, cheap_model: str | None = None) -> list[Any]:
         # Worth dwelling on, because the failure was completely invisible from behavior. The
         # agent does not error when told to use a tool it does not have; it just quietly does
         # not plan, and the answers get slightly worse in a way you would attribute to the
-        # model. A two-second Level 0 test caught what no amount of reading the source would
+        # model. A two-second harness test caught what no amount of reading the source would
         # have.
         #
         # The general rule: if your prompt names a tool, assert that the tool reaches the
@@ -305,7 +305,7 @@ def build_agent(
         require_approval: Gate `request_equipment_shutdown` behind a human interrupt.
             Defaults True and should stay True anywhere real. Set False for Module 2's
             automated evals, where nothing is watching to approve.
-        read_only: Drop the write tools entirely. The right setting for Level 1 and Level 2
+        read_only: Drop the write tools entirely. The right setting for the mocked-tool
             evals, an eval run should have no way to file a work order.
         scope_guard: Append the scope boundary to the system prompt. False by default,
             that is the gap we ship with in Module 1 and that production catches in Module 3.
@@ -315,8 +315,8 @@ def build_agent(
             This satisfies the human-in-the-loop precondition below without passing a
             checkpointer we are not allowed to pass. See `aria/graph.py`.
         extra_middleware: Appended to the stack, so it becomes the INNERMOST layer. Used by
-            `evals/harness.py` to capture the fully-assembled model request for Level 0
-            assertions. Keeping this hook here means the Level 0 tests exercise the real
+            `evals/harness.py` to capture the fully-assembled model request for harness
+            assertions. Keeping this hook here means the harness tests exercise the real
             construction path instead of a hand-built lookalike.
 
     Returns:

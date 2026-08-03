@@ -301,7 +301,7 @@ print("""
     python -m evals.runner --level regressions     # the new gate
     python -m evals.runner --level mocked-cheap   # did the fix break basic behavior?
     python -m evals.runner --level mocked        # did it break retrieval or citations?
-    pytest tests/ -q                               # 179 deterministic tests
+    pytest tests/ -q                               # 181 deterministic tests
 """)
 
 # %% [markdown]

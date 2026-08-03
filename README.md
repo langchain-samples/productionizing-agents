@@ -17,7 +17,7 @@ By the end of this session you will have taken one agent from "works on my lapto
 | Module | Topic | You will have built |
 | :----- | :---- | :------------------ |
 | **1** (30 min) | Agent development best practices & common pitfalls | An agent, built the way you'd build one today: application logic behind a tested MCP server, rules enforced by middleware instead of requested by the prompt, and spend limits |
-| **2** (40 min) | Deploy cost-effective, reliable agents with evals | A test suite of code tests and agent tests (179 deterministic tests + datasets and judges), a live red→green TDD cycle, and a measured answer to "can we run this on a cheaper model?" |
+| **2** (40 min) | Deploy cost-effective, reliable agents with evals | A test suite of code tests and LLM tests (181 deterministic tests + datasets and judges), a live red→green TDD cycle, and a measured answer to "can we run this on a cheaper model?" |
 | **3** (20 min) | Protect your agent's reputation with monitoring & alerting | A shipped agent behind a REST endpoint, online evaluators, alert rules, and a real safety-relevant bug that the eval suite passed over |
 | **4** (10 min) | Continually improve your agent 24/7 with self-improving loops | Automations routing production failures to human review, assertions that turn a reviewer's English into a regression test, and an aligned judge |
 
@@ -104,19 +104,19 @@ Full setup detail, including air-gapped / no-LangSmith fallbacks: **[SETUP.md](S
 │   └── graph.py              The deployable entry point (langgraph.json points here)
 │
 ├── evals/                  THE TEST SUITE, code + agent tests
-│   ├── harness.py            Level 0: assert on the assembled prompt. No LLM.
-│   ├── mocking.py            Clone a tool's contract, script its behavior
+│   ├── harness.py            Code tests: assert on the assembled prompt. No LLM.
+│   ├── mocking.py            Clone a tool's contract, mock its behavior
 │   ├── evaluators.py         Code assertions + LLM judges + assertion grading
 │   ├── datasets.py           Mocked-tool cases and the hand-written TDD spec
 │   ├── runner.py             aevaluate wiring and the model bake-off
-│   ├── test_stateful.py      Level 3: real state, pytest + LangSmith
-│   └── simulate.py           Level 4: an LLM playing the user
+│   ├── test_stateful.py      Advanced: real state, pytest + LangSmith
+│   └── simulate.py           Advanced: an LLM playing the user
 │
-├── tests/                  179 tests. No API key, no model, ~6 seconds.
+├── tests/                  181 tests. No API key, no model, ~6 seconds.
 │   ├── test_repository.py      The read surface (44)
 │   ├── test_work_orders.py     The write surface
 │   ├── test_middleware.py      The custom guards (25)
-│   ├── test_harness_context.py Level 0, what the model actually receives
+│   ├── test_harness_context.py What the model actually receives
 │   ├── test_evaluators.py      Tests for the tests
 │   └── test_tool_parity.py     Stops the two transports drifting
 │
@@ -162,13 +162,13 @@ The builder is stdlib-only: no jupytext dependency required.
 
 ## Running the modules without LangSmith
 
-Set `LANGSMITH_TRACING=false` and the agent runs normally. More usefully: **all 179 tests
-need no LangSmith key and no model key at all**, and that includes the whole of Level 0,
-the middleware unit tests and the assertions on the assembled prompt. Every notebook gates
+Set `LANGSMITH_TRACING=false` and the agent runs normally. More usefully: **all 181 tests
+need no LangSmith key and no model key at all**, and that includes every code test, the
+middleware unit tests and the assertions on the assembled prompt. Every notebook gates
 its model-backed cells behind `HAS_LLM` / `HAS_LANGSMITH`, so nothing crashes; those cells
 just print "Skipped."
 
-Levels 1–4 need datasets and experiments, so they need a key. Modules 3 and 4 are inherently
+The LLM tests need datasets and experiments, so they need a key. Modules 3 and 4 are inherently
 platform features. Those participants should pair up, see
 [SETUP.md](SETUP.md#no-langsmith-access) for the full capability matrix.
 

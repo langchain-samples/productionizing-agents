@@ -6,7 +6,7 @@ system that outlives the conversation and has to be cleaned up by a person.
 
 Note the `store` fixture. Resetting shared mutable state between tests is table stakes for
 normal testing, and it becomes essential in Module 2 where the same store backs the
-stateful ("Level 3") agent evals. A test that passes only when run first is worse than no
+stateful agent evals. A test that passes only when run first is worse than no
 test.
 """
 
