@@ -63,6 +63,17 @@ code{font:.87em JetBrains Mono,monospace;background:#1b2331;color:var(--acc);
      the link stops working once it does.</p>
 </a>
 
+<ul>
+  <li>Create a personal API key at <a class="plain" href="https://smith.langchain.com/">smith.langchain.com</a>
+      &rarr; Settings &rarr; API Keys.</li>
+  <li>Run <code>cp .env.example .env</code>, then paste in that key plus the model provider key
+      from the link above.</li>
+  <li><strong>Replace <code>YOURNAME</code></strong> in <code>LANGSMITH_PROJECT</code> &mdash; setup
+      fails on the placeholder.</li>
+  <li>Run <code>python scripts/preflight.py</code>. It tells you exactly what is still missing,
+      so do this <strong>before</strong> the session rather than during it.</li>
+</ul>
+
 <h3>Built by</h3>
 <p><a class="plain" href="https://www.langchain.com/">LangChain</a> &middot;
    runs on <a class="plain" href="https://smith.langchain.com/">LangSmith</a></p>
